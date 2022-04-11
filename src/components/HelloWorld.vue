@@ -8,6 +8,7 @@ import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiAccount } from '@mdi/js'
 import TradeTimeline from './TradeTimeline.vue'
 import { QuestradeTrade, BuyMatch } from './types.js'
+import { DateTime } from "luxon"
 
 const icon = ref(mdiAccount)
 const icon2 = ref("M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z")
@@ -87,7 +88,7 @@ function onParseCsv(results: ParseResult<string>) {
       return <QuestradeTrade>{
         id: "" + i,
         currency: currency,
-        date: new Date(2000 + date[2], date[1] - 1, date[0]),
+        date: DateTime.local(2000 + date[2], date[1], date[0]),
         action: row[4].toLowerCase(),
         quantity: parseNumber(row[5]),
         symbol: symbol,
@@ -173,25 +174,14 @@ function analyzeTrades(trades: QuestradeTrade[]): Record<string, QuestradeTrade[
   </div>
 
   <div class="accordion" id="accordionExample5">
-    <div
-      v-for="(trades, symbol, i) of tradesBySymbol"
-      class="accordion-item bg-white border border-gray-200"
-    >
+    <div v-for="(trades, symbol, i) of tradesBySymbol" class="accordion-item bg-white border border-gray-200">
       <h2 class="accordion-header mb-0" :id="'heading' + i">
         <button
           class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
-          type="button"
-          data-bs-toggle="collapse"
-          :data-bs-target="'#collapse' + i"
-          aria-expanded="false"
-          aria-controls="collapseOne5"
-        >{{ symbol }}</button>
+          type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse' + i" aria-expanded="false"
+          aria-controls="collapseOne5">{{ symbol }}</button>
       </h2>
-      <div
-        :id="'collapse' + i"
-        class="accordion-collapse collapse"
-        :aria-labelledby="'collapse' + i"
-      >
+      <div :id="'collapse' + i" class="accordion-collapse collapse" :aria-labelledby="'collapse' + i">
         <div class="accordion-body py-4 px-5">
           <TradeTimeline :trades="trades" />
         </div>

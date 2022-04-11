@@ -1,9 +1,11 @@
+import { DateTime } from "luxon"
+
 export interface QuestradeTrade {
   id: string,
   currency: string,
   symbol: string,
   desc: string,
-  date: Date,
+  date: DateTime,
   action: string,
   quantity: number,
   price: number,
