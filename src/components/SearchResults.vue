@@ -17,7 +17,7 @@ const filteredTitles = computed(() => {
 
 <template>
   <div class="root">
-    <p>Showing {{filteredTitles.length}} results for "{{ query }}"</p>
+    <p>Showing {{ filteredTitles.length }} results for "{{ query }}"</p>
     <ul>
       <li v-for="title in filteredTitles" :key="title.Page">{{ title.Name }}</li>
     </ul>

@@ -8,13 +8,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
+    "@mdi/font": "^6.6.96",
+    "@mdi/js": "^6.6.96",
     "axios": "^0.26.1",
+    "luxon": "^2.3.1",
     "papaparse": "^5.3.2",
+    "tw-elements": "^1.0.0-alpha12",
     "vue": "^3.2.25"
   },
   "devDependencies": {
     "@types/papaparse": "^5.3.2",
     "@vitejs/plugin-vue": "^2.3.0",
+    "autoprefixer": "^10.4.4",
+    "postcss": "^8.4.12",
+    "tailwindcss": "^3.0.23",
     "typescript": "^4.5.4",
     "vite": "^2.9.0",
     "vue-tsc": "^0.29.8"
