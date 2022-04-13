@@ -12,13 +12,14 @@ export interface QuestradeTrade {
   gross: number,
   commFees: number,
   secFees: number,
-  net: number,
 
   buyMatches: BuyMatch[],
   quantityMatched: number,
+  net?: number,
 }
 
 export interface BuyMatch {
   id: string,
   quantity: number,
+  gross: number,
 }

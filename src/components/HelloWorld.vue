@@ -4,14 +4,10 @@ import SearchResults from './SearchResults.vue'
 import Papa from 'papaparse'
 import type { ParseResult } from 'papaparse'
 import questradeUrl from "@/assets/questrade.csv?url"
-import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiAccount } from '@mdi/js'
 import TradeTimeline from './TradeTimeline.vue'
 import { QuestradeTrade, BuyMatch } from './types.js'
 import { DateTime } from "luxon"
-
-const icon = ref(mdiAccount)
-const icon2 = ref("M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h288c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-64zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z")
 
 const remainQuantity = (trade: QuestradeTrade): number => {
   return trade.quantity - trade.quantityMatched
@@ -97,14 +93,13 @@ function onParseCsv(results: ParseResult<string>) {
         gross: parseNumber(row[11]),
         commFees: parseNumber(row[12]),
         secFees: parseNumber(row[13]),
-        net: parseNumber(row[15]),
 
         buyMatches: [],
         quantityMatched: 0,
       }
     })
 
-  console.log(trades.value)
+  console.log("onParseCsv", trades.value)
 
   tradesBySymbol.value = analyzeTrades(trades.value)
 }
@@ -138,9 +133,11 @@ function analyzeTrades(trades: QuestradeTrade[]): Record<string, QuestradeTrade[
 
         trades.slice(i + 1).every((buyTrade) => {
           if (buyTrade.action == "buy" && remainQuantity(buyTrade) > 0) {
+            let num = Math.min(remainQuantity(sellTrade), remainQuantity(buyTrade))
             let match = <BuyMatch>{
               id: buyTrade.id,
-              quantity: Math.min(remainQuantity(sellTrade), remainQuantity(buyTrade))
+              quantity: num,
+              gross: buyTrade.gross * num / buyTrade.quantity,
             }
             buyTrade.quantityMatched += match.quantity
             sellTrade.quantityMatched += match.quantity
@@ -148,6 +145,8 @@ function analyzeTrades(trades: QuestradeTrade[]): Record<string, QuestradeTrade[
           }
           return remainQuantity(sellTrade) > 0
         })
+
+        sellTrade.net = sellTrade.buyMatches.reduce((sum, val) => sum + val.gross, sellTrade.gross)
       }
 
     })
@@ -156,6 +155,8 @@ function analyzeTrades(trades: QuestradeTrade[]): Record<string, QuestradeTrade[
   console.log(tradesBySymbol)
   return tradesBySymbol
 }
+
+const netSum = (trades: QuestradeTrade[]) => trades.reduce((sum, val) => sum + (val.net ?? 0), 0)
 
 </script>
 
@@ -179,7 +180,7 @@ function analyzeTrades(trades: QuestradeTrade[]): Record<string, QuestradeTrade[
         <button
           class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
           type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse' + i" aria-expanded="false"
-          aria-controls="collapseOne5">{{ symbol }}</button>
+          aria-controls="collapseOne5">{{ symbol }} {{ netSum(trades) }}</button>
       </h2>
       <div :id="'collapse' + i" class="accordion-collapse collapse" :aria-labelledby="'collapse' + i">
         <div class="accordion-body py-4 px-5">
