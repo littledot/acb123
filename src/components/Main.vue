@@ -8,15 +8,15 @@ import * as s from './symbol'
 import * as util from './util'
 import TradeTimeline from './TradeTimeline.vue'
 
-const props = defineProps<{
-}>()
+const props = defineProps<{}>()
 
 const userTrades = ref(new Map<string, t.TradeEvent>())
+const forexRates = ref(new t.Forex())
+provide(s.FOREX_RATES, forexRates)
+
 const tradesBySymbol = computed(() =>
   util.groupBy(Array.from(userTrades.value.values()), it => it.symbol)
 )
-const forexRates = ref(new t.Forex())
-provide(s.FOREX_RATES, forexRates)
 
 onMounted(() => {
   parseFile(questradeUrl)
@@ -44,7 +44,7 @@ async function doParseCsv(results: ParseResult<string[]>) {
   let trades = await cleanData(results)
   trades.forEach(it => userTrades.value.set(it.id, it))
 
-  trades = await matchBuySellTrades(trades)
+  trades = await matchDisposition(trades)
   loadForex(trades)
 }
 
@@ -67,7 +67,7 @@ async function cleanData(results: ParseResult<string[]>) {
   return trades
 }
 
-async function matchBuySellTrades(trades: t.TradeEvent[]) {
+async function matchDisposition(trades: t.TradeEvent[]) {
   let tradesBySymbol = util.groupBy(trades, it => it.symbol)
   console.log(tradesBySymbol)
 
@@ -95,6 +95,10 @@ async function loadForex(trades: t.TradeEvent[]) {
   await forexRates.value.loadBoc(...years)
 }
 
+function showFirst(i: number) {
+  return i == 0 ? ['show'] : ['collapse']
+}
+
 </script>
 <template>
 
@@ -106,7 +110,8 @@ async function loadForex(trades: t.TradeEvent[]) {
           type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse' + i" aria-expanded="false"
           aria-controls="collapseOne5">{{ symbol }}</button>
       </h2>
-      <div :id="'collapse' + i" class="accordion-collapse collapse" :aria-labelledby="'collapse' + i">
+      <div :id="'collapse' + i" class="accordion-collapse collapse" :class="showFirst(i)"
+        :aria-labelledby="'collapse' + i">
         <div class="accordion-body py-4 px-5">
           <TradeTimeline :trades="trades" />
         </div>

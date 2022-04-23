@@ -13,3 +13,18 @@ export function groupBy<T, K extends keyof any>(list: T[], getKey: (item: T) => 
     return map;
   }, new Map());
 }
+
+export const numFmt = new Intl.NumberFormat("en-US")
+
+export const moneyFmt = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+export function fmtMoney(n: number | undefined) {
+  return n ? moneyFmt.format(n) : null
+}
+
+export function ifT<I, O extends keyof any>(t: I, ifTruthy: (it: I) => O): O | null {
+  return t ? ifTruthy(t) : null
+}

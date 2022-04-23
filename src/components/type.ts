@@ -4,16 +4,16 @@ import axios from 'axios'
 import { unwatchFile } from "fs";
 
 export class TradeEvent {
-  id: string;
-  symbol: string;
-  date: DateTime;
-  action: string;
-  quantity: number;
-  currency: string;
-  price: number;
-  commFees: number
-  secFees: number;
-  desc: string;
+  id: string
+  symbol: string
+  date: DateTime
+  action: string
+  quantity: number
+  currency: string
+  price: number
+  commFees: number // negative
+  secFees: number // negative
+  desc: string
 
   matchedEvents: TradeEventMatch[] = [];
 
@@ -70,6 +70,10 @@ export class TradeEvent {
     this.matchedEvents.push(new TradeEventMatch(event, matchQuantity))
     event.matchedEvents.push(new TradeEventMatch(this, matchQuantity))
   }
+
+  gross() {
+    return this.price * this.quantity + this.commFees + this.secFees
+  }
 }
 
 
@@ -83,7 +87,7 @@ export class TradeEventMatch {
   }
 
   gross() {
-    return this.tradeEvent.price * this.quantity / this.tradeEvent.quantity
+    return this.tradeEvent.gross() * this.quantity / this.tradeEvent.quantity
   }
 }
 
@@ -100,7 +104,7 @@ export class Forex {
     }
   }
 
-  getBocRate(currency: string, date: DateTime): number | undefined {
+  getBocRate(currency: string, date: DateTime): number {
     if (currency == 'CAD') return 1
 
     let code = `FX${currency}CAD`
@@ -108,6 +112,11 @@ export class Forex {
     if (rate) {
       return parseFloat(rate)
     }
+    return NaN
+  }
+
+  getBocRateByTrade(trade: TradeEvent) {
+    return this.getBocRate(trade.currency, trade.date)
   }
 }
 

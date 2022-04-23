@@ -1,7 +1,7 @@
 <script setup lang='ts'>
-import { ref, reactive, computed, onMounted } from 'vue'
+import * as v from 'vue'
 
-const props = defineProps<{
+const props = v.defineProps<{
 }>()
 
 </script>
