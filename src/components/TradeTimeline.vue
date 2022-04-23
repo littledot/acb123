@@ -1,24 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, inject, onMounted, onRenderTriggered } from 'vue'
+import type { Ref } from 'vue'
 import { QuestradeTrade, BuyMatch } from './types.js'
-import Alert from './Alert.vue';
-
+import Alert from './Alert.vue'
+import * as t from './type'
+import * as s from './symbol'
 
 const props = defineProps<{
-  trades: QuestradeTrade[],
+  trades: t.TradeEvent[],
 }>()
 
-const tradesView = ref()
+const forexRates = <Ref<t.Forex>>inject(s.FOREX_RATES)
+const trades = ref(props.trades)
 
-onMounted(() => init())
+const tradesView = computed(() => init())
+
+onRenderTriggered((event) => {
+  console.log(`TradeTimeline.onRenderTriggered`, event.key, event)
+})
 
 const init = () => {
-  let trades = props.trades
+  console.log(`TradeTimeline props`, trades.value)
 
-  let tradesById = <Record<string, QuestradeTrade>>{}
-  trades.forEach(trade => tradesById[trade.id] = trade)
-
-  tradesView.value = trades.map((trade) => {
+  let tradesView = trades.value.map((trade) => {
     let numFmt = new Intl.NumberFormat("en-US")
     let moneyFmt = new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -28,34 +32,38 @@ const init = () => {
       maximumFractionDigits: 2,
     })
 
-    let buys = trade.buyMatches.map(buyMatch => {
-      let buyTrade = tradesById[buyMatch.id]
-      return {
-        id: buyTrade.id,
-        date: buyTrade.date.toISODate(),
-        quantity: numFmt.format(buyMatch.quantity),
-        gross: moneyFmt.format(buyMatch.gross),
-      }
-    });
+    let buys = []
+    if (trade.action == "sell") {
+      buys = trade.matchedEvents.map(match => {
+        return {
+          id: match.tradeEvent.id,
+          date: match.tradeEvent.date.toISODate(),
+          quantity: numFmt.format(match.quantity),
+          totalQuantity: numFmt.format(match.tradeEvent.quantity),
+        }
+      });
+    }
 
     return {
       date: trade.date.toISODate(),
-      currency: trade.currency.toUpperCase(),
+      currency: trade.currency,
       action: trade.action == "buy" ? "Bought" : "Sold",
       symbol: trade.symbol,
       quantity: numFmt.format(trade.quantity),
       price: moneyFmt.format(trade.price),
       fees: moneyFmt.format(trade.commFees + trade.secFees),
       grossLabel: trade.action == "buy" ? "Cost" : "Proceeds",
-      gross: moneyFmt.format(trade.gross),
-      net: trade.net ? moneyFmt.format(trade.net) : undefined,
+      // gross: moneyFmt.format(trade.origValue.gross),
+      // net: trade.net ? moneyFmt.format(trade.net) : undefined,
+      forex: forexRates.value.getBocRate(trade.currency, trade.date),
 
       buyMatches: buys,
-      missingBuys: trade.action != "buy" && buys.length == 0,
+      missingBuys: trade.action == "sell" && buys.length == 0,
     }
   })
 
-  console.log("tradesView", tradesView.value)
+  console.log("tradesView", tradesView)
+  return tradesView
 }
 
 </script>
@@ -71,6 +79,9 @@ const init = () => {
       </div>
       <!-- details -->
       <div class="flex flex-row flex-wrap gap-x-2 gap-y-1 ml-4 mb-2">
+        <div v-if="trade.currency != 'CAD'" class="basis-full text-left text-gray-700">
+          <strong>Forex:</strong> {{ trade.forex ?? "No value" }}
+        </div>
         <div>
           <strong>Price:</strong> {{ trade.price }}
         </div>
@@ -83,6 +94,7 @@ const init = () => {
         <div v-if="trade.net" class="text-gray-700">
           <strong>Net:</strong> {{ trade.net }}
         </div>
+
       </div>
 
       <!-- breakdown -->
@@ -114,7 +126,7 @@ const init = () => {
                       {{ buyTrade.date }}
                     </td>
                     <td class="text-sm text-gray-900 font-light px-6 py-2 whitespace-nowrap">
-                      Buy {{ buyTrade.quantity }}
+                      Buy {{ buyTrade.quantity }} / {{ buyTrade.totalQuantity }}
                     </td>
                     <td class="text-sm text-gray-900 font-light px-6 py-2 whitespace-nowrap text-right">
                       {{ buyTrade.gross }}
