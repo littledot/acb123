@@ -1,122 +1,202 @@
-import { DateTime } from "luxon"
+import { DateTime } from 'luxon'
+import money from 'currency.js'
 import * as u from './util'
 import axios from 'axios'
-import { unwatchFile } from "fs";
 
-export class TradeEvent {
+export interface Currency extends money.Options {
+  forexCode: string
+}
+
+export const CAD = { forexCode: 'CAD', symbol: "$", precision: 2 }
+export const USD = { forexCode: 'USD', symbol: "US$", precision: 2 }
+
+export interface QuestradeEvent {
   id: string
   symbol: string
-  date: DateTime
+  date: DateTime // trade date
+  settleDate: DateTime
   action: string
   quantity: number
-  currency: string
-  price: number
-  commFees: number // negative
-  secFees: number // negative
+  currency: Currency
+  price: money
+  commFees: money // negative
+  secFees: money // negative
   desc: string
+}
 
-  matchedEvents: TradeEventMatch[] = [];
+export function newQuestradeEvent(id: string, csv: string[]): QuestradeEvent {
+  id = id
 
-  constructor(id: string, csv: string[]) {
-    this.id = id
+  let rawDate = csv[1].split('-').map(x => +x) // dd-mm-yy
+  let rawDate2 = csv[2].split('-').map(x => +x)
 
-    let rawDate = csv[1].split("-").map(x => +x) // dd-mm-yy
-    this.date = DateTime.local(2000 + rawDate[2], rawDate[1], rawDate[0])
+  let currency = CAD
+  if (csv[0].startsWith(`U.S.`)) {
+    currency = USD
+  }
 
-    let currency = `?`
-    if (csv[0].startsWith(`U.S.`)) {
-      currency = `USD`
-    } else if (csv[0].startsWith(`Canadian`)) {
-      currency = `CAD`
-    }
+  let desc = csv[7].replace(`, AVG PRICE - ASK US FOR DETAILS`, ``)
+
+  let symbol = csv[6]
+  if (csv[7].startsWith(`HORIZONS U S DLR CURRENCY`)) {
+    symbol = `DLR`
+  }
+  if (!symbol) { // No symbol? Use desc
+    symbol = desc
+  }
+  symbol = symbol
+  if (symbol.startsWith('.')) { // Remove . from CAD trades
+    symbol = symbol.slice(1)
+  }
+
+  return {
+    id: id,
+    date: DateTime.local(2000 + rawDate[2], rawDate[1], rawDate[0]),
+    settleDate: DateTime.local(2000 + rawDate2[2], rawDate2[1], rawDate2[0]),
+    currency: currency,
+    desc: desc,
+    symbol: symbol,
+    action: csv[4].toLowerCase(),
+    quantity: u.parseNumber(csv[5]),
+    price: money(u.parseNumber(csv[10])),
+    commFees: money(u.parseNumber(csv[12])),
+    secFees: money(u.parseNumber(csv[13])),
+  }
+}
+
+export interface ReportItem {
+  tradeEvent: TradeEvent
+  tradeValue?: TradeValue // CAD
+  acb?: Acb
+  cg?: CapGains
+}
+
+export function newReportRecord(event: QuestradeEvent) {
+  let te = newTradeEvent(event)
+  let tv = event.currency === CAD ? {
+    price: te.price.amount,
+    priceForex: 1,
+    outlay: te.outlay.amount,
+    outlayForex: 1,
+  } : null
+
+  return <ReportItem>{
+    tradeEvent: te,
+    tradeValue: tv,
+  }
+}
+
+export class Money {
+  amount: money
+  currency: Currency
+
+  constructor(amount: money, currency: Currency) {
+    this.amount = amount
     this.currency = currency
-
-    this.desc = csv[7].replace(`, AVG PRICE - ASK US FOR DETAILS`, ``)
-
-    let symbol = csv[6]
-    if (csv[7].startsWith(`HORIZONS U S DLR CURRENCY`)) {
-      symbol = `.DLR`
-    }
-    if (!symbol) {
-      symbol = this.desc
-    }
-    this.symbol = symbol
-
-    this.action = csv[4].toLowerCase()
-    this.quantity = u.parseNumber(csv[5])
-    this.price = u.parseNumber(csv[10])
-    this.commFees = u.parseNumber(csv[12])
-    this.secFees = u.parseNumber(csv[13])
   }
 
-  unmatchedQuantity() {
-    let matched = this.matchedEvents.reduce((sum, it) => sum + it.quantity, 0)
-    return this.quantity - matched
-  }
-
-  matchDisposition(event: TradeEvent) {
-    if (this.action === event.action) { // Same action? No disposition
-      return
-    }
-    if (this.symbol !== event.symbol) { // Diff symbols? No disposition
-      return
-    }
-    if (event.unmatchedQuantity() <= 0) { // No more shares to dispose?
-      return
-    }
-
-    let matchQuantity = Math.min(this.unmatchedQuantity(), event.unmatchedQuantity())
-
-    this.matchedEvents.push(new TradeEventMatch(event, matchQuantity))
-    event.matchedEvents.push(new TradeEventMatch(this, matchQuantity))
-  }
-
-  gross() {
-    return this.price * this.quantity + this.commFees + this.secFees
+  format() {
+    return this.amount.format(this.currency)
   }
 }
 
+export interface TradeEvent {
+  id: string
+  security: string
+  date: DateTime // trade date
+  settleDate: DateTime
+  action: string
+  shares: number
+  price: Money
+  outlay: Money // negative
+}
 
-export class TradeEventMatch {
-  tradeEvent: TradeEvent;
-  quantity: number;
-
-  constructor(tradeEvent: TradeEvent, quantity: number) {
-    this.tradeEvent = tradeEvent
-    this.quantity = quantity
-  }
-
-  gross() {
-    return this.tradeEvent.gross() * this.quantity / this.tradeEvent.quantity
+function newTradeEvent(event: QuestradeEvent) {
+  let fees = event.commFees.add(event.secFees)
+  return {
+    id: event.id,
+    security: event.symbol,
+    date: event.date,
+    settleDate: event.settleDate,
+    action: event.action,
+    shares: event.quantity,
+    price: new Money(event.price, event.currency),
+    outlay: new Money(fees, event.currency),
   }
 }
+
+export interface TradeValue {
+  price: money
+  priceForex: number
+  outlay: money
+  outlayForex: number
+}
+
+export interface Acb {
+  shares: number
+  cost: money
+  acb: money
+}
+
+
+export function addToAcb(acb: Acb, shares: number, cost: money) {
+  let newShares = acb.shares + shares
+  let newCost = acb.cost.add(cost)
+  return {
+    shares: newShares,
+    cost: newCost,
+    acb: newCost.divide(newShares),
+  }
+}
+
+export interface CapGains {
+  gains: money
+  totalGains: money
+}
+
+export function addToCapGains(cg: CapGains, gains: money) {
+  return {
+    gains: gains,
+    totalGains: cg.totalGains.add(gains)
+  }
+}
+
 
 export class Forex {
   boc: Map<number, BocForexObs> = new Map();
 
-  async loadBoc(...years: number[]) {
+  async loadBocs(...years: number[]) {
     for (let year of years) {
-      let url = `https://littledot.github.io/bank-of-canada-exchange-rates/data/out/boc_${year}.full.json`
-      let res = await axios.get(url)
-
-      this.boc.set(year, res.data.observations)
-      console.log(`loaded boc forex`, year, res.data)
+      this.loadBoc(year)
     }
   }
 
-  getBocRate(currency: string, date: DateTime): number {
-    if (currency == 'CAD') return 1
+  async loadBoc(year: number) {
+    let url = `https://littledot.github.io/bank-of-canada-exchange-rates/data/out/boc_${year}.full.json`
+    let res = await axios.get(url)
 
-    let code = `FX${currency}CAD`
-    let rate = this.boc.get(date.year)?.[code]?.[date.toISODate()]
+    this.boc.set(year, res.data.observations)
+    console.log(`loaded boc forex`, year, res.data)
+    return <BocForexObs>res.data.observations
+  }
+
+  async getRatesByYear(date: DateTime) {
+    let rates = this.boc.get(date.year)
+    if (rates) return rates
+
+    return await this.loadBoc(date.year)
+  }
+
+  async getRate(currency: Currency, date: DateTime) {
+    if (currency === CAD) return 1
+
+    let code = `FX${currency.forexCode}CAD`
+    let rates = await this.getRatesByYear(date)
+    let rate = rates[code]?.[date.toISODate()]
     if (rate) {
       return parseFloat(rate)
     }
     return NaN
-  }
-
-  getBocRateByTrade(trade: TradeEvent) {
-    return this.getBocRate(trade.currency, trade.date)
   }
 }
 

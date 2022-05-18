@@ -9,7 +9,7 @@ import Nav from "@/components/Nav.vue"
 <template>
   <Nav />
   <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
-  <Main msg="Hello Vue 3 + TypeScript + Vite" />
+  <Main />
 </template>
 
 <style>
