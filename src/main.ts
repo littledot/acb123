@@ -3,4 +3,6 @@ import App from './App.vue'
 import './index.css'
 import 'tw-elements'
 
-createApp(App).mount('#app')
+
+const app = createApp(App)
+app.mount('#app')

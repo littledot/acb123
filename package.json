@@ -19,7 +19,8 @@
     "luxon": "^2.3.1",
     "papaparse": "^5.3.2",
     "tw-elements": "^1.0.0-alpha12",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vue3-popper": "^1.4.2"
   },
   "devDependencies": {
     "@types/luxon": "^2.3.1",

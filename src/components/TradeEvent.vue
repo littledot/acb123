@@ -5,6 +5,9 @@ import * as t from './type'
 import * as s from './symbol'
 import * as u from './util'
 import { createVNodeCall } from '@vue/compiler-core'
+import { mdiInformationOutline, mdiPencilOutline } from '@mdi/js'
+import Popper from "./core/Popper.vue"
+import Svg from './core/Svg.vue'
 
 const props = defineProps<{
   event: t.ReportItem
@@ -70,7 +73,13 @@ const ui = v.computed(() => {
       </div>
       <div class="grid grid-cols-3">
         <div class="text-left">
-          Price:{{ ui.cadPrice }}
+          <Popper>
+            Price:{{ ui.cadPrice }}
+            <Svg :path="mdiInformationOutline"></Svg>
+            <template #content>
+              1 USD = {{ ui.forexPriceRate }} CAD
+            </template>
+          </Popper>
         </div>
         <div class="text-left">
           Outlay:{{ ui.cadOutlay }}
