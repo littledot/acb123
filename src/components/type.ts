@@ -19,8 +19,8 @@ export interface QuestradeEvent {
   quantity: number
   currency: Currency
   price: money
-  commFees: money // negative
-  secFees: money // negative
+  commFees: money
+  secFees: money
   desc: string
 }
 
@@ -59,8 +59,8 @@ export function newQuestradeEvent(id: string, csv: string[]): QuestradeEvent {
     action: csv[4].toLowerCase(),
     quantity: u.parseNumber(csv[5]),
     price: money(u.parseNumber(csv[10])),
-    commFees: money(u.parseNumber(csv[12])),
-    secFees: money(u.parseNumber(csv[13])),
+    commFees: money(-u.parseNumber(csv[12])), // flip to positive
+    secFees: money(-u.parseNumber(csv[13])), // flip to positive
   }
 }
 
@@ -108,7 +108,7 @@ export interface TradeEvent {
   action: string
   shares: number
   price: Money
-  outlay: Money // negative
+  outlay: Money
 }
 
 function newTradeEvent(event: QuestradeEvent) {
@@ -135,6 +135,7 @@ export interface TradeValue {
 export interface Acb {
   shares: number
   cost: money
+  totalCost: money
   acb: money
 }
 
@@ -144,8 +145,9 @@ export function addToAcb(acb: Acb, shares: number, cost: money) {
   let newCost = acb.cost.add(cost)
   return {
     shares: newShares,
-    cost: newCost,
-    acb: newCost.divide(newShares),
+    cost: cost,
+    totalCost: newCost,
+    acb: newShares === 0 ? money(0) : newCost.divide(newShares),
   }
 }
 

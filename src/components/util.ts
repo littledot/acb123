@@ -22,7 +22,7 @@ export const moneyFmt = new Intl.NumberFormat("en-US", {
 })
 
 export function fmtNum(n: number | undefined) {
-  return n ? numFmt.format(n) : null
+  return Number.isNaN(n) ? null : numFmt.format(n)
 }
 
 export function fmtMoney(n: number | undefined) {

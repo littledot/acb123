@@ -75,20 +75,24 @@ function calcGains(items: t.ReportItem[]) {
       if (!val) return acb // No CAD value? Can't calculate ACB
 
       if (it.tradeEvent.action === 'buy') {
-        // buy cost = price * shares - -outlay
-        let cost = val.price.multiply(it.tradeEvent.shares).subtract(val.outlay)
+        // buy cost = price * shares + outlay
+        let cost = val.price.multiply(it.tradeEvent.shares).add(val.outlay)
         it.acb = t.addToAcb(acb, it.tradeEvent.shares, cost)
       }
       if (it.tradeEvent.action === 'sell') {
-        // sell cost = acb * shares
-        let cost = acb.acb.multiply(it.tradeEvent.shares)
-        it.acb = t.addToAcb(acb, -it.tradeEvent.shares, cost)
+        if (it.tradeEvent.shares == acb.shares) { // Sold all shares? Zero-out acb
+          it.acb = t.addToAcb(acb, -it.tradeEvent.shares, acb.cost.multiply(-1))
+        } else { // Sold partial? Cost = acb * shares
+          let cost = acb.acb.multiply(-it.tradeEvent.shares)
+          it.acb = t.addToAcb(acb, -it.tradeEvent.shares, cost)
+        }
       }
 
       return it.acb ?? acb
     }, {
       shares: 0,
       cost: money(0),
+      totalCost: money(0),
       acb: money(0),
     })
 
@@ -98,8 +102,8 @@ function calcGains(items: t.ReportItem[]) {
       if (!it.acb) return cg // No ACB? Can't calculate gains
       if (it.tradeEvent.action !== 'sell') return cg // No sale? No gains
 
-      let rev = val.price.multiply(it.tradeEvent.shares).add(val.outlay)
-      let gains = rev.subtract(it.acb.cost)
+      let rev = val.price.multiply(it.tradeEvent.shares).subtract(val.outlay)
+      let gains = rev.add(it.acb.cost)
       it.cg = t.addToCapGains(cg, gains)
 
       return it.cg ?? cg
