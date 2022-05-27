@@ -13,9 +13,11 @@ const props = defineProps<{
 </script>
 
 <template>
-  <ol class="border-l-2 border-blue-600">
-    <li v-for="it of events">
-      <TradeEvent :event="it" />
+  <ol>
+    <li v-for="(it, i) of events">
+      <TradeEvent :event="it"
+                  :show-header="i === 0"
+                  :show-timeline="i < events.length - 1" />
     </li>
     <!-- <li>
       <div class="flex flex-start items-center">
@@ -55,3 +57,10 @@ const props = defineProps<{
     </li> -->
   </ol>
 </template>
+<style scoped>
+.timeline-grid {
+  display: grid;
+  grid-template-columns: [price-l] min-content [price-r cost-l] min-content [cost-r shares-l] min-content [shares-r acb-l] min-content [acb-r cg-l] min-content [cg-r];
+  grid-auto-rows: auto;
+}
+</style>

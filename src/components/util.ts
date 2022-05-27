@@ -1,3 +1,4 @@
+import { mdiClose } from '@mdi/js'; 
 
 export function parseNumber(str: string): number {
   let s = str.replace(/[,)]/g, '')
@@ -21,7 +22,7 @@ export const moneyFmt = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 })
 
-export function fmtNum(n: number | undefined) {
+export function fmtNum(n: number) {
   return Number.isNaN(n) ? null : numFmt.format(n)
 }
 

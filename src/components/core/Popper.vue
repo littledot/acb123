@@ -3,10 +3,11 @@ import * as v from 'vue'
 import { defineComponent } from "vue"
 import Popper from "vue3-popper"
 
+// https://valgeirb.github.io/vue3-popper/guide/getting-started.html
+
 // const props = defineProps<{
 //   props: string
-// }>()
-
+// }>() 
 </script>
 
 <template>

@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+*:hover {
+  outline: 1px blue solid;
+}
+
+/* Golden Ratio */
+.flex-gr {
+  flex: 1.6;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.flex-3 {
+  flex: 3;
+}
