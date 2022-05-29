@@ -7,6 +7,7 @@ import * as t from '@comp/type'
 import * as u from '@comp/util'
 import EventTimeline from './EventTimeline.vue'
 import money from 'currency.js'
+import EditTradeModal from './EditTradeModal.vue'
 
 const data = ref(<t.ReportItem[]>[])
 const ui = ref(new Map<string, t.ReportItem[]>())
@@ -124,6 +125,7 @@ function showFirst(i: number) {
 <template>
   <div id="accordionExample5"
        class="accordion">
+    <EditTradeModal />
     <div v-for="([symbol, events], i) of ui"
          class="accordion-item bg-white border border-gray-200">
       <h2 :id="'heading' + i"

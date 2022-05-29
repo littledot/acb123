@@ -65,7 +65,9 @@ const ui = v.computed(() => {
 
 </script>
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col"
+       data-bs-toggle="modal"
+       data-bs-target="#staticBackdrop">
     <div class="flex flex-row items-center">
       <div class="bg-blue-600 w-5 h-5 rounded-full" />
       <div class="flex flex-row flex-1 gap-x-4 items-center">
