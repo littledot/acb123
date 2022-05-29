@@ -3,8 +3,8 @@ import { ref, reactive, computed, provide, inject, onMounted, onRenderTracked, o
 import Papa from 'papaparse'
 import type { ParseResult } from 'papaparse'
 import questradeUrl from '@/assets/questrade.csv?url'
-import * as t from './type'
-import * as u from './util'
+import * as t from '@comp/type'
+import * as u from '@comp/util'
 import EventTimeline from './EventTimeline.vue'
 import money from 'currency.js'
 
