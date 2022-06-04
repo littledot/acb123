@@ -74,9 +74,9 @@ export interface ReportItem {
 export function newReportRecord(event: QuestradeEvent) {
   let te = newTradeEvent(event)
   let tv = event.currency === CAD ? {
-    price: te.price.amount,
+    price: te.price,
     priceForex: 1,
-    outlay: te.outlay.amount,
+    outlay: te.outlay,
     outlayForex: 1,
   } : null
 
@@ -86,18 +86,9 @@ export function newReportRecord(event: QuestradeEvent) {
   }
 }
 
-export class Money {
-  amount: money
-  currency: Currency
-
-  constructor(amount: money, currency: Currency) {
-    this.amount = amount
-    this.currency = currency
-  }
-
-  format() {
-    return this.amount.format(this.currency)
-  }
+export interface Fx {
+  currency: string
+  rate: number
 }
 
 export interface TradeEvent {
@@ -107,12 +98,13 @@ export interface TradeEvent {
   settleDate: DateTime
   action: string
   shares: number
-  price: Money
-  outlay: Money
+  price: money
+  priceFx: Fx
+  outlay: money
+  outlayFx: Fx
 }
 
 function newTradeEvent(event: QuestradeEvent) {
-  let fees = event.commFees.add(event.secFees)
   return {
     id: event.id,
     security: event.symbol,
@@ -120,8 +112,10 @@ function newTradeEvent(event: QuestradeEvent) {
     settleDate: event.settleDate,
     action: event.action,
     shares: event.quantity,
-    price: new Money(event.price, event.currency),
-    outlay: new Money(fees, event.currency),
+    price: event.price,
+    priceFx: { currency: event.currency.forexCode, rate: -1 },
+    outlay: event.commFees.add(event.secFees),
+    outlayFx: { currency: event.currency.forexCode, rate: -1 },
   }
 }
 
@@ -189,10 +183,15 @@ export class Forex {
     return await this.loadBoc(date.year)
   }
 
-  async getRate(currency: Currency, date: DateTime) {
-    if (currency === CAD) return 1
+  async getRate(fx: Fx, date: DateTime) {
+    if (fx.currency === 'custom') return fx.rate
+    return this.getRate2(fx.currency, date)
+  }
 
-    let code = `FX${currency.forexCode}CAD`
+  async getRate2(currency: string, date: DateTime) {
+    if (currency === 'CAD') return 1
+
+    let code = `FX${currency}CAD`
     let rates = await this.getRatesByYear(date)
     let rate = rates[code]?.[date.toISODate()]
     if (rate) {

@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import * as v from 'vue'
-import * as t from './type'
+import * as t from '@comp/type'
 import * as s from './symbol'
 import * as u from './util'
 import TextInput from './core/TextInput.vue'
@@ -8,8 +8,10 @@ import DateInput from './core/DateInput.vue'
 import SelectInput from './core/SelectInput.vue'
 import NumberInput from './core/NumberInput.vue'
 import FxInput from './core/FxInput.vue'
+import { DateTime } from 'luxon'
 
-const props = defineProps<{
+let props = defineProps<{
+  trade: t.TradeEvent
 }>()
 
 let tradeActions = new Map([
@@ -17,10 +19,34 @@ let tradeActions = new Map([
   ['sell', 'Sell']
 ])
 
+let securityRef = v.ref<string>()
+let actionRef = v.ref<string>()
+let tradeDateRef = v.ref<DateTime>()
+let settleDateRef = v.ref<DateTime>()
+let sharesRef = v.ref<number>()
+let priceRef = v.ref<number>()
+let outlayRef = v.ref<number>()
+let priceFxRef = v.ref<t.Fx>()
+let outlayFxRef = v.ref<t.Fx>()
+
+v.watch(() => props.trade, (trade) => {
+  if (!trade) return
+
+  securityRef.value = trade.security
+  actionRef.value = trade.action
+  tradeDateRef.value = trade.date
+  settleDateRef.value = trade.settleDate
+  sharesRef.value = trade.shares
+  priceRef.value = trade.price.value
+  outlayRef.value = trade.outlay.value
+  priceFxRef.value = trade.priceFx
+  outlayFxRef.value = trade.outlayFx
+})
+
 </script>
 <template>
   <div class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
-       id="staticBackdrop"
+       id="editTradeModal"
        data-bs-backdrop="static"
        data-bs-keyboard="false"
        tabindex="-1"
@@ -41,29 +67,37 @@ let tradeActions = new Map([
                   aria-label="Close"></button>
         </div>
         <div class="modal-body relative p-4">
-          <div class="edit-trade-grid">
-            <div class="">Action</div>
-            <SelectInput :options="tradeActions" />
-
+          <form class="edit-trade-grid items-baseline gap-2
+                        needs-validation"
+                novalidate>
             <div class="">Security</div>
-            <TextInput />
+            <TextInput v-model="securityRef" />
+
+            <div class="">Action</div>
+            <SelectInput :options="tradeActions"
+                         v-model="actionRef" />
 
             <div class="">Trade Date</div>
-            <DateInput />
+            <DateInput v-model="tradeDateRef" />
 
             <div class="">Settlement Date</div>
-            <DateInput />
+            <DateInput v-model="settleDateRef" />
 
             <div class="">Shares</div>
-            <NumberInput />
+            <NumberInput v-model="sharesRef" />
 
             <div class="">Price</div>
-            <NumberInput />
-
+            <NumberInput v-model="priceRef" />
             <div class="">Price Currency</div>
-            <FxInput />
+            <FxInput :date="tradeDateRef"
+                     v-model="priceFxRef" />
 
-          </div>
+            <div class="">Outlay</div>
+            <NumberInput v-model="outlayRef" />
+            <div class="">Outlay Currency</div>
+            <FxInput :date="tradeDateRef"
+                     v-model="outlayFxRef" />
+          </form>
         </div>
         <div
              class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-200 rounded-b-md">
@@ -82,5 +116,6 @@ let tradeActions = new Map([
   display: grid;
   grid-template-columns: auto 1fr;
   grid-auto-rows: auto;
+  justify-items: end;
 }
 </style>

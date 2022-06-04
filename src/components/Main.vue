@@ -1,4 +1,5 @@
 <script setup lang='ts'>
+import * as v from 'vue'
 import { ref, reactive, computed, provide, inject, onMounted, onRenderTracked, onRenderTriggered } from 'vue'
 import Papa from 'papaparse'
 import type { ParseResult } from 'papaparse'
@@ -11,7 +12,7 @@ import EditTradeModal from './EditTradeModal.vue'
 
 const data = ref(<t.ReportItem[]>[])
 const ui = ref(new Map<string, t.ReportItem[]>())
-const forex = new t.Forex()
+const forex = <t.Forex>v.inject(u.DI.Fx)
 
 onMounted(() => {
   parseFile(questradeUrl)
@@ -51,13 +52,13 @@ async function convertForex(items: t.ReportItem[]) {
     if (it.tradeValue) continue
     let te = it.tradeEvent
 
-    let priceForex = await forex.getRate(te.price.currency, it.tradeEvent.date)
-    let outlayForex = await forex.getRate(te.outlay.currency, it.tradeEvent.date)
+    let priceForex = await forex.getRate(te.priceFx, it.tradeEvent.date)
+    let outlayForex = await forex.getRate(te.outlayFx, it.tradeEvent.date)
 
     it.tradeValue = {
-      price: te.price.amount.multiply(priceForex),
+      price: te.price.multiply(priceForex),
       priceForex: priceForex,
-      outlay: te.outlay.amount.multiply(outlayForex),
+      outlay: te.outlay.multiply(outlayForex),
       outlayForex: outlayForex,
     }
   }
@@ -125,7 +126,6 @@ function showFirst(i: number) {
 <template>
   <div id="accordionExample5"
        class="accordion">
-    <EditTradeModal />
     <div v-for="([symbol, events], i) of ui"
          class="accordion-item bg-white border border-gray-200">
       <h2 :id="'heading' + i"

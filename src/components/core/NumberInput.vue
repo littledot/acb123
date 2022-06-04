@@ -4,18 +4,32 @@ import * as t from '@comp/type'
 import * as s from '@comp/symbol'
 import * as u from '@comp/util'
 
-const props = defineProps<{
-  hint?: string
-  maxLength?: number
-}>()
+let props = defineProps({
+  hint: String,
+  min: Number,
+  max: Number,
+  maxLen: Number,
+
+  modelValue: Number,
+})
+let emits = defineEmits({
+  'update:modelValue': (it: number) => true
+})
 
 function onInput(event: Event) {
   let target = event.target as HTMLInputElement
   if (!target) return
 
-  if (props.maxLength) {
-    target.value = target.value.slice(0, props.maxLength)
-  }
+
+  u.log(typeof target.value, target.value)
+  target.value = target.value.slice(0, props.maxLen)
+
+  let value = +target.value
+  value = Math.min(value, props.max ?? value)
+  value = Math.max(value, props.min ?? value)
+
+  target.value = '' + value
+  emits('update:modelValue', value)
 }
 
 </script>
@@ -28,15 +42,18 @@ function onInput(event: Event) {
                 text-base
                 font-normal
                 text-gray-700
-                bg-white bg-clip-padding
+                bg-white disabled:bg-gray-100 
+                bg-clip-padding
                 border border-solid border-gray-300
                 rounded
                 transition
                 ease-in-out
                 m-0
-                focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
+                "
          type="number"
          @input="onInput"
+         v-model="modelValue"
          :placeholder="hint" />
 </template>
 <style scoped>

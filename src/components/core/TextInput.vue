@@ -4,11 +4,18 @@ import * as t from '@comp/type'
 import * as s from '@comp/symbol'
 import * as u from '@comp/util'
 
-const props = defineProps<{
+let props = defineProps<{
   hint?: string
   inputType?: string
   maxLength?: number
+
+  modelValue?: string
 }>()
+let emits = defineEmits({
+  'update:modelValue': (it: string) => true,
+})
+
+let vModel = u.vueModel(props, emits, 'modelValue')
 
 </script>
 <template>
@@ -29,7 +36,8 @@ const props = defineProps<{
                 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
          :type="inputType ?? 'text'"
          :maxlength="maxLength"
-         :placeholder="hint" />
+         :placeholder="hint"
+         v-model="vModel" />
 </template>
 <style scoped>
 </style>

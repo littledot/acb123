@@ -4,23 +4,19 @@ import * as t from '@comp/type'
 import * as s from '@comp/symbol'
 import * as u from '@comp/util'
 
-const props = defineProps<{
-  selectedId?: string
-  options?: Map<string, string> // ID <> value
-}>()
+let props = defineProps<{
+  options?: Map<unknown, string> // ID <> value
 
-const emits = defineEmits({
-  select: (id: string) => true
+  modelValue?: unknown,
+}>()
+let emits = defineEmits({
+  'update:modelValue': (it: unknown) => true,
 })
 
-let selectedId = v.ref()
+v.watch(() => props.modelValue, (init) => {
+  emits('update:modelValue', init)
+})
 
-let selectedValue = v.computed(() => props.selectedId ?
-  props.options?.get(props.selectedId) : null)
-
-function onChange(event: Event) {
-  emits('select', selectedId.value)
-}
 
 </script>
 <template>
@@ -39,12 +35,16 @@ function onChange(event: Event) {
                   ease-in-out
                   m-0
                   focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-          v-model="selectedId"
-          @change="onChange"
-          aria-label="Default select example">
-    <option v-for="[key, val] of options"
-            :value="key">
-      {{ val }}
+          v-model="modelValue"
+          aria-label="Selector">
+    <option value=""
+            disabled
+            hidden>
+      Fix for iOS
+    </option>
+    <option v-for="[id, option] of options"
+            :value="id">
+      {{ option }}
     </option>
   </select>
 </template>
