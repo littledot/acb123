@@ -4,8 +4,12 @@ import * as t from '@comp/type'
 import * as s from '@comp/symbol'
 import * as u from '@comp/util'
 
-const props = defineProps<{
+let props = defineProps<{
+  modelValue?: any
 }>()
+let emits = defineEmits({
+  'update:modelValue': (it: any) => true,
+})
 
 </script>
 <template>

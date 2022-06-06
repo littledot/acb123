@@ -86,6 +86,12 @@ export function newReportRecord(event: QuestradeEvent) {
   }
 }
 
+export function newReportRecord2(te: TradeEvent) {
+  return <ReportItem>{
+    tradeEvent: te,
+  }
+}
+
 export interface Fx {
   currency: string
   rate: number
@@ -104,7 +110,7 @@ export interface TradeEvent {
   outlayFx: Fx
 }
 
-function newTradeEvent(event: QuestradeEvent) {
+export function newTradeEvent(event: QuestradeEvent) {
   return {
     id: event.id,
     security: event.symbol,

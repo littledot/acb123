@@ -1,19 +1,20 @@
 <script setup lang='ts'>
-import * as v from 'vue'
+import { useTradeStore } from '@store/trade'
 import _ from 'lodash'
-import * as t from './type'
-import * as s from './symbol'
-import * as u from './util'
-import { createVNodeCall } from '@vue/compiler-core'
-import { mdiInformationOutline, mdiPencilOutline, mdiClose, mdiEqual } from '@mdi/js'
-import Metric from './core/Metric.vue'
+import * as v from 'vue'
 import FxMetric from './core/FxMetric.vue'
+import Metric from './core/Metric.vue'
+import EditTradeModal from './EditTradeModal.vue'
+import * as t from './type'
+import * as u from './util'
 
-const props = defineProps<{
-  event: t.ReportItem
+let props = defineProps<{
+  event: t.ReportItem,
   showHeader: boolean,
   showTimeline: boolean,
 }>()
+
+let showEditModal = v.ref(false)
 
 const ui = v.computed(() => {
   let trade = props.event.tradeEvent
@@ -63,9 +64,24 @@ const ui = v.computed(() => {
   }
 })
 
+function onUpdateTrade(trade: t.TradeEvent) {
+  let tradeStore = useTradeStore()
+  tradeStore.updateTrade(trade)
+}
+
 </script>
 <template>
-  <div class="flex flex-col">
+  <Teleport to="body">
+    <EditTradeModal :trade="event.tradeEvent"
+                    :show="showEditModal"
+                    @ok="onUpdateTrade"
+                    @close="showEditModal = false" />
+  </Teleport>
+
+  <div v-bind="$attrs"
+       class="flex flex-col"
+       @click="showEditModal = true">
+
     <div class="flex flex-row items-center">
       <div class="bg-blue-600 w-5 h-5 rounded-full" />
       <div class="flex flex-row flex-1 gap-x-4 items-center">

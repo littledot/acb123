@@ -6,6 +6,7 @@ import * as u from '@comp/util'
 import SelectInput from './SelectInput.vue'
 import NumberInput from './NumberInput.vue'
 import { DateTime } from 'luxon'
+import { useFxStore } from '@store/fx'
 
 let props = defineProps<{
   date?: DateTime,
@@ -21,7 +22,7 @@ const currencyOpt = new Map([
   ['custom', 'Custom Currency'],
 ])
 
-let fx = <t.Forex>v.inject(u.DI.Fx)
+let fxStore = useFxStore()
 
 let currencyRef = v.ref<string>()
 let rateRef = v.ref<number>()
@@ -41,7 +42,7 @@ v.watch([currencyRef, () => props.date], async ([currency, date]) => {
   let ui: any = {}
 
   if (props.date && currency && currency !== 'custom') {
-    rateRef.value = await fx.getRate2(currency, props.date)
+    rateRef.value = await fxStore.getRate2(currency, props.date)
       .catch((e) => {
         u.err('fx.getRate() failed.', e)
         ui.err = `Failed to query ${currency} exchange rate on ${props.date?.toISODate()}. Please enter it manually.`

@@ -5,30 +5,21 @@ import * as t from './type'
 import * as s from './symbol'
 import * as u from './util'
 import TradeEvent from './TradeEvent.vue'
-import EditTradeModal from './EditTradeModal.vue'
 
-const props = defineProps<{
+let props = defineProps<{
   events: t.ReportItem[]
 }>()
-
-let modalRef = v.ref()
-
-function test(it: t.ReportItem) {
-  modalRef.value = it.tradeEvent
-}
+let emits = defineEmits({})
 
 </script>
 
 <template>
-  <EditTradeModal :trade="modalRef" />
   <ol>
-    <li v-for="(it, i) of events">
+    <li v-for="(it, i) of events"
+        :key="it.tradeEvent.id">
       <TradeEvent :event="it"
                   :show-header="i === 0"
-                  :show-timeline="i < events.length - 1"
-                  data-bs-toggle="modal"
-                  data-bs-target="#editTradeModal"
-                  @click="test(it)" />
+                  :show-timeline="i < events.length - 1" />
     </li>
     <!-- <li>
       <div class="flex flex-start items-center">

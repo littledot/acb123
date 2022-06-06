@@ -14,16 +14,9 @@ let emits = defineEmits({
   'update:modelValue': (it: DateTime) => true
 })
 
-let dayRef = v.ref<number>()
-let monthRef = v.ref<number>()
-let yearRef = v.ref<number>()
-
-v.watch(() => props.modelValue, (init) => {
-  if (!init) return
-  dayRef.value = init.day
-  monthRef.value = init.month
-  yearRef.value = init.year
-})
+let dayRef = v.ref(props.modelValue?.day)
+let monthRef = v.ref(props.modelValue?.month)
+let yearRef = v.ref(props.modelValue?.year)
 
 let ui = v.computed(() => {
   let day = dayRef.value
