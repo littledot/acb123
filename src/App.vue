@@ -3,6 +3,15 @@
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import Main from '@/components/Main.vue'
 import Nav from "@/components/Nav.vue"
+import { useTradeStore } from '@store/trade'
+import { onBeforeMount } from 'vue'
+
+onBeforeMount(async () => {
+  let tradeStore = useTradeStore()
+  await tradeStore.init()
+})
+
+
 </script>
 
 <template>

@@ -1,15 +1,18 @@
-import { ReportItem, TradeEvent } from './../components/type'
-import { useFxStore } from './fx'
+import * as t from '@comp/type'
+import * as u from '@comp/util'
 import money from 'currency.js'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
-import * as u from '@comp/util'
-import * as t from '@comp/type'
 import { v4 as uuid } from 'uuid'
+import { useFxStore } from './fx'
+import { fromTradeEventJson, TradeEvent } from './tradeEvent'
+import { Convert as TradeEventIdsConverter } from './tradeEventIdsJson'
+import { Convert as TradeEventConverter } from './tradeEventJson'
+
 
 export const useTradeStore = defineStore('TradeStore', {
   state: () => ({
-    rawTrades: new Map<string, t.TradeEvent>(),
+    rawTrades: new Map<string, TradeEvent>(),
     trades: <t.ReportItem[]>[],
   }),
   getters: {
@@ -19,6 +22,29 @@ export const useTradeStore = defineStore('TradeStore', {
     }
   },
   actions: {
+    async init() {
+      // Load trade index
+      let idsStr = localStorage.getItem('tradeIds') ?? ''
+      let ids = TradeEventIdsConverter.toTradeEventIds(idsStr)
+      console.log(`loading ${ids.length} trades from ls.index`)
+
+      // Load trade events
+      let fails = 0
+      ids.forEach((id) => {
+        try {
+          let tradeStr = localStorage.getItem(id) ?? ''
+          let tradeJson = TradeEventConverter.toTradeEventJson(tradeStr)
+          let trade = fromTradeEventJson(tradeJson)
+          this.rawTrades.set(trade.id, trade)
+        } catch (err) {
+          fails++
+        }
+      })
+      console.log(`${fails} trades failed to load`)
+
+      await this._calcGains()
+    },
+
     async updateTrade(newTrade: t.TradeEvent) {
       this.rawTrades.set(newTrade.id, newTrade)
 
@@ -34,10 +60,24 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     // private
-    
+
+    _persistTrade(trade: t.TradeEvent) {
+      // Index trade for processing
+      this.rawTrades.set(trade.id, trade)
+
+      // Save trade to localStorage
+      let json = JSON.stringify(trade)
+      localStorage.setItem(trade.id, json)
+      console.log('persisted trade event', json)
+
+      // Save trade index to localStorage
+      let ids = new Set(this.rawTrades.keys()).add(trade.id)
+      localStorage.setItem('tradeIds', JSON.stringify([...ids]))
+    },
+
     _onParseCsv(results: ParseResult<string[]>) {
       cleanData(results)
-        .forEach((it) => this.rawTrades.set(it.id, it)) // Insert new trades
+        .forEach((it) => this._persistTrade(it)) // Insert new trades
 
       this._calcGains()
     },

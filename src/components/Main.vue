@@ -6,9 +6,9 @@ import EventTimeline from './EventTimeline.vue'
 
 let tradeStore = useTradeStore()
 
-onMounted(() => {
+function importExample() {
   tradeStore.importCsvFile(questradeUrl)
-})
+}
 
 function showFirst(i: number) {
   return i == 0 ? ['show'] : ['collapse']
@@ -18,7 +18,8 @@ function showFirst(i: number) {
 
 <template>
   <div id="accordionExample5"
-       class="accordion">
+       class="accordion flex flex-col">
+    <button @click="importExample">Import</button>
     <div v-for="([security, events], i) of tradeStore.tradesBySecurity"
          :key="security"
          class="accordion-item bg-white border border-gray-200">

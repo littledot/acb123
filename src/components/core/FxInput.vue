@@ -24,18 +24,13 @@ const currencyOpt = new Map([
 
 let fxStore = useFxStore()
 
-let currencyRef = v.ref<string>()
-let rateRef = v.ref<number>()
+let currencyRef = v.ref(props.modelValue?.currency)
+let rate = props.modelValue?.rate ?? -1
+let rateRef = v.ref(rate > 0 ? rate : undefined)
 
 let uiRef = v.ref<{
   err?: string
 }>({})
-
-v.watch(() => props.modelValue, (init) => {
-  currencyRef.value = init?.currency
-  let rate = init?.rate ?? -1 // Rate is -1 for async currencies
-  rateRef.value = rate > 0 ? rate : undefined
-})
 
 v.watch([currencyRef, () => props.date], async ([currency, date]) => {
   u.log('FxInput', { 'cur': currency, 'date': date })
