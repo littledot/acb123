@@ -19,7 +19,7 @@ let emits = defineEmits({
 const currencyOpt = new Map([
   ['CAD', 'Canadian Dollar'],
   ['USD', 'US Dollar'],
-  ['custom', 'Custom Currency'],
+  ['custom', 'Other'],
 ])
 
 let fxStore = useFxStore()

@@ -70,7 +70,7 @@ async function onSave() {
   emits('close')
 }
 
-async function onDelete(){
+async function onDelete() {
   await tradeStore.deleteTrade(trade)
   emits('close')
 }
@@ -80,13 +80,18 @@ function onCancel() {
   emits('close')
 }
 
+function onClickBg(event: Event) {
+  if (event.target.id === 'modalRoot') emits('close')
+}
+
 </script>
 <template>
   <Transition>
     <div v-if="show"
          class="modal fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto bg-black/50"
-         id="editTradeModal"
+         id="modalRoot"
          tabindex="-1"
+         @click="onClickBg"
          aria-labelledby="staticBackdropLabel"
          aria-hidden="true">
       <div class="modal-dialog relative w-auto pointer-events-none">
