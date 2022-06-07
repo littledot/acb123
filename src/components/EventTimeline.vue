@@ -18,8 +18,8 @@ let emits = defineEmits({})
     <li v-for="(it, i) of events"
         :key="it.tradeEvent.id">
       <TradeEvent :event="it"
-                  :show-header="i === 0"
-                  :show-timeline="i < events.length - 1" />
+                  :isFirst="i === 0"
+                  :isLast="i === events.length - 1" />
     </li>
     <!-- <li>
       <div class="flex flex-start items-center">

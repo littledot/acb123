@@ -11,8 +11,9 @@ import * as u from './util'
 
 let props = defineProps<{
   event: t.ReportItem,
-  showHeader: boolean,
-  showTimeline: boolean,
+
+  isFirst: boolean,
+  isLast: boolean,
 }>()
 
 let showEditModal = v.ref(false)
@@ -33,8 +34,6 @@ const ui = v.computed(() => {
   let cg = props.event.cg
 
   return {
-    showHeader: props.showHeader ? ['block'] : ['hidden'],
-    showTimeline: props.showTimeline ? ['visible'] : ['invisible'],
     title: `${date}: ${action} ${trade.shares} shares`,
     showForex: isForex,
     forexPrice: trade.price.format(),
@@ -77,29 +76,48 @@ const ui = v.computed(() => {
        class="flex flex-col"
        @click="showEditModal = true">
 
-    <div class="flex flex-row items-center">
-      <div class="bg-blue-600 w-5 h-5 rounded-full" />
-      <div class="flex flex-row flex-1 gap-x-4 items-center">
-        <h4 class="flex-3 text-left text-gray-800 font-semibold text-xl">{{ ui.title }}</h4>
+    <div id="trade-title-section"
+         class="flex flex-row items-center">
+      <div id="title-timeline"
+           class="relative flex self-stretch">
+        <div id="dot"
+             class="w-5 h-5 bg-blue-600 rounded-full m-auto" />
+        <div id="line"
+             class="absolute 
+                    w-1 h-full mx-2
+                    bg-blue-600"
+             :class="{
+               'h-1/2': isFirst || isLast,
+               'top-1/2': isFirst, 'bottom-1/2': isLast,
+             }" />
+      </div>
+      <div id="title-column-headers"
+           class="flex flex-row flex-1 gap-x-4 items-center">
+        <h4 class="flex-[3] text-left text-gray-800 font-semibold text-xl">{{ ui.title }}</h4>
         <p class="col-header"
-           :class="ui.showHeader">Cost</p>
+           :class="{ hidden: !isFirst }">Cost</p>
         <p class="col-header"
-           :class="ui.showHeader">Accumulated Cost</p>
+           :class="{ hidden: !isFirst }">Accumulated Cost</p>
         <p class="col-header"
-           :class="ui.showHeader">Accumulated Shares</p>
+           :class="{ hidden: !isFirst }">Accumulated Shares</p>
         <p class="col-header"
-           :class="ui.showHeader">ACB</p>
+           :class="{ hidden: !isFirst }">ACB</p>
         <p class="col-header"
-           :class="ui.showHeader">Capital Gains</p>
+           :class="{ hidden: !isFirst }">Capital Gains</p>
         <p class="col-header"
-           :class="ui.showHeader">Acc. Capital Gains</p>
+           :class="{ hidden: !isFirst }">Acc. Capital Gains</p>
       </div>
     </div>
-    <div class="flex flex-row">
-      <div class="bg-blue-600 w-1 mx-2 -my-2"
-           :class="ui.showTimeline" />
-      <div class="flex flex-row flex-1 gap-x-4">
-        <div class="flex flex-row flex-3 gap-x-6">
+
+    <div id="trade-body"
+         class="flex flex-row">
+      <div id="body-timeline"
+           class="bg-blue-600 w-1 mx-2"
+           :class="{ invisible: isLast }" />
+      <div id="body-trade-detail"
+           class="flex flex-row flex-1 gap-x-4">
+        <div id="trade-subtotal"
+             class="flex flex-row flex-[3] gap-x-6">
           <FxMetric label="Price"
                     :value="ui.forexPrice"
                     :value2="ui.cadPrice"
