@@ -19,8 +19,9 @@ let props = defineProps<{
 }>()
 let emits = defineEmits({
   close: () => true,
-  ok: (it: TradeEvent) => true,
 })
+
+let tradeStore = useTradeStore()
 
 let tradeActions = new Map([
   ['buy', 'Buy'],
@@ -51,7 +52,7 @@ function init() {
   outlayFxRef.value = trade.outlayFx
 }
 
-function ok() {
+async function onSave() {
   let newTrade = <TradeEvent>{
     id: trade.id,
     security: securityRef.value,
@@ -64,11 +65,17 @@ function ok() {
     priceFx: priceFxRef.value,
     outlayFx: outlayFxRef.value,
   }
-  emits('ok', newTrade)
+
+  await tradeStore.updateTrade(newTrade)
   emits('close')
 }
 
-function cancel() {
+async function onDelete(){
+  await tradeStore.deleteTrade(trade)
+  emits('close')
+}
+
+function onCancel() {
   init()
   emits('close')
 }
@@ -130,19 +137,28 @@ function cancel() {
                        v-model="outlayFxRef" />
             </form>
           </div>
-          <div
-               class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-200 rounded-b-md">
-            <button type="button"
-                    class="inline-block px-6 py-2.5 bg-purple-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-purple-700 hover:shadow-lg focus:bg-purple-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-purple-800 active:shadow-lg transition duration-150 ease-in-out"
-                    @click="cancel"
-                    data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button type="button"
-                    class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out ml-1"
-                    @click="ok">
-              Save
-            </button>
+          <div class="modal-footer flex flex-shrink-0 flex-wrap items-center p-4 border-t border-gray-200 rounded-b-md">
+            <div class="flex-1">
+              <button type="button"
+                      class="inline-block px-6 py-2.5 bg-red-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-red-700 hover:shadow-lg focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out"
+                      @click="onDelete"
+                      data-bs-dismiss="modal">
+                Delete
+              </button>
+            </div>
+            <div class="flex flex-row">
+              <button type="button"
+                      class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+                      @click="onCancel"
+                      data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button type="button"
+                      class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out ml-1"
+                      @click="onSave">
+                Save
+              </button>
+            </div>
           </div>
         </div>
       </div>

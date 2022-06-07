@@ -23,12 +23,12 @@ export const useTradeStore = defineStore('TradeStore', {
   },
   actions: {
     async init() {
-      // Load trade index
+      // Load trade index from ls
       let idsStr = localStorage.getItem('tradeIds') ?? ''
       let ids = TradeEventIdsConverter.toTradeEventIds(idsStr)
       console.log(`loading ${ids.length} trades from ls.index`)
 
-      // Load trade events
+      // Load trade events from ls
       let fails = 0
       ids.forEach((id) => {
         try {
@@ -45,10 +45,23 @@ export const useTradeStore = defineStore('TradeStore', {
       await this._calcGains()
     },
 
-    async updateTrade(newTrade: t.TradeEvent) {
-      this.rawTrades.set(newTrade.id, newTrade)
+    async updateTrade(trade: TradeEvent) {
+      this._persistTrade(trade)
 
-      this._calcGains()
+      await this._calcGains()
+    },
+
+    async deleteTrade(trade: TradeEvent) {
+      this.rawTrades.delete(trade.id)
+
+      // Delete trade from ls
+      localStorage.removeItem(trade.id)
+
+      // Delete trade index from ls
+      let ids = new Set(this.rawTrades.keys())
+      localStorage.setItem('tradeIds', JSON.stringify([...ids]))
+
+      await this._calcGains()
     },
 
     importCsvFile(file: File | string) {
@@ -61,7 +74,7 @@ export const useTradeStore = defineStore('TradeStore', {
 
     // private
 
-    _persistTrade(trade: t.TradeEvent) {
+    _persistTrade(trade: TradeEvent) {
       // Index trade for processing
       this.rawTrades.set(trade.id, trade)
 
@@ -75,11 +88,11 @@ export const useTradeStore = defineStore('TradeStore', {
       localStorage.setItem('tradeIds', JSON.stringify([...ids]))
     },
 
-    _onParseCsv(results: ParseResult<string[]>) {
+    async _onParseCsv(results: ParseResult<string[]>) {
       cleanData(results)
         .forEach((it) => this._persistTrade(it)) // Insert new trades
 
-      this._calcGains()
+      await this._calcGains()
     },
 
     async _calcGains() {

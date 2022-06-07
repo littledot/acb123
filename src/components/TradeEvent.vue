@@ -65,17 +65,11 @@ const ui = v.computed(() => {
   }
 })
 
-function onUpdateTrade(trade: TradeEvent) {
-  let tradeStore = useTradeStore()
-  tradeStore.updateTrade(trade)
-}
-
 </script>
 <template>
   <Teleport to="body">
     <EditTradeModal :trade="event.tradeEvent"
                     :show="showEditModal"
-                    @ok="onUpdateTrade"
                     @close="showEditModal = false" />
   </Teleport>
 
