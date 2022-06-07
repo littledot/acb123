@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import money from 'currency.js'
 import * as u from './util'
 import axios from 'axios'
+import { TradeEvent } from '@store/tradeEvent'
 
 export interface Currency extends money.Options {
   forexCode: string
@@ -95,19 +96,6 @@ export function newReportRecord2(te: TradeEvent) {
 export interface Fx {
   currency: string
   rate: number
-}
-
-export interface TradeEvent {
-  id: string
-  security: string
-  date: DateTime // trade date
-  settleDate: DateTime
-  action: string
-  shares: number
-  price: money
-  priceFx: Fx
-  outlay: money
-  outlayFx: Fx
 }
 
 export function newTradeEvent(event: QuestradeEvent) {

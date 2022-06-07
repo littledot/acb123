@@ -11,14 +11,15 @@ import FxInput from './core/FxInput.vue'
 import { DateTime } from 'luxon'
 import money from 'currency.js'
 import { useTradeStore } from '@store/trade'
+import { TradeEvent } from '@store/tradeEvent'
 
 let props = defineProps<{
   show: boolean,
-  trade: t.TradeEvent,
+  trade: TradeEvent,
 }>()
 let emits = defineEmits({
   close: () => true,
-  ok: (it: t.TradeEvent) => true,
+  ok: (it: TradeEvent) => true,
 })
 
 let tradeActions = new Map([
@@ -51,7 +52,7 @@ function init() {
 }
 
 function ok() {
-  let newTrade = <t.TradeEvent>{
+  let newTrade = <TradeEvent>{
     id: trade.id,
     security: securityRef.value,
     action: actionRef.value,

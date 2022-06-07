@@ -1,5 +1,6 @@
 <script setup lang='ts'>
 import { useTradeStore } from '@store/trade'
+import { TradeEvent } from '@store/tradeEvent'
 import _ from 'lodash'
 import * as v from 'vue'
 import FxMetric from './core/FxMetric.vue'
@@ -64,7 +65,7 @@ const ui = v.computed(() => {
   }
 })
 
-function onUpdateTrade(trade: t.TradeEvent) {
+function onUpdateTrade(trade: TradeEvent) {
   let tradeStore = useTradeStore()
   tradeStore.updateTrade(trade)
 }
