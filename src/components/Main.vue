@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import questradeUrl from '@/assets/questrade.csv?url'
+import questradeUrl from '@/assets/questrade1.csv?url'
 import { useTradeStore } from '@store/trade'
 import { onMounted } from 'vue'
 import EventTimeline from './EventTimeline.vue'

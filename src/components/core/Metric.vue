@@ -28,8 +28,9 @@ let labelPopper = v.computed(() => {
       </div>
     </Popper>
     <div id="value"
-         class="text-xl">
-      <span>{{ value }}</span>
+         class="flex flex-row center-items">
+      <span class="text-xl">{{ value }}</span>
+      <slot name="valueRight" />
     </div>
   </div>
 </template>

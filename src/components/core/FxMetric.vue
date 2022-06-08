@@ -40,7 +40,8 @@ let labelPopper = v.computed(() => {
         </div>
       </div>
 
-      <Icon :path="mdiClose" />
+      <Icon class="w-4 h-4"
+            :path="mdiClose" />
 
       <div id="fx-label"
            class="flex flex-col place-items-start">

@@ -8,6 +8,9 @@ import Metric from './core/Metric.vue'
 import EditTradeModal from './EditTradeModal.vue'
 import * as t from './type'
 import * as u from './util'
+import { mdiAlert, mdiPencil } from '@mdi/js'
+import Popper from '@comp/core/Popper.vue'
+import Icon from '@comp/core/Icon.vue'
 
 let props = defineProps<{
   event: t.ReportItem,
@@ -17,6 +20,7 @@ let props = defineProps<{
 }>()
 
 let showEditModal = v.ref(false)
+let isHover = v.ref(false)
 
 const ui = v.computed(() => {
   let trade = props.event.tradeEvent
@@ -52,6 +56,7 @@ const ui = v.computed(() => {
       cost: acb.cost.format(),
       totalCost: acb.accCost.format(),
       acb: acb.acb.format(),
+      showNegativeSharesAlert: acb.shares < 0,
     } : {
       class: ['invisible'],
     },
@@ -76,7 +81,9 @@ const ui = v.computed(() => {
 
   <div v-bind="$attrs"
        class="flex flex-col"
-       @click="showEditModal = true">
+       @dblclick="showEditModal = true"
+       @mouseover="isHover = true"
+       @mouseleave="isHover = false">
 
     <div id="trade-title"
          class="flex flex-row items-center">
@@ -97,7 +104,14 @@ const ui = v.computed(() => {
 
       <div id="title-content"
            class="flex flex-row flex-1 gap-x-4 items-center ml-2">
-        <h4 class="flex-[3] text-left text-gray-800 font-semibold text-xl">{{ ui.title }}</h4>
+        <div class="flex flex-row flex-[3] items-center">
+          <h4 class="text-left text-gray-800 font-semibold text-xl">
+            {{ ui.title }}</h4>
+          <Icon :path="mdiPencil"
+                class="w-6 h-6 ml-2 fill-current"
+                :class="{ hidden: !(isHover || showEditModal) }"
+                @click="showEditModal = true" />
+        </div>
         <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Cost</p>
         <p class="flex-1 text-left font-semibold"
@@ -121,7 +135,7 @@ const ui = v.computed(() => {
       <div id="body-content"
            class="flex flex-row flex-1 gap-x-4 ml-2 mt-2 mb-4">
         <div id="trade-subtotal"
-             class="flex flex-row flex-[3] gap-x-6">
+             class="flex flex-row flex-[3] gap-x-8">
           <FxMetric label="Price"
                     :value="ui.forexPrice"
                     :value2="ui.cadPrice"
@@ -140,8 +154,24 @@ const ui = v.computed(() => {
                 :value="ui.acb?.cost" />
         <Metric class="flex-1"
                 :value="ui.acb?.totalCost" />
-        <Metric class="flex-1"
-                :value="ui.acb?.shares" />
+        <div class="flex-1 flex flex-row">
+          <Metric :value="ui.acb?.shares">
+            <template #valueRight>
+              <div class="w-6 h-6"
+                   :class="{ hidden: !ui.acb?.showNegativeSharesAlert }">
+                <Popper>
+                  <Icon :path="mdiAlert"
+                        class="w-6 h-6 ml-2 fill-yellow-500" />
+                  <template #pop>
+                    <p class="text-left">Negative shares detected.</p>
+                    <p>Some trades may be missing and calculations may not be accurate.</p>
+                  </template>
+                </Popper>
+              </div>
+            </template>
+          </Metric>
+
+        </div>
         <Metric class="flex-1"
                 :value="ui.acb?.acb" />
 

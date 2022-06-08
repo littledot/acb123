@@ -18,7 +18,7 @@ import Popper from "vue3-popper"
           closeDelay="100">
     <slot />
     <template #content="props">
-      <slot name="content"
+      <slot name="pop"
             v-bind="props" />
     </template>
   </Popper>
