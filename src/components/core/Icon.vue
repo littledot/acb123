@@ -18,8 +18,7 @@ const props = defineProps<{
        role="img"
        xmlns="http://www.w3.org/2000/svg"
        viewBox="0 0 24 24">
-    <path fill="currentColor"
-          :d="path">
+    <path :d="path">
     </path>
   </svg>
 </template>

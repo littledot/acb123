@@ -81,7 +81,7 @@ function onCancel() {
 }
 
 function onClickBg(event: Event) {
-  if (event.target.id === 'modalRoot') emits('close')
+  if (event.target.id === 'modalRoot') onCancel()
 }
 
 </script>
@@ -92,6 +92,8 @@ function onClickBg(event: Event) {
          id="modalRoot"
          tabindex="-1"
          @click="onClickBg"
+         @keyup.enter="onSave"
+         @keyup.esc="onCancel"
          aria-labelledby="staticBackdropLabel"
          aria-hidden="true">
       <div class="modal-dialog relative w-auto pointer-events-none">
