@@ -13,13 +13,14 @@ import { DateTime } from 'luxon'
 import money from 'currency.js'
 import { useTradeStore } from '@store/trade'
 import { TradeEvent } from '@store/tradeEvent'
+import Modal from './core/Modal.vue'
 
 let props = defineProps<{
   show: boolean,
   trade: TradeEvent,
 }>()
 let emits = defineEmits({
-  close: () => true,
+  hide: () => true,
 })
 
 let tradeStore = useTradeStore()
@@ -29,7 +30,6 @@ let tradeActions = new Map([
   ['sell', 'Sell']
 ])
 
-let trade = props.trade
 let securityRef = v.ref<string>()
 let actionRef = v.ref<string>()
 let tradeDateRef = v.ref<DateTime>()
@@ -42,6 +42,7 @@ let outlayFxRef = v.ref<t.Fx>()
 init()
 
 function init() {
+  let trade = props.trade
   securityRef.value = trade.security
   actionRef.value = trade.action
   tradeDateRef.value = trade.date
@@ -55,7 +56,7 @@ function init() {
 
 async function onSave() {
   let newTrade = <TradeEvent>{
-    id: trade.id,
+    id: props.trade.id,
     security: securityRef.value,
     action: actionRef.value,
     date: tradeDateRef.value,
@@ -68,105 +69,52 @@ async function onSave() {
   }
 
   await tradeStore.updateTrade(newTrade)
-  emits('close')
 }
 
 async function onDelete() {
-  await tradeStore.deleteTrade(trade)
-  emits('close')
-}
-
-function onCancel() {
-  init()
-  emits('close')
-}
-
-function onClickBg(event: Event) {
-  if (event.target.id === 'modalRoot') onCancel()
+  await tradeStore.deleteTrade(props.trade)
 }
 
 </script>
 <template>
-  <Transition>
-    <div v-if="show"
-         class="modal fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto bg-black/50"
-         id="modalRoot"
-         tabindex="-1"
-         @click="onClickBg"
-         @keyup.enter="onSave"
-         @keyup.esc="onCancel"
-         aria-labelledby="staticBackdropLabel"
-         aria-hidden="true">
-      <div class="modal-dialog relative w-auto pointer-events-none">
-        <div
-             class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current">
-          <div
-               class="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">
-            <h5 class="text-xl font-medium leading-normal text-gray-800"
-                id="exampleModalLabel">
-              Edit Trade
-            </h5>
-            <button type="button"
-                    class="btn-close box-content w-4 h-4 p-1 text-black border-none rounded-none opacity-50 focus:shadow-none focus:outline-none focus:opacity-100 hover:text-black hover:opacity-75 hover:no-underline"
-                    @click="onCancel"
-                    aria-label="Close"/>
-          </div>
-          <div class="modal-body relative p-4">
-            <form class="edit-trade-grid items-baseline gap-2
-                        needs-validation"
-                  novalidate>
-              <div class="">Security</div>
-              <TextInput v-model="securityRef" />
+  <Modal title="Edit Trade"
+         @ok="onSave"
+         @cancel="init"
+         @delete="onDelete"
+         :show="show"
+         @hide="emits('hide')">
+    <form class="edit-trade-grid items-baseline gap-2
+                 needs-validation"
+          novalidate>
+      <div class="">Security</div>
+      <TextInput v-model="securityRef" />
 
-              <div class="">Action</div>
-              <SelectInput :options="tradeActions"
-                           v-model="actionRef" />
+      <div class="">Action</div>
+      <SelectInput :options="tradeActions"
+                   v-model="actionRef" />
 
-              <div class="">Trade Date</div>
-              <DateInput v-model="tradeDateRef" />
+      <div class="">Trade Date</div>
+      <DateInput v-model="tradeDateRef" />
 
-              <div class="">Settlement Date</div>
-              <DateInput v-model="settleDateRef" />
+      <div class="">Settlement Date</div>
+      <DateInput v-model="settleDateRef" />
 
-              <div class="">Shares</div>
-              <NumberInput v-model="sharesRef" />
+      <div class="">Shares</div>
+      <NumberInput v-model="sharesRef" />
 
-              <div class="">Price</div>
-              <NumberInput v-model="priceRef" />
-              <div class="">Price Currency</div>
-              <FxInput :date="tradeDateRef"
-                       v-model="priceFxRef" />
+      <div class="">Price</div>
+      <NumberInput v-model="priceRef" />
+      <div class="">Price Currency</div>
+      <FxInput :date="tradeDateRef"
+               v-model="priceFxRef" />
 
-              <div class="">Outlay</div>
-              <NumberInput v-model="outlayRef" />
-              <div class="">Outlay Currency</div>
-              <FxInput :date="tradeDateRef"
-                       v-model="outlayFxRef" />
-            </form>
-          </div>
-          <div class="modal-footer flex flex-shrink-0 flex-wrap items-center p-4 border-t border-gray-200 rounded-b-md">
-            <div class="flex-1">
-              <Button type="err"
-                      @click="onDelete">
-                Delete
-              </Button>
-            </div>
-            <div class="flex flex-row">
-              <Button type="pri"
-                      @click="onCancel">
-                Cancel
-              </Button>
-              <Button class="ml-1"
-                      type="ok"
-                      @click="onSave">
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Transition>
+      <div class="">Outlay</div>
+      <NumberInput v-model="outlayRef" />
+      <div class="">Outlay Currency</div>
+      <FxInput :date="tradeDateRef"
+               v-model="outlayFxRef" />
+    </form>
+  </Modal>
 </template>
 <style scoped>
 .edit-trade-grid {

@@ -35,7 +35,7 @@ export const useTradeStore = defineStore('TradeStore', {
 
     async init() {
       // Load trade index from ls
-      let idsStr = localStorage.getItem(this._lsKey('tradeIds')) ?? ''
+      let idsStr = localStorage.getItem(this._lsKey('tradeIds')) ?? '[]'
       let ids = TradeEventIdsConverter.toTradeEventIds(idsStr)
       console.log(`loading ${ids.length} trades from ls.index`)
 

@@ -75,8 +75,9 @@ const ui = v.computed(() => {
 <template>
   <Teleport to="body">
     <EditTradeModal :trade="event.tradeEvent"
+                    :showDelete="true"
                     :show="showEditModal"
-                    @close="showEditModal = false" />
+                    @hide="showEditModal = false" />
   </Teleport>
 
   <div v-bind="$attrs"
@@ -99,6 +100,7 @@ const ui = v.computed(() => {
              :class="{
                'h-1/2': isFirst || isLast,
                'top-1/2': isFirst, 'bottom-1/2': isLast,
+               'hidden': isFirst && isLast, // Only item? hide line
              }" />
       </div>
 
