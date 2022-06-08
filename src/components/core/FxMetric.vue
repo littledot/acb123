@@ -11,6 +11,7 @@ const props = defineProps<{
   label?: string,
   value?: string,
   value2?: string,
+  fxCurrency?: string,
   fxValue?: number,
   labelTooltip?: string,
   labelTooltipPlacement?: string,
@@ -28,10 +29,10 @@ let labelPopper = v.computed(() => {
         <Popper :content="labelTooltip"
                 :placement="labelTooltipPlacement"
                 :disabled="!!!labelTooltip">
-          <div id="label"
-               class="text-sm font-semibold">
+          <p id="label"
+             class="font-semibold">
             {{ label }}
-          </div>
+          </p>
         </Popper>
         <div id="value"
              class="text-m font-normal">
@@ -46,20 +47,20 @@ let labelPopper = v.computed(() => {
         <Popper :content="labelTooltip"
                 :placement="labelTooltipPlacement"
                 :disabled="!!!labelTooltip">
-          <div id="label"
-               class="text-sm font-medium">
-            FX Rate
-          </div>
+          <p id="label"
+             class="text-sm">
+            {{ fxCurrency }} FX
+          </p>
         </Popper>
-        <div id="value"
-             class="text-m font-normal">
+        <p id="value"
+           class="">
           <span>{{ fxValue }}</span>
-        </div>
+        </p>
       </div>
     </div>
 
     <div id="value"
-         class="text-2xl font-normal">
+         class="text-xl">
       <span>{{ value2 }}</span>
     </div>
 

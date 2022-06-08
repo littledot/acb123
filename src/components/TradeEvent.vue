@@ -37,8 +37,10 @@ const ui = v.computed(() => {
     title: `${date}: ${action} ${trade.shares} shares`,
     showForex: isForex,
     forexPrice: trade.price.format(),
+    forexPriceCurrency: trade.priceFx.currency,
     forexPriceRate: cad?.priceForex,
     forexOutlay: trade.outlay.format(),
+    forexOutlayCurrency: trade.outlayFx.currency,
     forexOutlayRate: cad?.outlayForex,
     cadPrice: cad?.price.format(),
     cadOutlay: cad?.outlay.format(),
@@ -48,7 +50,7 @@ const ui = v.computed(() => {
       class: ['visible'],
       shares: u.fmtNum(acb.shares),
       cost: acb.cost.format(),
-      totalCost: acb.totalCost.format(),
+      totalCost: acb.accCost.format(),
       acb: acb.acb.format(),
     } : {
       class: ['invisible'],
@@ -76,14 +78,15 @@ const ui = v.computed(() => {
        class="flex flex-col"
        @click="showEditModal = true">
 
-    <div id="trade-title-section"
+    <div id="trade-title"
          class="flex flex-row items-center">
+
       <div id="title-timeline"
            class="relative flex self-stretch">
         <div id="dot"
-             class="w-5 h-5 bg-blue-600 rounded-full m-auto" />
+             class="w-5 h-5 m-auto bg-blue-600 rounded-full" />
         <div id="line"
-             class="absolute 
+             class="absolute
                     w-1 h-full mx-2
                     bg-blue-600"
              :class="{
@@ -91,20 +94,21 @@ const ui = v.computed(() => {
                'top-1/2': isFirst, 'bottom-1/2': isLast,
              }" />
       </div>
-      <div id="title-column-headers"
-           class="flex flex-row flex-1 gap-x-4 items-center">
+
+      <div id="title-content"
+           class="flex flex-row flex-1 gap-x-4 items-center ml-2">
         <h4 class="flex-[3] text-left text-gray-800 font-semibold text-xl">{{ ui.title }}</h4>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Cost</p>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Accumulated Cost</p>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Accumulated Shares</p>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">ACB</p>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Capital Gains</p>
-        <p class="col-header"
+        <p class="flex-1 text-left font-semibold"
            :class="{ hidden: !isFirst }">Acc. Capital Gains</p>
       </div>
     </div>
@@ -114,17 +118,19 @@ const ui = v.computed(() => {
       <div id="body-timeline"
            class="bg-blue-600 w-1 mx-2"
            :class="{ invisible: isLast }" />
-      <div id="body-trade-detail"
-           class="flex flex-row flex-1 gap-x-4">
+      <div id="body-content"
+           class="flex flex-row flex-1 gap-x-4 ml-2 mt-2 mb-4">
         <div id="trade-subtotal"
              class="flex flex-row flex-[3] gap-x-6">
           <FxMetric label="Price"
                     :value="ui.forexPrice"
                     :value2="ui.cadPrice"
+                    :fx-currency="ui.forexPriceCurrency"
                     :fx-value="ui.forexPriceRate" />
           <FxMetric label="Outlay"
                     :value="ui.forexOutlay"
                     :value2="ui.cadOutlay"
+                    :fx-currency="ui.forexOutlayCurrency"
                     :fx-value="ui.forexOutlayRate" />
           <Metric label="Total"
                   :value="ui.cadTotal" />
@@ -148,9 +154,4 @@ const ui = v.computed(() => {
   </div>
 </template>
 <style scoped>
-.col-header {
-  flex: 1;
-  text-align: left;
-  font-weight: 600;
-}
 </style>

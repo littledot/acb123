@@ -123,19 +123,19 @@ export interface TradeValue {
 export interface Acb {
   shares: number
   cost: money
-  totalCost: money
+  accCost: money
   acb: money
 }
 
 
 export function addToAcb(acb: Acb, shares: number, cost: money) {
   let newShares = acb.shares + shares
-  let newCost = acb.cost.add(cost)
+  let newAccCost = acb.accCost.add(cost)
   return {
     shares: newShares,
     cost: cost,
-    totalCost: newCost,
-    acb: newShares === 0 ? money(0) : newCost.divide(newShares),
+    accCost: newAccCost,
+    acb: newShares === 0 ? money(0) : newAccCost.divide(newShares),
   }
 }
 

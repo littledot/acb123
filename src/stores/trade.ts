@@ -12,6 +12,7 @@ import { Convert as TradeEventConverter } from './tradeEventJson'
 
 export const useTradeStore = defineStore('TradeStore', {
   state: () => ({
+    lsNamespace: ['default'],
     rawTrades: new Map<string, TradeEvent>(),
     trades: <t.ReportItem[]>[],
   }),
@@ -22,9 +23,19 @@ export const useTradeStore = defineStore('TradeStore', {
     }
   },
   actions: {
+    async clear() {
+      this.rawTrades.clear()
+
+      Object.keys(localStorage)
+        .filter(it => it.startsWith(this._lsKey()))
+        .forEach(it => localStorage.removeItem(it))
+
+      await this._calcGains()
+    },
+
     async init() {
       // Load trade index from ls
-      let idsStr = localStorage.getItem('tradeIds') ?? ''
+      let idsStr = localStorage.getItem(this._lsKey('tradeIds')) ?? ''
       let ids = TradeEventIdsConverter.toTradeEventIds(idsStr)
       console.log(`loading ${ids.length} trades from ls.index`)
 
@@ -32,7 +43,7 @@ export const useTradeStore = defineStore('TradeStore', {
       let fails = 0
       ids.forEach((id) => {
         try {
-          let tradeStr = localStorage.getItem(id) ?? ''
+          let tradeStr = localStorage.getItem(this._lsKey('trade', id)) ?? ''
           let tradeJson = TradeEventConverter.toTradeEventJson(tradeStr)
           let trade = fromTradeEventJson(tradeJson)
           this.rawTrades.set(trade.id, trade)
@@ -55,11 +66,11 @@ export const useTradeStore = defineStore('TradeStore', {
       this.rawTrades.delete(trade.id)
 
       // Delete trade from ls
-      localStorage.removeItem(trade.id)
+      localStorage.removeItem(this._lsKey('trade', trade.id))
 
       // Delete trade index from ls
       let ids = new Set(this.rawTrades.keys())
-      localStorage.setItem('tradeIds', JSON.stringify([...ids]))
+      localStorage.setItem(this._lsKey('tradeIds'), JSON.stringify([...ids]))
 
       await this._calcGains()
     },
@@ -74,18 +85,22 @@ export const useTradeStore = defineStore('TradeStore', {
 
     // private
 
+    _lsKey(...keys: string[]) {
+      return this.lsNamespace.concat(keys).join('|')
+    },
+
     _persistTrade(trade: TradeEvent) {
       // Index trade for processing
       this.rawTrades.set(trade.id, trade)
 
       // Save trade to localStorage
       let json = JSON.stringify(trade)
-      localStorage.setItem(trade.id, json)
+      localStorage.setItem(this._lsKey('trade', trade.id), json)
       console.log('persisted trade event', json)
 
       // Save trade index to localStorage
       let ids = new Set(this.rawTrades.keys()).add(trade.id)
-      localStorage.setItem('tradeIds', JSON.stringify([...ids]))
+      localStorage.setItem(this._lsKey('tradeIds'), JSON.stringify([...ids]))
     },
 
     async _onParseCsv(results: ParseResult<string[]>) {
@@ -113,6 +128,7 @@ function cleanData(results: ParseResult<string[]>) {
     .slice(1)
     .filter(row => row.length > 16)
     .map((row, i) => t.newQuestradeEvent(uuid(), row))
+    // .filter((it) => it.symbol === 'DLR') // debugging
     .map(it => t.newTradeEvent(it))
   return trades
 }
@@ -150,7 +166,7 @@ function calcGains(items: t.ReportItem[]) {
         it.acb = t.addToAcb(acb, it.tradeEvent.shares, cost)
       }
       if (it.tradeEvent.action === 'sell') {
-        if (it.tradeEvent.shares == acb.shares) { // Sold all shares? Zero-out acb
+        if (it.tradeEvent.shares === acb.shares) { // Sold all shares? Zero-out acb
           it.acb = t.addToAcb(acb, -it.tradeEvent.shares, acb.cost.multiply(-1))
         } else { // Sold partial? Cost = acb * shares
           let cost = acb.acb.multiply(-it.tradeEvent.shares)
@@ -162,7 +178,7 @@ function calcGains(items: t.ReportItem[]) {
     }, {
       shares: 0,
       cost: money(0),
-      totalCost: money(0),
+      accCost: money(0),
       acb: money(0),
     })
 

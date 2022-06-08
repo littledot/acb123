@@ -28,7 +28,7 @@ let labelPopper = v.computed(() => {
       </div>
     </Popper>
     <div id="value"
-         class="text-2xl font-normal">
+         class="text-xl">
       <span>{{ value }}</span>
     </div>
   </div>
