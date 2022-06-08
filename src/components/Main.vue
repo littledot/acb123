@@ -2,9 +2,9 @@
 import questradeUrl from '@/assets/questrade1.csv?url'
 import { useTradeStore } from '@store/trade'
 import { onMounted, ref } from 'vue'
-import EventTimeline from './EventTimeline.vue'
-import Button from './core/Button.vue'
-import Modal from './core/Modal.vue'
+import EventTimeline from '@comp/EventTimeline.vue'
+import Button from '@comp/core/Button.vue'
+import Modal from '@comp/core/Modal.vue'
 
 let tradeStore = useTradeStore()
 

@@ -1,6 +1,7 @@
-import { DateTime } from 'luxon'
-import { BocForexObs, Fx } from '@comp/type'
+import { BocForexObs } from '@comp/type'
+import { Fx } from '@store/tradeEventJson'
 import axios from 'axios'
+import { DateTime } from 'luxon'
 import { defineStore } from 'pinia'
 
 export const useFxStore = defineStore('FxStore', {

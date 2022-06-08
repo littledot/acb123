@@ -1,12 +1,8 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '../type'
-import * as s from '../symbol'
-import * as u from '../util'
 
 // https://github.com/JamesCoyle/vue-icon/blob/master/lib/svg-icon.vue
 
-const props = defineProps<{
+let props = defineProps<{
   path: string
 }>()
 

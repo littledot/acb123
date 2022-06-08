@@ -1,11 +1,9 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '@comp/type'
-import * as s from '@comp/symbol'
 import * as u from '@comp/util'
-import SelectInput from './SelectInput.vue'
-import NumberInput from './NumberInput.vue'
 import { DateTime } from 'luxon'
+import * as v from 'vue'
+import NumberInput from '@comp/core/NumberInput.vue'
+import SelectInput from '@comp/core/SelectInput.vue'
 
 let props = defineProps<{
   modelValue?: DateTime,

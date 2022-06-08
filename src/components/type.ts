@@ -1,8 +1,8 @@
-import { DateTime } from 'luxon'
-import money from 'currency.js'
-import * as u from './util'
-import axios from 'axios'
 import { TradeEvent } from '@store/tradeEvent'
+import axios from 'axios'
+import money from 'currency.js'
+import { DateTime } from 'luxon'
+import * as u from './util'
 
 export interface Currency extends money.Options {
   forexCode: string
@@ -127,6 +127,14 @@ export interface Acb {
   acb: money
 }
 
+export function zeroOutAcb(acb: Acb) {
+  return {
+    shares: 0,
+    cost: acb.accCost.multiply(-1),
+    accCost: money(0),
+    acb: money(0),
+  }
+}
 
 export function addToAcb(acb: Acb, shares: number, cost: money) {
   let newShares = acb.shares + shares

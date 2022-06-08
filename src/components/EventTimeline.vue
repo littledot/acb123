@@ -1,10 +1,6 @@
 <script setup lang='ts'>
-import { ref, computed, inject, onMounted, onRenderTriggered } from 'vue'
-import * as v from 'vue'
-import * as t from './type'
-import * as s from './symbol'
-import * as u from './util'
-import TradeEvent from './TradeEvent.vue'
+import TradeEvent from '@comp/TradeEvent.vue'
+import * as t from '@comp/type'
 
 let props = defineProps<{
   events: t.ReportItem[]

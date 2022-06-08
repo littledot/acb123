@@ -1,9 +1,5 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '../type'
-import * as s from '../symbol'
-import * as u from '../util'
-import Popper from './Popper.vue'
+import Popper from '@comp/core/Popper.vue'
 
 const props = defineProps<{
   label?: string,
@@ -11,10 +7,6 @@ const props = defineProps<{
   labelTooltip?: string,
   labelTooltipPlacement?: string,
 }>()
-
-let labelPopper = v.computed(() => {
-
-})
 
 </script>
 <template>

@@ -1,13 +1,9 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '../type'
-import * as s from '../symbol'
-import * as u from '../util'
-import Popper from './Popper.vue'
-import Icon from './Icon.vue'
-import { mdiClose, mdiEqual } from '@mdi/js'
+import { mdiClose } from '@mdi/js'
+import Icon from '@comp/core/Icon.vue'
+import Popper from '@comp/core/Popper.vue'
 
-const props = defineProps<{
+let props = defineProps<{
   label?: string,
   value?: string,
   value2?: string,
@@ -17,9 +13,6 @@ const props = defineProps<{
   labelTooltipPlacement?: string,
 }>()
 
-let labelPopper = v.computed(() => {
-
-})
 
 </script>
 <template>

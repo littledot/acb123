@@ -1,19 +1,16 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '@comp/type'
-import * as s from './symbol'
-import * as u from './util'
-import TextInput from './core/TextInput.vue'
-import DateInput from './core/DateInput.vue'
-import Button from './core/Button.vue'
-import SelectInput from './core/SelectInput.vue'
-import NumberInput from './core/NumberInput.vue'
-import FxInput from './core/FxInput.vue'
-import { DateTime } from 'luxon'
-import money from 'currency.js'
 import { useTradeStore } from '@store/trade'
 import { TradeEvent } from '@store/tradeEvent'
-import Modal from './core/Modal.vue'
+import { Fx } from '@store/tradeEventJson'
+import money from 'currency.js'
+import { DateTime } from 'luxon'
+import * as v from 'vue'
+import DateInput from '@comp/core/DateInput.vue'
+import FxInput from '@comp/core/FxInput.vue'
+import Modal from '@comp/core/Modal.vue'
+import NumberInput from '@comp/core/NumberInput.vue'
+import SelectInput from '@comp/core/SelectInput.vue'
+import TextInput from '@comp/core/TextInput.vue'
 
 let props = defineProps<{
   show: boolean,
@@ -37,8 +34,8 @@ let settleDateRef = v.ref<DateTime>()
 let sharesRef = v.ref<number>()
 let priceRef = v.ref<number>(0)
 let outlayRef = v.ref<number>(0)
-let priceFxRef = v.ref<t.Fx>()
-let outlayFxRef = v.ref<t.Fx>()
+let priceFxRef = v.ref<Fx>()
+let outlayFxRef = v.ref<Fx>()
 init()
 
 function init() {

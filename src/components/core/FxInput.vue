@@ -1,19 +1,18 @@
 <script setup lang='ts'>
-import * as v from 'vue'
-import * as t from '@comp/type'
-import * as s from '@comp/symbol'
+import NumberInput from '@comp/core/NumberInput.vue'
+import SelectInput from '@comp/core/SelectInput.vue'
 import * as u from '@comp/util'
-import SelectInput from './SelectInput.vue'
-import NumberInput from './NumberInput.vue'
-import { DateTime } from 'luxon'
 import { useFxStore } from '@store/fx'
+import { Fx } from '@store/tradeEventJson'
+import { DateTime } from 'luxon'
+import * as v from 'vue'
 
 let props = defineProps<{
   date?: DateTime,
-  modelValue?: t.Fx,
+  modelValue?: Fx,
 }>()
 let emits = defineEmits({
-  'update:modelValue': (it: t.Fx) => true,
+  'update:modelValue': (it: Fx) => true,
 })
 
 const currencyOpt = new Map([

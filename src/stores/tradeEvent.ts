@@ -1,6 +1,6 @@
+import { Fx, TradeEventJson } from '@store/tradeEventJson'
 import money from 'currency.js'
 import { DateTime } from "luxon"
-import { Fx, TradeEventJson } from './tradeEventJson'
 
 export interface TradeEvent {
   id: string
