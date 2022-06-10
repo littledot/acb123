@@ -19,6 +19,8 @@ let showClearModal = ref(false)
   <div class="flex flex-col">
     <Teleport to="body">
       <Modal title="Confirm Clear Data"
+             okLabel="Clear"
+             okStyle="err"
              @ok="useTradeStore().clear()"
              :show="showClearModal"
              @hide="showClearModal = false">

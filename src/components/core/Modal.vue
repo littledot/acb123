@@ -7,8 +7,11 @@ let props = defineProps<{
 
   title: string,
   okLabel?: string,
+  okStyle?: string,
   cancelLabel?: string,
+  cancelStyle?: string,
   deleteLabel?: string,
+  deleteStyle?: string,
 }>()
 let emits = defineEmits({
   hide: () => true,
@@ -67,18 +70,18 @@ function onClickBg(event: Event) {
           <div class="modal-footer flex flex-shrink-0 flex-wrap items-center p-4 border-t border-gray-200 rounded-b-md">
             <div class="flex-1">
               <Button v-if="showDelete"
-                      type="err"
+                      :type="deleteStyle ?? 'err'"
                       @click="onDelete">
                 {{ deleteLabel ?? 'Delete' }}
               </Button>
             </div>
             <div class="flex flex-row">
-              <Button type="pri"
+              <Button :type="cancelStyle ?? 'pri'"
                       @click="onCancel">
                 {{ cancelLabel ?? 'Cancel' }}
               </Button>
               <Button class="ml-1"
-                      type="ok"
+                      :type="okStyle ?? 'ok'"
                       @click="onOk">
                 {{ okLabel ?? 'OK' }}
               </Button>
