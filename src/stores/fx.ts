@@ -1,8 +1,15 @@
-import { BocForexObs } from '@comp/type'
 import { Fx } from '@store/tradeEventJson'
 import axios from 'axios'
 import { DateTime } from 'luxon'
 import { defineStore } from 'pinia'
+
+interface BocForexObs {
+  [currencyCode: string]: BocForexRate
+}
+
+interface BocForexRate {
+  [date: string]: string
+}
 
 export const useFxStore = defineStore('FxStore', {
   state: () => ({
