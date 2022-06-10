@@ -12,6 +12,7 @@
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^6.6.96",
     "@mdi/js": "^6.6.96",
+    "@types/lodash": "^4.14.182",
     "@types/uuid": "^8.3.4",
     "@vueuse/core": "^8.6.0",
     "axios": "^0.26.1",
