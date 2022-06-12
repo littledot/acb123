@@ -1,17 +1,13 @@
-import { TradeValue } from './../components/type'
-import { Options } from './tradeEventJson'
 import * as t from '@comp/type'
 import * as u from '@comp/util'
 import { useFxStore } from '@store/fx'
-import { fromTradeEventJson, TradeHistory, TradeEvent, TradeEventLot, TradeEventLots } from '@store/tradeEvent'
+import { fromTradeEventJson, Options, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
 import { Convert as TradeEventIdsConverter } from '@store/tradeEventIdsJson'
 import { Convert as TradeEventConverter } from '@store/tradeEventJson'
 import money from 'currency.js'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
 import { v4 as uuid } from 'uuid'
-import { mapValues } from 'lodash'
-import { StringDecoder } from 'string_decoder'
 
 
 export const useTradeStore = defineStore('TradeStore', {
@@ -129,7 +125,8 @@ export const useTradeStore = defineStore('TradeStore', {
       this.history.clear()
 
       for (let [sec, trades] of tradesBySec) {
-        let optionLots = new Map<string, TradeEventLots>()
+        let optionLots = new Map<Options, TradeEventLots>()
+        let optionKeys = new Map<string, TradeEventLots>()
 
         // Group options using FIFO
         let optTrades = trades.filter(it => it.tradeEvent.options)
@@ -137,13 +134,14 @@ export const useTradeStore = defineStore('TradeStore', {
           let optTrade = optTradeObj.tradeEvent
           if (!optTrade.options) return
           let key = Object.values(optTrade.options).join('|')
-          let lots = optionLots.get(key)
+          let lots = optionKeys.get(key)
           if (!lots) {
             lots = {
               lots: [],
               unsure: [],
             }
-            optionLots.set(key, lots)
+            optionKeys.set(key, lots)
+            optionLots.set(optTrade.options, lots)
           }
 
           if (optTrade.action.startsWith('buy')) { // Buy? Create a new lot
@@ -194,7 +192,7 @@ function cleanData(results: ParseResult<string[]>) {
     .map((row, i) => t.newQuestradeEvent(uuid(), row))
     // .filter((it) => it.symbol === 'DLR') // debugging
     .map(it => t.newTradeEvent(it))
-    // .filter(it => it.options) // debugging
+    .filter(it => it.options) // debugging
   return trades
 }
 

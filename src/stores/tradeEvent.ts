@@ -1,4 +1,4 @@
-import { Options } from './tradeEventJson'
+import { OptionsJson } from './tradeEventJson'
 import { Fx, TradeEventJson } from '@store/tradeEventJson'
 import money from 'currency.js'
 import { DateTime } from "luxon"
@@ -16,7 +16,7 @@ export interface TradeEvent {
   outlay: money
   outlayFx: Fx
 
-  options?: Options,
+  options?: Options
 }
 
 export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
@@ -31,11 +31,29 @@ export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
     priceFx: json.priceFx,
     outlay: money(json.outlay),
     outlayFx: json.outlayFx,
-    options: json.options,
+    options: fromOptionsJson(json.options),
   }
 }
+
+export interface Options {
+  type: string
+  expiryDate: DateTime
+  strike: money
+  strikeFx: Fx
+}
+
+export function fromOptionsJson(json?: OptionsJson) {
+  return json ? <Options>{
+    type: json.type,
+    expiryDate: DateTime.fromJSDate(json.expiryDate),
+    strike: money(json.strike),
+    strikeFx: json.strikeFx,
+  } : undefined
+}
+
+
 export interface TradeHistory {
-  option: Map<string, TradeEventLots>,
+  option: Map<Options, TradeEventLots>,
   stock: ReportItem[],
 }
 

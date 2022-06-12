@@ -1,4 +1,4 @@
-import { TradeEvent } from '@store/tradeEvent'
+import { Options, TradeEvent } from '@store/tradeEvent'
 import axios from 'axios'
 import money from 'currency.js'
 import { capitalize } from 'lodash'
@@ -23,7 +23,11 @@ export interface QuestradeEvent {
   price: money
   commFees: money
   secFees: money
-  options: any
+  options?: {
+    type: string
+    expiryDate: DateTime
+    strike: money
+  }
   raw: string
 }
 
@@ -111,6 +115,7 @@ export interface Fx {
 }
 
 export function newTradeEvent(event: QuestradeEvent) {
+  let fx = { currency: event.currency.forexCode, rate: -1 }
   return {
     id: event.id,
     security: event.symbol,
@@ -119,10 +124,10 @@ export function newTradeEvent(event: QuestradeEvent) {
     action: event.action,
     shares: event.quantity,
     price: event.price,
-    priceFx: { currency: event.currency.forexCode, rate: -1 },
+    priceFx: fx,
     outlay: event.commFees.add(event.secFees),
-    outlayFx: { currency: event.currency.forexCode, rate: -1 },
-    options: event.options,
+    outlayFx: fx,
+    options: event.options?.let(it => Object.assign({ strikeFx: fx }, it)),
     raw: event.raw,
   }
 }
