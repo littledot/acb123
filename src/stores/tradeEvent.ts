@@ -1,6 +1,8 @@
+import { Options } from './tradeEventJson'
 import { Fx, TradeEventJson } from '@store/tradeEventJson'
 import money from 'currency.js'
 import { DateTime } from "luxon"
+import { ReportItem } from '@comp/type'
 
 export interface TradeEvent {
   id: string
@@ -13,6 +15,8 @@ export interface TradeEvent {
   priceFx: Fx
   outlay: money
   outlayFx: Fx
+
+  options?: Options,
 }
 
 export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
@@ -27,5 +31,20 @@ export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
     priceFx: json.priceFx,
     outlay: money(json.outlay),
     outlayFx: json.outlayFx,
+    options: json.options,
   }
+}
+export interface TradeHistory {
+  option: Map<string, TradeEventLots>,
+  stock: ReportItem[],
+}
+
+export interface TradeEventLots {
+  lots: TradeEventLot[],
+  unsure: ReportItem[],
+}
+
+export interface TradeEventLot {
+  trades: ReportItem[],
+  accShares: number,
 }

@@ -1,6 +1,7 @@
 import { TradeEvent } from '@store/tradeEvent'
 import axios from 'axios'
 import money from 'currency.js'
+import { capitalize } from 'lodash'
 import { DateTime } from 'luxon'
 import * as u from './util'
 
@@ -22,47 +23,55 @@ export interface QuestradeEvent {
   price: money
   commFees: money
   secFees: money
-  desc: string
+  options: any
+  raw: string
 }
 
+// https://regex101.com/r/3pWM5r/latest
+const optionsRegex = /^(PUT|CALL) \.?(\w+) (\d{2}\/\d{2}\/\d{2}) (\d*(?:,\d{3})*\.?\d*),/i
+
 export function newQuestradeEvent(id: string, csv: string[]): QuestradeEvent {
-  id = id
-
-  let rawDate = csv[1].split('-').map(x => +x) // dd-mm-yy
-  let rawDate2 = csv[2].split('-').map(x => +x)
-
-  let currency = CAD
-  if (csv[0].startsWith(`U.S.`)) {
-    currency = USD
-  }
-
-  let desc = csv[7].replace(`, AVG PRICE - ASK US FOR DETAILS`, ``)
-
-  let symbol = csv[6]
-  if (csv[7].startsWith(`HORIZONS U S DLR CURRENCY`)) {
-    symbol = `DLR`
-  }
-  if (!symbol) { // No symbol? Use desc
-    symbol = desc
-  }
-  symbol = symbol
-  if (symbol.startsWith('.')) { // Remove . from CAD trades
-    symbol = symbol.slice(1)
-  }
-
-  return {
+  let o = {
     id: id,
-    date: DateTime.local(2000 + rawDate[2], rawDate[1], rawDate[0]),
-    settleDate: DateTime.local(2000 + rawDate2[2], rawDate2[1], rawDate2[0]),
-    currency: currency,
-    desc: desc,
-    symbol: symbol,
+    date: DateTime.fromFormat(csv[1], 'dd-MM-yy'),
+    settleDate: DateTime.fromFormat(csv[2], 'dd-MM-yy'),
     action: csv[4].toLowerCase(),
     quantity: u.parseNumber(csv[5]),
     price: money(u.parseNumber(csv[10])),
     commFees: money(-u.parseNumber(csv[12])), // flip to positive
     secFees: money(-u.parseNumber(csv[13])), // flip to positive
+    raw: csv.join(',')
+  } as QuestradeEvent
+
+  o.currency = CAD
+  if (csv[0].startsWith(`U.S.`)) {
+    o.currency = USD
   }
+
+  let desc = csv[7]
+  let optionsMatch = optionsRegex.exec(desc)
+  if (optionsMatch) {
+    let [_, optType, symbol, rawExpiration, rawStrike] = optionsMatch
+    o.symbol = symbol
+    // o.action += capitalize(optType) // buyCall, sellPut, etc.
+    o.quantity *= 100
+    o.options = {
+      type: optType.toLowerCase(),
+      expiryDate: DateTime.fromFormat(rawExpiration, 'MM/dd/yy'),
+      strike: money(u.parseNumber(rawStrike)),
+    }
+    console.log(o)
+  } else {
+    o.symbol = csv[6] ? csv[6] :
+      desc.startsWith(`HORIZONS U S DLR CURRENCY`) ? 'DLR' :
+        desc.replace(`, AVG PRICE - ASK US FOR DETAILS`, '')
+  }
+
+  if (o.symbol.startsWith('.')) { // Remove . from CAD symbols
+    o.symbol = o.symbol.slice(1)
+  }
+
+  return o
 }
 
 export interface ReportItem {
@@ -70,6 +79,7 @@ export interface ReportItem {
   tradeValue?: TradeValue // CAD
   acb?: Acb
   cg?: CapGains
+  warn: string[]
 }
 
 export function newReportRecord(event: QuestradeEvent) {
@@ -84,12 +94,14 @@ export function newReportRecord(event: QuestradeEvent) {
   return <ReportItem>{
     tradeEvent: te,
     tradeValue: tv,
+    warn: [],
   }
 }
 
 export function newReportRecord2(te: TradeEvent) {
   return <ReportItem>{
     tradeEvent: te,
+    warn: [],
   }
 }
 
@@ -110,6 +122,8 @@ export function newTradeEvent(event: QuestradeEvent) {
     priceFx: { currency: event.currency.forexCode, rate: -1 },
     outlay: event.commFees.add(event.secFees),
     outlayFx: { currency: event.currency.forexCode, rate: -1 },
+    options: event.options,
+    raw: event.raw,
   }
 }
 

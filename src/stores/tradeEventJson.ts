@@ -18,6 +18,14 @@ export interface TradeEventJson {
   priceFx:    Fx;
   outlay:     number;
   outlayFx:   Fx;
+  options?:    Options;
+  raw:        string;
+}
+
+export interface Options {
+  type:       string;
+  expiryDate: Date;
+  strike:     number;
 }
 
 export interface Fx {
@@ -181,6 +189,13 @@ const typeMap: any = {
       { json: "priceFx", js: "priceFx", typ: r("Fx") },
       { json: "outlay", js: "outlay", typ: 3.14 },
       { json: "outlayFx", js: "outlayFx", typ: r("Fx") },
+      { json: "options", js: "options", typ: r("Options") },
+      { json: "raw", js: "raw", typ: "" },
+  ], false),
+  "Options": o([
+      { json: "type", js: "type", typ: "" },
+      { json: "expiryDate", js: "expiryDate", typ: Date },
+      { json: "strike", js: "strike", typ: 0 },
   ], false),
   "Fx": o([
       { json: "currency", js: "currency", typ: "" },
