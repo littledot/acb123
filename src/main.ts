@@ -1,9 +1,9 @@
+import { createPinia } from 'pinia'
+import 'tw-elements'
 import { createApp } from 'vue'
 import App from './App.vue'
-import DI from './plugins/di'
 import './index.css'
-import 'tw-elements'
-import { createPinia } from 'pinia'
+import './scope-ext'
 
 
 const app = createApp(App)

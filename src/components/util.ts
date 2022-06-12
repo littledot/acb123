@@ -53,10 +53,6 @@ export function fmtMoney(n: number | undefined) {
   return n ? moneyFmt.format(n) : null
 }
 
-export function ifT<I, O extends keyof any>(t: I, ifTruthy: (it: I) => O): O | null {
-  return t ? ifTruthy(t) : null
-}
-
 export const months = new Map([
   [1, 'January'],
   [2, 'February'],
