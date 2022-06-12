@@ -1,3 +1,5 @@
+// Credits: https://github.com/thedaviddelta/scope-extensions-js/issues/3
+
 export { }
 
 declare global {
