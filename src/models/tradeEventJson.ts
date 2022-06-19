@@ -8,28 +8,28 @@
 // match the expected interface, even if the JSON is valid.
 
 export interface TradeEventJson {
-  id:         string;
-  security:   string;
-  date:       Date;
-  settleDate: Date;
   action:     string;
-  shares:     number;
-  price:      number;
-  priceFx:    Fx;
+  date:       Date;
+  id:         string;
+  options?:   OptionJson;
   outlay:     number;
-  outlayFx:   Fx;
-  options?:    OptionsJson;
+  outlayFx:   FxJson;
+  price:      number;
+  priceFx:    FxJson;
   raw:        string;
+  security:   string;
+  settleDate: Date;
+  shares:     number;
 }
 
-export interface OptionsJson {
-  strikeFx:   Fx;
-  type:       string;
+export interface OptionJson {
   expiryDate: Date;
   strike:     number;
+  strikeFx:   FxJson;
+  type:       string;
 }
 
-export interface Fx {
+export interface FxJson {
   currency: string;
   rate:     number;
 }
@@ -180,27 +180,27 @@ function r(name: string) {
 
 const typeMap: any = {
   "TradeEventJson": o([
-      { json: "id", js: "id", typ: "" },
-      { json: "security", js: "security", typ: "" },
-      { json: "date", js: "date", typ: Date },
-      { json: "settleDate", js: "settleDate", typ: Date },
       { json: "action", js: "action", typ: "" },
-      { json: "shares", js: "shares", typ: 0 },
-      { json: "price", js: "price", typ: 3.14 },
-      { json: "priceFx", js: "priceFx", typ: r("Fx") },
+      { json: "date", js: "date", typ: Date },
+      { json: "id", js: "id", typ: "" },
+      { json: "options", js: "options", typ: u(undefined, r("OptionJson")) },
       { json: "outlay", js: "outlay", typ: 3.14 },
-      { json: "outlayFx", js: "outlayFx", typ: r("Fx") },
-      { json: "options", js: "options", typ: r("OptionsJson") },
+      { json: "outlayFx", js: "outlayFx", typ: r("FxJson") },
+      { json: "price", js: "price", typ: 3.14 },
+      { json: "priceFx", js: "priceFx", typ: r("FxJson") },
       { json: "raw", js: "raw", typ: "" },
-  ], false),
-  "OptionsJson": o([
-      { json: "strikeFx", js: "strikeFx", typ: r("Fx") },
-      { json: "type", js: "type", typ: "" },
+      { json: "security", js: "security", typ: "" },
+      { json: "settleDate", js: "settleDate", typ: Date },
+      { json: "shares", js: "shares", typ: 0 },
+  ], "any"),
+  "OptionJson": o([
       { json: "expiryDate", js: "expiryDate", typ: Date },
       { json: "strike", js: "strike", typ: 0 },
-  ], false),
-  "Fx": o([
+      { json: "strikeFx", js: "strikeFx", typ: r("FxJson") },
+      { json: "type", js: "type", typ: "" },
+  ], "any"),
+  "FxJson": o([
       { json: "currency", js: "currency", typ: "" },
       { json: "rate", js: "rate", typ: 0 },
-  ], false),
+  ], "any"),
 };

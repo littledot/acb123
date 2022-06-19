@@ -1,4 +1,4 @@
-import { Fx } from '@store/tradeEventJson'
+import { Fx } from '@store/tradeEvent'
 import axios from 'axios'
 import { DateTime } from 'luxon'
 import { defineStore } from 'pinia'
@@ -16,6 +16,9 @@ export const useFxStore = defineStore('FxStore', {
     boc: new Map<number, BocForexObs>(),
   }),
   actions: {
+    async init() {
+    },
+
     async getRate(fx: Fx, date: DateTime) {
       if (fx.currency === 'custom') return fx.rate
       return this.getRate2(fx.currency, date)

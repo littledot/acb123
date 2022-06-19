@@ -15,6 +15,7 @@
     "paths": {
       "@/*": ["/*"],
       "@comp/*": ["components/*"],
+      "@models/*": ["models/*"],
       "@store/*": ["stores/*"],
     },
   },

@@ -3,7 +3,7 @@ import * as u from '@comp/util'
 import { useFxStore } from '@store/fx'
 import { fromTradeEventJson, Options, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
 import { Convert as TradeEventIdsConverter } from '@store/tradeEventIdsJson'
-import { Convert as TradeEventConverter } from '@store/tradeEventJson'
+import { Convert as TradeEventConverter } from '@models/tradeEventJson'
 import money from 'currency.js'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
