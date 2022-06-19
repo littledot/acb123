@@ -1,23 +1,94 @@
 <script setup lang='ts'>
+import Icon from '@comp/core/Icon.vue'
 import TradeEvent from '@comp/TradeEvent.vue'
-import * as t from '@comp/type'
+import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
+import { TradeHistory } from '@store/tradeEvent'
+import { capitalize } from 'lodash'
+import OptionEvent from './OptionEvent.vue'
 
 let props = defineProps<{
-  events: t.ReportItem[]
+  events: TradeHistory
 }>()
 let emits = defineEmits({})
 
 </script>
 
 <template>
-  <ol>
-    <li v-for="(it, i) of events"
-        :key="it.tradeEvent.id">
-      <TradeEvent :event="it"
-                  :isFirst="i === 0"
-                  :isLast="i === events.length - 1" />
-    </li>
-  </ol>
+  <div class="flex flex-col">
+    <div v-if="events.option.size > 0"
+         id="options">
+
+      <div v-for="([option, optLots], i) of events.option">
+        <div class="flex flex-row gap-x-4 items-center">
+          <div class="flex-[3] flex flex-row items-center mr-7">
+            <div class="flex flex-row items-center font-semibold text-xl">
+              <span>
+                {{ capitalize(option.type) }} options</span>
+              <Icon class="w-5 h-5 ml-2 mr-1"
+                    :path="mdiClockAlertOutline" />
+              <span>
+                {{ option.expiryDate.toISODate() }}</span>
+              <Icon class="w-5 h-5 ml-2"
+                    :path="mdiCurrencyUsd" />
+              <span>
+                {{ option.strike }}</span>
+            </div>
+          </div>
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Cost</p>
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Accumulated Cost</p>
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Accumulated Options</p>
+          <!-- <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Accumulated Shares</p> -->
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">ACB</p>
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Capital Gains</p>
+          <p class="flex-1 text-left font-semibold"
+             :class="{ hidden: i > 0 }">Acc. Capital Gains</p>
+        </div>
+
+        <div v-for="(lot, i) of optLots.lots">
+          <OptionEvent v-for="(it, i) of lot.trades"
+                       :key="it.tradeEvent.id"
+                       :event="it"
+                       :isFirst="i === 0"
+                       :isLast="i === lot.trades.length - 1" />
+        </div>
+      </div>
+    </div>
+    <div v-if="events.stock.length > 0"
+         id="stocks">
+      <div class="flex flex-row gap-x-4 items-center">
+        <div class="flex-[3] flex flex-row items-center mr-7">
+          <p class="text-left font-semibold text-xl">Stocks</p>
+        </div>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Cost</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Accumulated Cost</p>
+        <!-- <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Accumulated Options</p> -->
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Accumulated Shares</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">ACB</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Capital Gains</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Acc. Capital Gains</p>
+      </div>
+
+      <div v-for="(it, i) of events.stock"
+           :key="it.tradeEvent.id">
+        <TradeEvent :event="it"
+                    :isFirst="i === 0"
+                    :isLast="i === events.stock.length - 1" />
+      </div>
+    </div>
+  </div>
 </template>
 <style scoped>
 .timeline-grid {

@@ -25,7 +25,7 @@ export const useFxStore = defineStore('FxStore', {
       if (currency === 'CAD') return 1
 
       let code = `FX${currency}CAD`
-      let rates = await this.z_getRatesByYear(date)
+      let rates = await this._getRatesByYear(date)
       let rate = rates[code]?.[date.toISODate()]
       if (rate) {
         return parseFloat(rate)
@@ -35,13 +35,13 @@ export const useFxStore = defineStore('FxStore', {
 
     // private actions
 
-    async z_loadBocs(...years: number[]) {
+    async _loadBocs(...years: number[]) {
       for (let year of years) {
-        this.z_loadBoc(year)
+        this._loadBoc(year)
       }
     },
 
-    async z_loadBoc(year: number) {
+    async _loadBoc(year: number) {
       let url = `https://littledot.github.io/bank-of-canada-exchange-rates/data/out/boc_${year}.full.json`
       let res = await axios.get(url)
 
@@ -50,11 +50,11 @@ export const useFxStore = defineStore('FxStore', {
       return <BocForexObs>res.data.observations
     },
 
-    async z_getRatesByYear(date: DateTime) {
+    async _getRatesByYear(date: DateTime) {
       let rates = this.boc.get(date.year)
       if (rates) return rates
 
-      return await this.z_loadBoc(date.year)
+      return await this._loadBoc(date.year)
     },
   },
 })

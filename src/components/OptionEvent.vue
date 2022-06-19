@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { useTradeStore } from '@store/trade'
 import { TradeEvent } from '@store/tradeEvent'
-import _ from 'lodash'
+import { capitalize } from 'lodash'
 import * as v from 'vue'
 import FxMetric from './core/FxMetric.vue'
 import Metric from './core/Metric.vue'
@@ -23,22 +23,16 @@ let showEditModal = v.ref(false)
 let isHover = v.ref(false)
 
 const ui = v.computed(() => {
-  let trade = props.event.tradeEvent
-  let action = _.capitalize(trade.action)
-  let date = trade.date.toISODate()
-
+  let { tradeEvent: trade, tradeValue: cad, acb, cg, warn } = props.event
+  let option = trade.options
 
   let isForex = v.toRaw(trade.priceFx.currency) !== 'CAD'
     || v.toRaw(trade.outlayFx.currency) !== 'CAD'
 
-  let cad = props.event.tradeValue
   let total = cad?.price.multiply(trade.shares).add(cad.outlay)
 
-  let acb = props.event.acb
-  let cg = props.event.cg
-
   return {
-    title: `${date}: ${action} ${trade.shares} shares`,
+    title: `${trade.date.toISODate()}: ${capitalize(trade.action)} ${trade.shares} options`,
     showForex: isForex,
     forexPrice: trade.price.format(),
     forexPriceCurrency: trade.priceFx.currency,
@@ -114,6 +108,20 @@ const ui = v.computed(() => {
                 :class="{ hidden: !(isHover || showEditModal) }"
                 @click="showEditModal = true" />
         </div>
+        <!-- <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Cost</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Accumulated Cost</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Accumulated Options</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Accumulated Shares</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">ACB</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Capital Gains</p>
+        <p class="flex-1 text-left font-semibold"
+           :class="{ hidden: !isFirst }">Acc. Capital Gains</p> -->
       </div>
     </div>
 
