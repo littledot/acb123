@@ -1,9 +1,7 @@
 import * as t from '@comp/type'
-import * as u from '@comp/util'
+import { Convert } from '@models/models'
 import { useFxStore } from '@store/fx'
-import { fromTradeEventJson, Options, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
-import { Convert as TradeEventIdsConverter } from '@store/tradeEventIdsJson'
-import { Convert as TradeEventConverter } from '@models/tradeEventJson'
+import { fromTradeEventJson, Options, Profile, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
 import money from 'currency.js'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
@@ -13,9 +11,8 @@ import { v4 as uuid } from 'uuid'
 export const useTradeStore = defineStore('TradeStore', {
   state: () => ({
     lsNamespace: ['default'],
-    rawTrades: new Map<string, TradeEvent>(),
-    trades: <t.ReportItem[]>[],
     history: new Map<string, TradeHistory>(),
+    profile: new Profile(),
   }),
   getters: {
     tradesBySecurity: (state) => {
@@ -24,8 +21,6 @@ export const useTradeStore = defineStore('TradeStore', {
   },
   actions: {
     async clear() {
-      this.rawTrades.clear()
-
       Object.keys(localStorage)
         .filter(it => it.startsWith(this._lsKey()))
         .forEach(it => localStorage.removeItem(it))
@@ -34,43 +29,45 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     async init() {
-      // Load trade index from ls
-      let idsStr = localStorage.getItem(this._lsKey('tradeIds')) ?? '[]'
-      let ids = TradeEventIdsConverter.toTradeEventIds(idsStr)
-      console.log(`loading ${ids.length} trades from ls.index`)
-
-      // Load trade events from ls
-      let fails = 0
-      ids.forEach((id) => {
-        try {
-          let tradeStr = localStorage.getItem(this._lsKey('trade', id)) ?? ''
-          let tradeJson = TradeEventConverter.toTradeEventJson(tradeStr)
-          let trade = fromTradeEventJson(tradeJson)
-          this.rawTrades.set(trade.id, trade)
-        } catch (err) {
-          fails++
+      try {
+        let profileStr = localStorage.getItem(this._lsKey('profile')) ?? '{}'
+        let profileJson = Convert.toProfileJson(profileStr)
+        for (let [security, ids] of Object.entries(profileJson.tradeIds)) {
+          for (let id of ids) {
+            try {
+              let tradeStr = localStorage.getItem(this._lsKey('trade', id)) ?? '{}'
+              let tradeJson = Convert.toTradeEventJson(tradeStr)
+              let trade = fromTradeEventJson(tradeJson)
+              this.profile.appendTrade(trade)
+            } catch (err) {
+              console.error(err)
+            }
+          }
         }
-      })
-      console.log(`${fails} trades failed to load`)
+
+      } catch (err) {
+        console.error(err)
+      }
 
       await this._calcGains()
     },
 
-    async updateTrade(trade: TradeEvent) {
+
+    async updateTrade(trade: TradeEvent, old: TradeEvent) {
+      this.profile.updateTrade(trade, old)
       this._persistTrade(trade)
+      this._persistProfile()
 
       await this._calcGains()
     },
 
     async deleteTrade(trade: TradeEvent) {
-      this.rawTrades.delete(trade.id)
-
       // Delete trade from ls
       localStorage.removeItem(this._lsKey('trade', trade.id))
 
       // Delete trade index from ls
-      let ids = new Set(this.rawTrades.keys())
-      localStorage.setItem(this._lsKey('tradeIds'), JSON.stringify([...ids]))
+      this.profile.deleteTrade(trade)
+      this._persistProfile()
 
       await this._calcGains()
     },
@@ -90,38 +87,39 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     _persistTrade(trade: TradeEvent) {
-      // Index trade for processing
-      this.rawTrades.set(trade.id, trade)
-
       // Save trade to localStorage
       let json = JSON.stringify(trade)
       localStorage.setItem(this._lsKey('trade', trade.id), json)
-      // console.log('persisted trade event', json)
+      console.log('persisted trade event', json)
+    },
 
-      // Save trade index to localStorage
-      let ids = new Set(this.rawTrades.keys()).add(trade.id)
-      localStorage.setItem(this._lsKey('tradeIds'), JSON.stringify([...ids]))
+    _persistProfile() {
+      let profileJson = this.profile.toProfileJson()
+      let json = Convert.profileJsonToJson(profileJson)
+      localStorage.setItem(this._lsKey('profile'), json)
+      console.log('persisted profile')
     },
 
     async _onParseCsv(results: ParseResult<string[]>) {
-      cleanData(results)
-        .forEach((it) => this._persistTrade(it)) // Insert new trades
+      let trades = cleanData(results)
+      trades.forEach(it => {
+        this._persistTrade(it)
+        this.profile.insertTrade(it)
+      })
+      this._persistProfile()
 
       await this._calcGains()
     },
 
     async _calcGains() {
-      this.trades = Array.from(this.rawTrades.values())
-        .sort((a, b) => {
-          // Order by trade date
-          if (a.date != b.date) return a.date.toMillis() - b.date.toMillis()
-          // Buy before sell
-          if (a.action != b.action) return a.action < b.action ? -1 : 1
-          return 0
-        })
-        .map(it => t.newReportRecord2(it))
+      let tradesBySec = [...this.profile.tradeEvents.entries()]
+        .reduce((map, [key, val]) => {
+          let events = val as TradeEvent[]
+          map.set(key, events.map(it => t.newReportRecord2(it)))
 
-      let tradesBySec = u.groupBy(this.trades, it => it.tradeEvent.security)
+          return map
+        }, new Map<string, t.ReportItem[]>())
+
       this.history.clear()
 
       for (let [sec, trades] of tradesBySec) {
@@ -177,9 +175,10 @@ export const useTradeStore = defineStore('TradeStore', {
         })
       }
 
-      calcGains(this.history)
+      let trades = Array.from(tradesBySec.values())
+        .reduce((arr, it) => arr.concat(it), [])
 
-      await convertForex(this.trades)
+      await convertForex(trades)
       calcGains(this.history)
     }
   }
@@ -192,7 +191,7 @@ function cleanData(results: ParseResult<string[]>) {
     .map((row, i) => t.newQuestradeEvent(uuid(), row))
     // .filter((it) => it.symbol === 'DLR') // debugging
     .map(it => t.newTradeEvent(it))
-    .filter(it => it.options) // debugging
+  // .filter(it => it.options) // debugging
   return trades
 }
 

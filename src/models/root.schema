@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "root",
+  "title": "root",
+  "type": "object",
+  "properties": {
+    "1": {
+      "$ref": "#/$defs/config"
+    }
+  },
+  "$defs": {
+    "config": {
+      "title": "Config",
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/profile"
+          }
+        }
+      },
+      "required": [
+        "profiles"
+      ]
+    },
+    "profile": {
+      "title": "profileJson",
+      "type": "object",
+      "properties": {
+        "tradeIds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "tradeIds"
+      ]
+    }
+  }
+}

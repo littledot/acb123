@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { useTradeStore } from '@store/trade'
 import { TradeEvent } from '@store/tradeEvent'
-import { Fx } from '@store/tradeEventJson'
+import { Fx } from '@store/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import * as v from 'vue'
@@ -65,7 +65,7 @@ async function onSave() {
     outlayFx: outlayFxRef.value,
   }
 
-  await tradeStore.updateTrade(newTrade)
+  await tradeStore.updateTrade(newTrade, props.trade)
 }
 
 async function onDelete() {
