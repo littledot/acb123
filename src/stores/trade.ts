@@ -22,8 +22,11 @@ export const useTradeStore = defineStore('TradeStore', {
   actions: {
     async clear() {
       Object.keys(localStorage)
-        .filter(it => it.startsWith(this._lsKey()))
+        .filter(it => it.startsWith(this._lsKey('trade')))
         .forEach(it => localStorage.removeItem(it))
+
+      this.profile.clearTrades()
+      this._persistProfile()
 
       await this._calcGains()
     },
@@ -94,6 +97,7 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     _persistProfile() {
+      // Save profile to localStorage
       let profileJson = this.profile.toProfileJson()
       let json = Convert.profileJsonToJson(profileJson)
       localStorage.setItem(this._lsKey('profile'), json)

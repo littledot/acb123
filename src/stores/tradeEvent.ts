@@ -67,6 +67,10 @@ export class Profile {
     }
   }
 
+  clearTrades() {
+    this.tradeEvents.clear()
+  }
+
   toProfileJson() {
     let tradeIds = <any>{}
     for (let [security, events] of this.tradeEvents) {
