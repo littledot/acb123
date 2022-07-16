@@ -62,23 +62,19 @@ let emits = defineEmits({})
     <div v-if="events.stock.length > 0"
          id="stocks">
       <div class="flex flex-row gap-x-4 items-center">
-        <div class="flex-[3] flex flex-row items-center mr-7">
-          <p class="text-left font-semibold text-xl">Stocks</p>
+        <div class="w-[calc(40ch+1rem)]  flex flex-row items-center mr-7">
+          <p class="text-left font-semibold text-xl mr-90">Stocks</p>
         </div>
-        <p class="flex-1 text-left font-semibold"
+        <p class="w-[20ch] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Cost</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: events.option.size > 0 }">Accumulated Cost</p>
-        <!-- <p class="flex-1 text-left font-semibold"
+        <!-- <p class="w-[20ch] text-left text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Accumulated Options</p> -->
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: events.option.size > 0 }">Accumulated Shares</p>
-        <p class="flex-1 text-left font-semibold"
+        <p class="w-[20ch] text-right font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Shares</p>
+        <p class="w-[20ch] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">ACB</p>
-        <p class="flex-1 text-left font-semibold"
+        <p class="w-[20ch] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Capital Gains</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: events.option.size > 0 }">Acc. Capital Gains</p>
       </div>
 
       <div v-for="(it, i) of events.stock"

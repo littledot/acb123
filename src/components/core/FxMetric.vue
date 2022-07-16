@@ -43,7 +43,7 @@ let props = defineProps<{
                 :disabled="!!!labelTooltip">
           <p id="label"
              class="text-sm">
-            {{ fxCurrency }} FX
+            {{ fxCurrency }}
           </p>
         </Popper>
         <p id="value"

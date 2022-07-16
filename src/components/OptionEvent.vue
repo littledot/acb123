@@ -46,11 +46,11 @@ const ui = v.computed(() => {
 
     acb: acb ? {
       class: ['visible'],
-      shares: u.fmtNum(acb.shares),
+      shares: u.fmtNum(acb.accShares),
       cost: acb.cost.format(),
       totalCost: acb.accCost.format(),
       acb: acb.acb.format(),
-      showNegativeSharesAlert: acb.shares < 0,
+      showNegativeSharesAlert: acb.accShares < 0,
     } : {
       class: ['invisible'],
     },

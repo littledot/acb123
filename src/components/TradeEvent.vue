@@ -11,6 +11,7 @@ import * as u from './util'
 import { mdiAlert, mdiPencil } from '@mdi/js'
 import Popper from '@comp/core/Popper.vue'
 import Icon from '@comp/core/Icon.vue'
+import CalcValue from './core/CalcValue.vue'
 
 let props = defineProps<{
   event: t.ReportItem,
@@ -52,22 +53,20 @@ const ui = v.computed(() => {
 
     acb: acb ? {
       class: ['visible'],
-      shares: u.fmtNum(acb.shares),
-      cost: acb.cost.format(),
+      shares: u.signNumFmt.format(acb.shares),
+      totalShares: u.fmtNum(acb.accShares),
+      cost: acb.cost.format({ pattern: `+!#` }),
       totalCost: acb.accCost.format(),
       acb: acb.acb.format(),
-      showNegativeSharesAlert: acb.shares < 0,
+      showNegativeSharesAlert: acb.accShares < 0,
     } : {
       class: ['invisible'],
     },
 
     cg: cg ? {
-      class: ['visible'],
-      gains: cg.gains.format(),
+      gains: cg.gains.format({ pattern: `+!#` }),
       totalGains: cg.totalGains.format(),
-    } : {
-      class: ['invisible'],
-    },
+    } : null,
   }
 })
 
@@ -124,23 +123,76 @@ const ui = v.computed(() => {
            :class="{ invisible: isLast }" />
       <div id="body-content"
            class="flex flex-row flex-1 gap-x-4 ml-2 mt-2 mb-4">
+        <!-- <div class="flex flex-col">
+          <div id="trade-subtotal"
+               class="flex flex-row flex-[3] gap-x-8">
+            <FxMetric label="Price"
+                      :value="ui.forexPrice"
+                      :value2="ui.cadPrice"
+                      :fx-currency="ui.forexPriceCurrency"
+                      :fx-value="ui.forexPriceRate" />
+            <FxMetric label="Outlay"
+                      :value="ui.forexOutlay"
+                      :value2="ui.cadOutlay"
+                      :fx-currency="ui.forexOutlayCurrency"
+                      :fx-value="ui.forexOutlayRate" />
+            <Metric label="Total"
+                    :value="ui.cadTotal" />
+          </div>
+          <div class="h-0.5 bg-gray-800" />
+          <div class="flex flex-row justify-end">
+            <Metric label="Total"
+                    :value="ui.cadTotal" />
+          </div>
+        </div> -->
+
         <div id="trade-subtotal"
-             class="flex flex-row flex-[3] gap-x-8">
-          <FxMetric label="Price"
+             class="price-grid gap-x-4 gap-y-2">
+          <FxMetric class="col-[1/2] row-[1/2]"
+                    label="Price"
                     :value="ui.forexPrice"
                     :value2="ui.cadPrice"
                     :fx-currency="ui.forexPriceCurrency"
                     :fx-value="ui.forexPriceRate" />
-          <FxMetric label="Outlay"
+          <FxMetric class="col-[2/3] row-[1/2]"
+                    label="Outlay"
                     :value="ui.forexOutlay"
                     :value2="ui.cadOutlay"
                     :fx-currency="ui.forexOutlayCurrency"
                     :fx-value="ui.forexOutlayRate" />
-          <Metric label="Total"
+          <div class="col-[1/3] row-[2/3] h-0.5 bg-gray-600" />
+          <Metric class="col-[2/3] row-[3/4]"
+                  label="Total"
                   :value="ui.cadTotal" />
+
+          <CalcValue class="col-[3/4] row-[1/2]"
+                     :value="ui.acb?.cost" />
+          <div class="col-[3/4] row-[2/3] h-0.5 bg-gray-600" />
+          <CalcValue class="col-[3/4] row-[3/4]"
+                     :value="ui.acb?.totalCost" />
+
+          <CalcValue class="col-[4/5] row-[1/2]"
+                     :value="ui.acb?.shares" />
+          <div class="col-[4/5] row-[2/3] h-0.5 bg-gray-600" />
+          <CalcValue class="col-[4/5] row-[3/4]"
+                     :value="ui.acb?.totalShares" />
+
+          <!-- <CalcValue class="col-[5/6] row-[1/2]"
+                  :value="ui.acb?.shares" />
+          <div class="col-[5/6] row-[2/3] h-0.5 bg-gray-600" /> -->
+          <CalcValue class="col-[5/6] row-[3/4]"
+                     :value="ui.acb?.acb" />
+
+          <template v-if="ui.cg">
+            <CalcValue class="col-[6/7] row-[1/2]"
+                       :value="ui.cg?.gains" />
+            <div class="col-[6/7] row-[2/3] h-0.5 bg-gray-600" />
+            <CalcValue class="col-[6/7] row-[3/4]"
+                       :value="ui.cg?.totalGains" />
+          </template>
         </div>
 
-        <Metric class="flex-1"
+        <!-- <Metric class="flex-1"
                 :value="ui.acb?.cost" />
         <Metric class="flex-1"
                 :value="ui.acb?.totalCost" />
@@ -166,10 +218,15 @@ const ui = v.computed(() => {
         <Metric class="flex-1"
                 :value="ui.cg?.gains" />
         <Metric class="flex-1"
-                :value="ui.cg?.totalGains" />
+                :value="ui.cg?.totalGains" /> -->
       </div>
     </div>
   </div>
 </template>
 <style scoped>
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 20ch);
+  grid-auto-rows: auto;
+}
 </style>

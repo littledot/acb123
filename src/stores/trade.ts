@@ -11,8 +11,8 @@ import { v4 as uuid } from 'uuid'
 export const useTradeStore = defineStore('TradeStore', {
   state: () => ({
     lsNamespace: ['default'],
-    history: new Map<string, TradeHistory>(),
     profile: new Profile(),
+    history: new Map<string, TradeHistory>(),
   }),
   getters: {
     tradesBySecurity: (state) => {
@@ -53,6 +53,7 @@ export const useTradeStore = defineStore('TradeStore', {
       }
 
       await this._calcGains()
+      console.log('init')
     },
 
 
@@ -241,18 +242,15 @@ function calcGainsForTrades(trades: t.ReportItem[]) {
       it.acb = t.addToAcb(acb, tEvent.shares, cost)
     }
     if (tEvent.action === 'sell') {
-      if (tEvent.shares === acb.shares) { // Sold all shares? Zero-out acb
-        let cost = acb.accCost.multiply(-1)
-        it.acb = t.addToAcb(acb, -tEvent.shares, cost)
-      } else { // Sold partial? Cost = acb * shares
-        let cost = acb.acb.multiply(-tEvent.shares)
-        it.acb = t.addToAcb(acb, -tEvent.shares, cost)
-      }
+      // sell cost = acb * shares
+      let cost = acb.acb.multiply(-tEvent.shares)
+      it.acb = t.addToAcb(acb, -tEvent.shares, cost)
     }
 
     return it.acb ?? acb
   }, {
     shares: 0,
+    accShares: 0,
     cost: money(0),
     accCost: money(0),
     acb: money(0),

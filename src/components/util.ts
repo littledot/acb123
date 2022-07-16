@@ -38,9 +38,10 @@ export function groupBy<T, K extends keyof any>(list: T[], getKey: (item: T) => 
   }, new Map())
 }
 
-export const numFmt = new Intl.NumberFormat("en-US")
+export const numFmt = new Intl.NumberFormat('en-US')
+export const signNumFmt = new Intl.NumberFormat('en-US', { signDisplay: 'always' })
 
-export const moneyFmt = new Intl.NumberFormat("en-US", {
+export const moneyFmt = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })

@@ -141,26 +141,21 @@ export interface TradeValue {
 
 export interface Acb {
   shares: number
+  accShares: number
   cost: money
   accCost: money
   acb: money
 }
 
-export function zeroOutAcb(acb: Acb) {
-  return {
-    shares: 0,
-    cost: acb.accCost.multiply(-1),
-    accCost: money(0),
-    acb: money(0),
-  }
-}
-
 export function addToAcb(acb: Acb, shares: number, cost: money) {
-  let newShares = acb.shares + shares
-  let newAccCost = acb.accCost.add(cost)
+  let newShares = acb.accShares + shares
+  // Sold all shares? Zero-out acb
+  let newCost = newShares === 0 ? acb.accCost.multiply(-1) : cost
+  let newAccCost = acb.accCost.add(newCost)
   return {
-    shares: newShares,
-    cost: cost,
+    shares: shares,
+    accShares: newShares,
+    cost: newCost,
     accCost: newAccCost,
     acb: newShares === 0 ? money(0) : newAccCost.divide(newShares),
   }
