@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import Icon from '@comp/core/Icon.vue'
-import { mdiPencil } from '@mdi/js'
+import { mdiPencil, mdiAlert } from '@mdi/js'
 import _ from 'lodash'
 import * as v from 'vue'
 import FxMetric from './core/FxMetric.vue'
@@ -8,6 +8,7 @@ import Metric from './core/Metric.vue'
 import EditTradeModal from './EditTradeModal.vue'
 import * as t from './type'
 import * as u from './util'
+import Popper from './core/Popper.vue'
 
 let props = defineProps<{
   event: t.ReportItem,
@@ -137,28 +138,38 @@ const ui = v.computed(() => {
                 :value="ui.cadTotal" />
 
         <div v-if="ui.acb"
-             class="col-[4/5] row-[1/2] flex flex-col justify-end">
-          <span class="text-l text-right"
+             class="col-[4/5] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
                 :class="ui.acb.costColor">{{ ui.acb.cost }}</span>
-          <span class="text-xl text-right">{{ ui.acb.totalCost }}</span>
+          <span class="text-xl">{{ ui.acb.totalCost }}</span>
         </div>
 
         <div v-if="ui.acb"
-             class="col-[5/6] row-[1/2] flex flex-col justify-end">
-          <span class="text-l text-right"
+             class="col-[5/6] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
                 :class="ui.acb.sharesColor">{{ ui.acb.shares }}</span>
-          <span class="text-xl text-right">{{ ui.acb.totalShares }}</span>
+          <div class="flex flex-row justify-end items-center">
+            <Popper v-if="ui.acb.showNegativeSharesAlert">
+              <Icon :path="mdiAlert"
+                    class="w-6 h-6 mx-1 fill-yellow-500" />
+              <template #pop>
+                <p class="text-left">Negative shares detected.</p>
+                <p>Some trades may be missing and calculations may not be accurate.</p>
+              </template>
+            </Popper>
+            <span class="text-xl">{{ ui.acb.totalShares }}</span>
+          </div>
         </div>
 
-        <div class="col-[6/7] row-[1/2] flex flex-col justify-end">
-          <span class="text-xl text-right">{{ ui.acb?.acb }}</span>
+        <div class="col-[6/7] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-xl">{{ ui.acb?.acb }}</span>
         </div>
 
         <div v-if="ui.cg"
-             class="col-[7/8] row-[1/2] flex flex-col justify-end">
-          <span class="text-l text-right"
+             class="col-[7/8] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
                 :class="ui.cg.gainsColor">{{ ui.cg.gains }}</span>
-          <span class="text-xl text-right">{{ ui.cg.totalGains }}</span>
+          <span class="text-xl">{{ ui.cg.totalGains }}</span>
         </div>
       </div>
     </div>
