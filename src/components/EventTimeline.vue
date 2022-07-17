@@ -62,18 +62,20 @@ let emits = defineEmits({})
     <div v-if="events.stock.length > 0"
          id="stocks">
       <div class="flex flex-row gap-x-4 items-center">
-        <div class="w-[calc(40ch+1rem)]  flex flex-row items-center mr-7">
+        <div class="w-[calc(36rem+2rem)]  flex flex-row items-center mr-7">
           <p class="text-left font-semibold text-xl mr-90">Stocks</p>
         </div>
-        <p class="w-[20ch] text-right font-semibold"
+        <!-- <p class="w-[12rem] text-left font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Total</p> -->
+        <p class="w-[12rem] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Cost</p>
-        <!-- <p class="w-[20ch] text-left text-right font-semibold"
+        <!-- <p class="w-[12rem] text-left text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Accumulated Options</p> -->
-        <p class="w-[20ch] text-right font-semibold"
+        <p class="w-[12rem] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Shares</p>
-        <p class="w-[20ch] text-right font-semibold"
+        <p class="w-[12rem] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">ACB</p>
-        <p class="w-[20ch] text-right font-semibold"
+        <p class="w-[12rem] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Capital Gains</p>
       </div>
 
