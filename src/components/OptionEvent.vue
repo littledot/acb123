@@ -1,6 +1,7 @@
 <script setup lang='ts'>
-import { useTradeStore } from '@store/trade'
-import { TradeEvent } from '@store/tradeEvent'
+import Icon from '@comp/core/Icon.vue'
+import Popper from '@comp/core/Popper.vue'
+import { mdiAlert, mdiPencil } from '@mdi/js'
 import { capitalize } from 'lodash'
 import * as v from 'vue'
 import FxMetric from './core/FxMetric.vue'
@@ -8,9 +9,6 @@ import Metric from './core/Metric.vue'
 import EditTradeModal from './EditTradeModal.vue'
 import * as t from './type'
 import * as u from './util'
-import { mdiAlert, mdiPencil } from '@mdi/js'
-import Popper from '@comp/core/Popper.vue'
-import Icon from '@comp/core/Icon.vue'
 
 let props = defineProps<{
   event: t.ReportItem,
@@ -45,23 +43,21 @@ const ui = v.computed(() => {
     cadTotal: total?.format(),
 
     acb: acb ? {
-      class: ['visible'],
-      shares: u.fmtNum(acb.accShares),
-      cost: acb.cost.format(),
+      shares: u.signNumFmt.format(acb.shares),
+      sharesColor: `text-${acb.shares < 0 ? 'red' : 'green'}-600`,
+      totalShares: u.fmtNum(acb.accShares),
+      cost: acb.cost.format({ pattern: `+!#` }),
+      costColor: `text-${acb.cost.value < 0 ? 'red' : 'green'}-600`,
       totalCost: acb.accCost.format(),
       acb: acb.acb.format(),
       showNegativeSharesAlert: acb.accShares < 0,
-    } : {
-      class: ['invisible'],
-    },
+    } : null,
 
     cg: cg ? {
-      class: ['visible'],
-      gains: cg.gains.format(),
+      gains: cg.gains.format({ pattern: `+!#` }),
+      gainsColor: `text-${cg.gains.value < 0 ? 'red' : 'green'}-600`,
       totalGains: cg.totalGains.format(),
-    } : {
-      class: ['invisible'],
-    },
+    } : null,
   }
 })
 
@@ -108,20 +104,6 @@ const ui = v.computed(() => {
                 :class="{ hidden: !(isHover || showEditModal) }"
                 @click="showEditModal = true" />
         </div>
-        <!-- <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Cost</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Accumulated Cost</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Accumulated Options</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Accumulated Shares</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">ACB</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Capital Gains</p>
-        <p class="flex-1 text-left font-semibold"
-           :class="{ hidden: !isFirst }">Acc. Capital Gains</p> -->
       </div>
     </div>
 
@@ -130,54 +112,67 @@ const ui = v.computed(() => {
       <div id="body-timeline"
            class="bg-blue-600 w-1 mx-2"
            :class="{ invisible: isLast }" />
+
       <div id="body-content"
-           class="flex flex-row flex-1 gap-x-4 ml-2 mt-2 mb-4">
-        <div id="trade-subtotal"
-             class="flex flex-row flex-[3] gap-x-8">
-          <FxMetric label="Price"
-                    :value="ui.forexPrice"
-                    :value2="ui.cadPrice"
-                    :fx-currency="ui.forexPriceCurrency"
-                    :fx-value="ui.forexPriceRate" />
-          <FxMetric label="Outlay"
-                    :value="ui.forexOutlay"
-                    :value2="ui.cadOutlay"
-                    :fx-currency="ui.forexOutlayCurrency"
-                    :fx-value="ui.forexOutlayRate" />
-          <Metric label="Total"
-                  :value="ui.cadTotal" />
+           class="price-grid gap-x-4 gap-y-2 ml-2 mt-2 mb-4">
+        <FxMetric class="col-[1/2] row-[1/2]"
+                  label="Price"
+                  :value="ui.forexPrice"
+                  :value2="ui.cadPrice"
+                  :fx-currency="ui.forexPriceCurrency"
+                  :fx-value="ui.forexPriceRate" />
+        <FxMetric class="col-[2/3] row-[1/2]"
+                  label="Outlay"
+                  :value="ui.forexOutlay"
+                  :value2="ui.cadOutlay"
+                  :fx-currency="ui.forexOutlayCurrency"
+                  :fx-value="ui.forexOutlayRate" />
+        <Metric class="col-[3/4] row-[1/2]"
+                label="Total"
+                :value="ui.cadTotal" />
+
+        <div v-if="ui.acb"
+             class="col-[4/5] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
+                :class="ui.acb.costColor">{{ ui.acb.cost }}</span>
+          <span class="text-xl">{{ ui.acb.totalCost }}</span>
         </div>
 
-        <Metric class="flex-1"
-                :value="ui.acb?.cost" />
-        <Metric class="flex-1"
-                :value="ui.acb?.totalCost" />
-        <Metric class="flex-1"
-                :value="ui.acb?.shares">
-          <template #valueRight>
-            <div class="w-6 h-6"
-                 :class="{ hidden: !ui.acb?.showNegativeSharesAlert }">
-              <Popper>
-                <Icon :path="mdiAlert"
-                      class="w-6 h-6 ml-1 fill-yellow-500" />
-                <template #pop>
-                  <p class="text-left">Negative shares detected.</p>
-                  <p>Some trades may be missing and calculations may not be accurate.</p>
-                </template>
-              </Popper>
-            </div>
-          </template>
-        </Metric>
-        <Metric class="flex-1"
-                :value="ui.acb?.acb" />
+        <div v-if="ui.acb"
+             class="col-[5/6] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
+                :class="ui.acb.sharesColor">{{ ui.acb.shares }}</span>
+          <div class="flex flex-row justify-end items-center">
+            <Popper v-if="ui.acb.showNegativeSharesAlert">
+              <Icon :path="mdiAlert"
+                    class="w-6 h-6 mx-1 fill-yellow-500" />
+              <template #pop>
+                <p class="text-left">Negative shares detected.</p>
+                <p>Some trades may be missing and calculations may not be accurate.</p>
+              </template>
+            </Popper>
+            <span class="text-xl">{{ ui.acb.totalShares }}</span>
+          </div>
+        </div>
 
-        <Metric class="flex-1"
-                :value="ui.cg?.gains" />
-        <Metric class="flex-1"
-                :value="ui.cg?.totalGains" />
+        <div class="col-[6/7] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-xl">{{ ui.acb?.acb }}</span>
+        </div>
+
+        <div v-if="ui.cg"
+             class="col-[7/8] row-[1/2] flex flex-col justify-end text-right">
+          <span class="text-l"
+                :class="ui.cg.gainsColor">{{ ui.cg.gains }}</span>
+          <span class="text-xl">{{ ui.cg.totalGains }}</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <style scoped>
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 12rem);
+  grid-auto-rows: auto;
+}
 </style>

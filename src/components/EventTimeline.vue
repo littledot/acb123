@@ -20,8 +20,8 @@ let emits = defineEmits({})
 
       <div v-for="([option, optLots], i) of events.option">
         <div class="flex flex-row gap-x-4 items-center">
-          <div class="flex-[3] flex flex-row items-center mr-7">
-            <div class="flex flex-row items-center font-semibold text-xl">
+          <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
+            <div class="flex flex-row items-center font-semibold text-xl mr-90">
               <span>
                 {{ capitalize(option.type) }} options</span>
               <Icon class="w-5 h-5 ml-2 mr-1"
@@ -34,20 +34,16 @@ let emits = defineEmits({})
                 {{ option.strike }}</span>
             </div>
           </div>
-          <p class="flex-1 text-left font-semibold"
+          <p class="w-[12rem] text-right font-semibold"
              :class="{ hidden: i > 0 }">Cost</p>
-          <p class="flex-1 text-left font-semibold"
-             :class="{ hidden: i > 0 }">Accumulated Cost</p>
-          <p class="flex-1 text-left font-semibold"
-             :class="{ hidden: i > 0 }">Accumulated Options</p>
-          <!-- <p class="flex-1 text-left font-semibold"
-             :class="{ hidden: i > 0 }">Accumulated Shares</p> -->
-          <p class="flex-1 text-left font-semibold"
+          <p class="w-[12rem] text-right font-semibold"
+             :class="{ hidden: i > 0 }">Shares</p>
+          <!-- <p class="w-[12rem] text-right font-semibold"
+             :class="{ hidden: i > 0 }">Shares</p> -->
+          <p class="w-[12rem] text-right font-semibold"
              :class="{ hidden: i > 0 }">ACB</p>
-          <p class="flex-1 text-left font-semibold"
+          <p class="w-[12rem] text-right font-semibold"
              :class="{ hidden: i > 0 }">Capital Gains</p>
-          <p class="flex-1 text-left font-semibold"
-             :class="{ hidden: i > 0 }">Acc. Capital Gains</p>
         </div>
 
         <div v-for="(lot, i) of optLots.lots">
@@ -62,11 +58,9 @@ let emits = defineEmits({})
     <div v-if="events.stock.length > 0"
          id="stocks">
       <div class="flex flex-row gap-x-4 items-center">
-        <div class="w-[calc(36rem+2rem)]  flex flex-row items-center mr-7">
-          <p class="text-left font-semibold text-xl mr-90">Stocks</p>
+        <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
+          <p class="text-left font-semibold text-xl">Stocks</p>
         </div>
-        <!-- <p class="w-[12rem] text-left font-semibold"
-           :class="{ hidden: events.option.size > 0 }">Total</p> -->
         <p class="w-[12rem] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Cost</p>
         <!-- <p class="w-[12rem] text-left text-right font-semibold"
