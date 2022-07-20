@@ -1,9 +1,9 @@
 import { ReportItem } from '@comp/type'
-import { FxJson, OptionJson, ProfileJson, TradeEventJson } from '@models/models'
+import { DbFx, DbOption, DbProfile, DbTradeEvent } from '@models/models'
 import money from 'currency.js'
 import { DateTime } from "luxon"
 
-export type Fx = FxJson
+export type Fx = DbFx
 
 export class Profile {
   tradeEvents: Map<string, TradeEvent[]>
@@ -76,7 +76,7 @@ export class Profile {
     for (let [security, events] of this.tradeEvents) {
       tradeIds[security] = events.map(it => it.id)
     }
-    return <ProfileJson>{
+    return <DbProfile>{
       tradeIds: tradeIds,
     }
   }
@@ -97,7 +97,7 @@ export interface TradeEvent {
   options?: Options
 }
 
-export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
+export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
   return {
     id: json.id,
     security: json.security,
@@ -109,7 +109,7 @@ export function fromTradeEventJson(json: TradeEventJson): TradeEvent {
     priceFx: json.priceFx,
     outlay: money(json.outlay),
     outlayFx: json.outlayFx,
-    options: fromOptionJson(json.options),
+    options: fromDbOption(json.options),
   }
 }
 
@@ -120,7 +120,7 @@ export interface Options {
   strikeFx: Fx
 }
 
-export function fromOptionJson(json?: OptionJson) {
+export function fromDbOption(json?: DbOption) {
   return json ? <Options>{
     type: json.type,
     expiryDate: DateTime.fromJSDate(json.expiryDate),

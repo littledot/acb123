@@ -1,7 +1,7 @@
 import * as t from '@comp/type'
 import { Convert } from '@models/models'
 import { useFxStore } from '@store/fx'
-import { fromTradeEventJson, Options, Profile, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
+import { fromDbTradeEvent, Options, Profile, TradeEvent, TradeEventLots, TradeHistory } from '@store/tradeEvent'
 import money from 'currency.js'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
@@ -34,13 +34,13 @@ export const useTradeStore = defineStore('TradeStore', {
     async init() {
       try {
         let profileStr = localStorage.getItem(this._lsKey('profile')) ?? '{}'
-        let profileJson = Convert.toProfileJson(profileStr)
-        for (let [security, ids] of Object.entries(profileJson.tradeIds)) {
+        let dbProfile = Convert.toDbProfile(profileStr)
+        for (let [security, ids] of Object.entries(dbProfile.tradeIds)) {
           for (let id of ids) {
             try {
               let tradeStr = localStorage.getItem(this._lsKey('trade', id)) ?? '{}'
-              let tradeJson = Convert.toTradeEventJson(tradeStr)
-              let trade = fromTradeEventJson(tradeJson)
+              let dbTrade = Convert.toDbTradeEvent(tradeStr)
+              let trade = fromDbTradeEvent(dbTrade)
               this.profile.appendTrade(trade)
             } catch (err) {
               console.error(err)
@@ -99,8 +99,8 @@ export const useTradeStore = defineStore('TradeStore', {
 
     _persistProfile() {
       // Save profile to localStorage
-      let profileJson = this.profile.toProfileJson()
-      let json = Convert.profileJsonToJson(profileJson)
+      let dbProfile = this.profile.toProfileJson()
+      let json = Convert.dbProfileToJson(dbProfile)
       localStorage.setItem(this._lsKey('profile'), json)
       console.log('persisted profile')
     },

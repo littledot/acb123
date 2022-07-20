@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "root",
+  "title": "root",
+  "type": "object",
+  "properties": {
+    "1": {
+      "$ref": "#/$defs/config"
+    },
+    "2": {
+      "$ref": "#/$defs/tradeEvent"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string"
+    },
+    "tradeIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/uuid"
+      }
+    },
+    "config": {
+      "title": "Config",
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/profile"
+          }
+        }
+      },
+      "required": [
+        "profiles"
+      ]
+    },
+    "profile": {
+      "title": "dbProfile",
+      "type": "object",
+      "properties": {
+        "tradeHistory": {
+          "$ref": "#/$defs/tradeHistory"
+        },
+        "tradeIds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "tradeIds"
+      ]
+    },
+    "tradeHistory": {
+      "title": "dbTradeHistory",
+      "type": "object",
+      "properties": {
+        "option": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/optionHistory"
+          }
+        },
+        "stock": {
+          "$ref": "#/$defs/stockHistory"
+        },
+        "uncategorized": {
+          "$ref": "#/$defs/tradeIds"
+        }
+      },
+      "required": [
+        "option",
+        "stock",
+        "uncategorized"
+      ]
+    },
+    "optionHistory": {
+      "title": "dbOptionHistory",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "contract": {
+          "$ref": "#/$defs/option"
+        },
+        "tradeIds": {
+          "$ref": "#/$defs/tradeIds"
+        }
+      },
+      "required": [
+        "id",
+        "contract",
+        "tradeIds"
+      ]
+    },
+    "option": {
+      "title": "dbOption",
+      "type": "object",
+      "properties": {
+        "strikeFx": {
+          "$ref": "#/$defs/fx"
+        },
+        "type": {
+          "type": "string"
+        },
+        "expiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "strike": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "strikeFx",
+        "type",
+        "expiryDate",
+        "strike"
+      ]
+    },
+    "fx": {
+      "title": "DbFx",
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "currency",
+        "rate"
+      ]
+    },
+    "stockHistory": {
+      "title": "dbStockHistory",
+      "$ref": "#/$defs/tradeIds"
+    },
+    "tradeLots": {
+      "title": "tradeLotsJson",
+      "type": "object",
+      "properties": {
+        "option": {}
+      }
+    },
+    "tradeLot": {
+      "title": "tradeLotJson",
+      "type": "object"
+    },
+    "tradeEvent": {
+      "title": "DbTradeEvent",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "security": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "settleDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "action": {
+          "type": "string"
+        },
+        "shares": {
+          "type": "integer"
+        },
+        "price": {
+          "type": "number"
+        },
+        "priceFx": {
+          "$ref": "#/$defs/fx"
+        },
+        "outlay": {
+          "type": "number"
+        },
+        "outlayFx": {
+          "$ref": "#/$defs/fx"
+        },
+        "options": {
+          "$ref": "#/$defs/option"
+        },
+        "raw": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "security",
+        "date",
+        "settleDate",
+        "action",
+        "shares",
+        "price",
+        "priceFx",
+        "outlay",
+        "outlayFx",
+        "raw"
+      ]
+    }
+  }
+}

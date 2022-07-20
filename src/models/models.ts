@@ -1,61 +1,74 @@
 // To parse this data:
 //
-//   import { Convert, Root, TradeEventJson } from "./file";
+//   import { Convert, Models } from "./file";
 //
-//   const root = Convert.toRoot(json);
-//   const tradeEventJson = Convert.toTradeEventJson(json);
+//   const models = Convert.toModels(json);
 //
 // These functions will throw an error if the JSON doesn't
 // match the expected interface, even if the JSON is valid.
 
-export interface Root {
+export interface Models {
     "1"?: Config;
+    "2"?: DbTradeEvent;
 }
 
 export interface Config {
-    profiles: { [key: string]: ProfileJson };
+    profiles: { [key: string]: DbProfile };
 }
 
-export interface ProfileJson {
-    tradeIds: { [key: string]: string[] };
+export interface DbProfile {
+    tradeHistory?: DbTradeHistory;
+    tradeIds:      { [key: string]: string[] };
 }
 
-export interface TradeEventJson {
+export interface DbTradeHistory {
+    option:        DbOptionHistory[];
+    stock:         string[];
+    uncategorized: string[];
+}
+
+export interface DbOptionHistory {
+    contract: DbOption;
+    id:       string;
+    tradeIds: string[];
+}
+
+export interface DbOption {
+    expiryDate: Date;
+    strike:     number;
+    strikeFx:   DbFx;
+    type:       string;
+}
+
+export interface DbFx {
+    currency: string;
+    rate:     number;
+}
+
+export interface DbTradeEvent {
     action:     string;
     date:       Date;
     id:         string;
-    options?:   OptionJson;
+    options?:   DbOption;
     outlay:     number;
-    outlayFx:   FxJson;
+    outlayFx:   DbFx;
     price:      number;
-    priceFx:    FxJson;
+    priceFx:    DbFx;
     raw:        string;
     security:   string;
     settleDate: Date;
     shares:     number;
 }
 
-export interface OptionJson {
-    expiryDate: Date;
-    strike:     number;
-    strikeFx:   FxJson;
-    type:       string;
-}
-
-export interface FxJson {
-    currency: string;
-    rate:     number;
-}
-
 // Converts JSON strings to/from your types
 // and asserts the results of JSON.parse at runtime
 export class Convert {
-    public static toRoot(json: string): Root {
-        return cast(JSON.parse(json), r("Root"));
+    public static toModels(json: string): Models {
+        return cast(JSON.parse(json), r("Models"));
     }
 
-    public static rootToJson(value: Root): string {
-        return JSON.stringify(uncast(value, r("Root")), null, 2);
+    public static modelsToJson(value: Models): string {
+        return JSON.stringify(uncast(value, r("Models")), null, 2);
     }
 
     public static toConfig(json: string): Config {
@@ -66,36 +79,52 @@ export class Convert {
         return JSON.stringify(uncast(value, r("Config")), null, 2);
     }
 
-    public static toProfileJson(json: string): ProfileJson {
-        return cast(JSON.parse(json), r("ProfileJson"));
+    public static toDbProfile(json: string): DbProfile {
+        return cast(JSON.parse(json), r("DbProfile"));
     }
 
-    public static profileJsonToJson(value: ProfileJson): string {
-        return JSON.stringify(uncast(value, r("ProfileJson")), null, 2);
+    public static dbProfileToJson(value: DbProfile): string {
+        return JSON.stringify(uncast(value, r("DbProfile")), null, 2);
     }
 
-    public static toTradeEventJson(json: string): TradeEventJson {
-        return cast(JSON.parse(json), r("TradeEventJson"));
+    public static toDbTradeHistory(json: string): DbTradeHistory {
+        return cast(JSON.parse(json), r("DbTradeHistory"));
     }
 
-    public static tradeEventJsonToJson(value: TradeEventJson): string {
-        return JSON.stringify(uncast(value, r("TradeEventJson")), null, 2);
+    public static dbTradeHistoryToJson(value: DbTradeHistory): string {
+        return JSON.stringify(uncast(value, r("DbTradeHistory")), null, 2);
     }
 
-    public static toOptionJson(json: string): OptionJson {
-        return cast(JSON.parse(json), r("OptionJson"));
+    public static toDbOptionHistory(json: string): DbOptionHistory {
+        return cast(JSON.parse(json), r("DbOptionHistory"));
     }
 
-    public static optionJsonToJson(value: OptionJson): string {
-        return JSON.stringify(uncast(value, r("OptionJson")), null, 2);
+    public static dbOptionHistoryToJson(value: DbOptionHistory): string {
+        return JSON.stringify(uncast(value, r("DbOptionHistory")), null, 2);
     }
 
-    public static toFxJson(json: string): FxJson {
-        return cast(JSON.parse(json), r("FxJson"));
+    public static toDbOption(json: string): DbOption {
+        return cast(JSON.parse(json), r("DbOption"));
     }
 
-    public static fxJsonToJson(value: FxJson): string {
-        return JSON.stringify(uncast(value, r("FxJson")), null, 2);
+    public static dbOptionToJson(value: DbOption): string {
+        return JSON.stringify(uncast(value, r("DbOption")), null, 2);
+    }
+
+    public static toDbFx(json: string): DbFx {
+        return cast(JSON.parse(json), r("DbFx"));
+    }
+
+    public static dbFxToJson(value: DbFx): string {
+        return JSON.stringify(uncast(value, r("DbFx")), null, 2);
+    }
+
+    public static toDbTradeEvent(json: string): DbTradeEvent {
+        return cast(JSON.parse(json), r("DbTradeEvent"));
+    }
+
+    public static dbTradeEventToJson(value: DbTradeEvent): string {
+        return JSON.stringify(uncast(value, r("DbTradeEvent")), null, 2);
     }
 }
 
@@ -232,37 +261,49 @@ function r(name: string) {
 }
 
 const typeMap: any = {
-    "Root": o([
+    "Models": o([
         { json: "1", js: "1", typ: u(undefined, r("Config")) },
+        { json: "2", js: "2", typ: u(undefined, r("DbTradeEvent")) },
     ], "any"),
     "Config": o([
-        { json: "profiles", js: "profiles", typ: m(r("ProfileJson")) },
+        { json: "profiles", js: "profiles", typ: m(r("DbProfile")) },
     ], "any"),
-    "ProfileJson": o([
+    "DbProfile": o([
+        { json: "tradeHistory", js: "tradeHistory", typ: u(undefined, r("DbTradeHistory")) },
         { json: "tradeIds", js: "tradeIds", typ: m(a("")) },
     ], "any"),
-    "TradeEventJson": o([
+    "DbTradeHistory": o([
+        { json: "option", js: "option", typ: a(r("DbOptionHistory")) },
+        { json: "stock", js: "stock", typ: a("") },
+        { json: "uncategorized", js: "uncategorized", typ: a("") },
+    ], "any"),
+    "DbOptionHistory": o([
+        { json: "contract", js: "contract", typ: r("DbOption") },
+        { json: "id", js: "id", typ: "" },
+        { json: "tradeIds", js: "tradeIds", typ: a("") },
+    ], "any"),
+    "DbOption": o([
+        { json: "expiryDate", js: "expiryDate", typ: Date },
+        { json: "strike", js: "strike", typ: 0 },
+        { json: "strikeFx", js: "strikeFx", typ: r("DbFx") },
+        { json: "type", js: "type", typ: "" },
+    ], "any"),
+    "DbFx": o([
+        { json: "currency", js: "currency", typ: "" },
+        { json: "rate", js: "rate", typ: 0 },
+    ], "any"),
+    "DbTradeEvent": o([
         { json: "action", js: "action", typ: "" },
         { json: "date", js: "date", typ: Date },
         { json: "id", js: "id", typ: "" },
-        { json: "options", js: "options", typ: u(undefined, r("OptionJson")) },
+        { json: "options", js: "options", typ: u(undefined, r("DbOption")) },
         { json: "outlay", js: "outlay", typ: 3.14 },
-        { json: "outlayFx", js: "outlayFx", typ: r("FxJson") },
+        { json: "outlayFx", js: "outlayFx", typ: r("DbFx") },
         { json: "price", js: "price", typ: 3.14 },
-        { json: "priceFx", js: "priceFx", typ: r("FxJson") },
+        { json: "priceFx", js: "priceFx", typ: r("DbFx") },
         { json: "raw", js: "raw", typ: "" },
         { json: "security", js: "security", typ: "" },
         { json: "settleDate", js: "settleDate", typ: Date },
         { json: "shares", js: "shares", typ: 0 },
-    ], "any"),
-    "OptionJson": o([
-        { json: "expiryDate", js: "expiryDate", typ: Date },
-        { json: "strike", js: "strike", typ: 0 },
-        { json: "strikeFx", js: "strikeFx", typ: r("FxJson") },
-        { json: "type", js: "type", typ: "" },
-    ], "any"),
-    "FxJson": o([
-        { json: "currency", js: "currency", typ: "" },
-        { json: "rate", js: "rate", typ: 0 },
     ], "any"),
 };
