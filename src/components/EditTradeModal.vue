@@ -11,10 +11,11 @@ import Modal from '@comp/core/Modal.vue'
 import NumberInput from '@comp/core/NumberInput.vue'
 import SelectInput from '@comp/core/SelectInput.vue'
 import TextInput from '@comp/core/TextInput.vue'
+import { ReportItem } from './type'
 
 let props = defineProps<{
   show: boolean,
-  trade: TradeEvent,
+  trade: ReportItem,
 }>()
 let emits = defineEmits({
   hide: () => true,
@@ -39,7 +40,7 @@ let outlayFxRef = v.ref<Fx>()
 init()
 
 function init() {
-  let trade = props.trade
+  let trade = props.trade.tradeEvent
   securityRef.value = trade.security
   actionRef.value = trade.action
   tradeDateRef.value = trade.date
@@ -53,7 +54,7 @@ function init() {
 
 async function onSave() {
   let newTrade = <TradeEvent>{
-    id: props.trade.id,
+    id: props.trade.tradeEvent.id,
     security: securityRef.value,
     action: actionRef.value,
     date: tradeDateRef.value,
@@ -69,7 +70,7 @@ async function onSave() {
 }
 
 async function onDelete() {
-  await tradeStore.deleteTrade(props.trade)
+  await tradeStore.deleteTrade(props.trade.tradeEvent)
 }
 
 </script>

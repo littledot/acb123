@@ -1,4 +1,5 @@
-import { Options, TradeEvent } from '@store/tradeEvent'
+import { useFxStore } from '@store/fx'
+import { Option, TradeEvent } from '@store/tradeEvent'
 import axios from 'axios'
 import money from 'currency.js'
 import { capitalize } from 'lodash'
@@ -107,6 +108,71 @@ export function newReportRecord2(te: TradeEvent) {
     tradeEvent: te,
     warn: [],
   }
+}
+
+export async function calcGainsForTrades(trades: ReportItem[]) {
+  let startIdx = trades.findIndex(it => !it.tradeValue || !it.acb)
+  if (startIdx == -1) return // No data missing? No need to recalculate
+  let target = trades.slice(startIdx)
+
+  target.reduce((acb, it) => {
+    let { tradeEvent: tEvent, tradeValue: tValue } = it
+    if (!tValue) return acb // No CAD value? Can't calculate ACB
+
+    if (tEvent.action === 'buy') {
+      // buy cost = price * shares + outlay
+      let cost = tValue.price.multiply(tEvent.shares).add(tValue.outlay)
+      it.acb = addToAcb(acb, tEvent.shares, cost)
+    }
+    if (tEvent.action === 'sell') {
+      // sell cost = acb * shares
+      let cost = acb.acb.multiply(-tEvent.shares)
+      it.acb = addToAcb(acb, -tEvent.shares, cost)
+    }
+
+    return it.acb ?? acb
+  }, {
+    shares: 0,
+    accShares: 0,
+    cost: money(0),
+    accCost: money(0),
+    acb: money(0),
+  })
+
+  target.reduce((cg, it) => {
+    let { tradeEvent: tEvent, tradeValue: tValue } = it
+    if (!tValue) return cg // No CAD value? Can't calculate gains
+    if (!it.acb) return cg // No ACB? Can't calculate gains
+    if (tEvent.action !== 'sell') return cg // No sale? No gains
+
+    let revenue = tValue.price.multiply(tEvent.shares).subtract(tValue.outlay)
+    let gains = revenue.add(it.acb.cost)
+    it.cg = addToCapGains(cg, gains)
+
+    return it.cg ?? cg
+  }, {
+    gains: money(0),
+    totalGains: money(0),
+  })
+}
+
+export async function convertForex(items: ReportItem[]) {
+  for (let it of items) {
+    if (it.tradeValue) continue
+    let te = it.tradeEvent
+
+    let fxStore = useFxStore()
+    let priceForex = await fxStore.getRate(te.priceFx, it.tradeEvent.date)
+    let outlayForex = await fxStore.getRate(te.outlayFx, it.tradeEvent.date)
+
+    it.tradeValue = {
+      price: te.price.multiply(priceForex),
+      priceForex: priceForex,
+      outlay: te.outlay.multiply(outlayForex),
+      outlayForex: outlayForex,
+    }
+  }
+  return items
 }
 
 export interface Fx {

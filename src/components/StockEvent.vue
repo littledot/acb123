@@ -70,7 +70,7 @@ const ui = v.computed(() => {
 </script>
 <template>
   <Teleport to="body">
-    <EditTradeModal :trade="event.tradeEvent"
+    <EditTradeModal :trade="event"
                     :showDelete="true"
                     :show="showEditModal"
                     @hide="showEditModal = false" />

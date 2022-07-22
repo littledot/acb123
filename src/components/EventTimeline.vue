@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import Icon from '@comp/core/Icon.vue'
-import TradeEvent from '@comp/TradeEvent.vue'
+import StockEvent from '@comp/StockEvent.vue'
 import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
 import { TradeHistory } from '@store/tradeEvent'
 import { capitalize } from 'lodash'
@@ -19,34 +19,35 @@ let emits = defineEmits({})
          id="options">
 
       <div v-for="([option, optLots], i) of events.option">
-        <div class="flex flex-row gap-x-4 items-center">
-          <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
-            <div class="flex flex-row items-center font-semibold text-xl mr-90">
-              <span>
-                {{ capitalize(option.type) }} options</span>
-              <Icon class="w-5 h-5 ml-2 mr-1"
-                    :path="mdiClockAlertOutline" />
-              <span>
-                {{ option.expiryDate.toISODate() }}</span>
-              <Icon class="w-5 h-5 ml-2"
-                    :path="mdiCurrencyUsd" />
-              <span>
-                {{ option.strike }}</span>
+        <div v-for="(lot, i) of optLots">
+          <div class="flex flex-row gap-x-4 items-center">
+            <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
+              <div class="flex flex-row items-center font-semibold text-xl mr-90">
+                <span>
+                  {{ capitalize(lot.contract.type) }} options</span>
+                <Icon class="w-5 h-5 ml-2 mr-1"
+                      :path="mdiClockAlertOutline" />
+                <span>
+                  {{ lot.contract.expiryDate.toISODate() }}</span>
+                <Icon class="w-5 h-5 ml-2"
+                      :path="mdiCurrencyUsd" />
+                <span>
+                  {{ lot.contract.strike }}</span>
+              </div>
             </div>
-          </div>
-          <p class="w-[12rem] text-right font-semibold"
-             :class="{ hidden: i > 0 }">Cost</p>
-          <p class="w-[12rem] text-right font-semibold"
-             :class="{ hidden: i > 0 }">Shares</p>
-          <!-- <p class="w-[12rem] text-right font-semibold"
+            <p class="w-[12rem] text-right font-semibold"
+               :class="{ hidden: i > 0 }">Cost</p>
+            <p class="w-[12rem] text-right font-semibold"
+               :class="{ hidden: i > 0 }">Shares</p>
+            <!-- <p class="w-[12rem] text-right font-semibold"
              :class="{ hidden: i > 0 }">Shares</p> -->
-          <p class="w-[12rem] text-right font-semibold"
-             :class="{ hidden: i > 0 }">ACB</p>
-          <p class="w-[12rem] text-right font-semibold"
-             :class="{ hidden: i > 0 }">Capital Gains</p>
-        </div>
+            <p class="w-[12rem] text-right font-semibold"
+               :class="{ hidden: i > 0 }">ACB</p>
+            <p class="w-[12rem] text-right font-semibold"
+               :class="{ hidden: i > 0 }">Capital Gains</p>
+          </div>
 
-        <div v-for="(lot, i) of optLots.lots">
+
           <OptionEvent v-for="(it, i) of lot.trades"
                        :key="it.tradeEvent.id"
                        :event="it"
@@ -75,7 +76,7 @@ let emits = defineEmits({})
 
       <div v-for="(it, i) of events.stock"
            :key="it.tradeEvent.id">
-        <TradeEvent :event="it"
+        <StockEvent :event="it"
                     :isFirst="i === 0"
                     :isLast="i === events.stock.length - 1" />
       </div>

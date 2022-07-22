@@ -17,8 +17,8 @@ export interface Config {
 }
 
 export interface DbProfile {
-    tradeHistory?: DbTradeHistory;
-    tradeIds:      { [key: string]: string[] };
+    tradeHistory: { [key: string]: DbTradeHistory };
+    tradeIds:     { [key: string]: string[] };
 }
 
 export interface DbTradeHistory {
@@ -54,7 +54,7 @@ export interface DbTradeEvent {
     outlayFx:   DbFx;
     price:      number;
     priceFx:    DbFx;
-    raw:        string;
+    raw?:       string;
     security:   string;
     settleDate: Date;
     shares:     number;
@@ -269,7 +269,7 @@ const typeMap: any = {
         { json: "profiles", js: "profiles", typ: m(r("DbProfile")) },
     ], "any"),
     "DbProfile": o([
-        { json: "tradeHistory", js: "tradeHistory", typ: u(undefined, r("DbTradeHistory")) },
+        { json: "tradeHistory", js: "tradeHistory", typ: m(r("DbTradeHistory")) },
         { json: "tradeIds", js: "tradeIds", typ: m(a("")) },
     ], "any"),
     "DbTradeHistory": o([
@@ -301,7 +301,7 @@ const typeMap: any = {
         { json: "outlayFx", js: "outlayFx", typ: r("DbFx") },
         { json: "price", js: "price", typ: 3.14 },
         { json: "priceFx", js: "priceFx", typ: r("DbFx") },
-        { json: "raw", js: "raw", typ: "" },
+        { json: "raw", js: "raw", typ: u(undefined, "") },
         { json: "security", js: "security", typ: "" },
         { json: "settleDate", js: "settleDate", typ: Date },
         { json: "shares", js: "shares", typ: 0 },
