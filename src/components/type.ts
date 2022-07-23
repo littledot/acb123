@@ -110,10 +110,30 @@ export function newReportRecord2(te: TradeEvent) {
   }
 }
 
+export function sumShares(trades: ReportItem[]) {
+  return trades.reduce((sum, it) => {
+    let n = it.tradeEvent.action.let(it => it === 'buy' ? 1 : -1)
+    return sum + it.tradeEvent.shares * n
+  }, 0)
+}
+
 export async function calcGainsForTrades(trades: ReportItem[]) {
   let startIdx = trades.findIndex(it => !it.tradeValue || !it.acb)
   if (startIdx == -1) return // No data missing? No need to recalculate
   let target = trades.slice(startIdx)
+
+  // Find last known good acb & cg
+  let initAcb = (startIdx > 0 ? trades[startIdx - 1].acb : null) ?? {
+    shares: 0,
+    accShares: 0,
+    cost: money(0),
+    accCost: money(0),
+    acb: money(0),
+  }
+  let initCg = (startIdx > 0 ? trades[startIdx - 1].cg : null) ?? {
+    gains: money(0),
+    totalGains: money(0),
+  }
 
   target.reduce((acb, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
@@ -124,36 +144,27 @@ export async function calcGainsForTrades(trades: ReportItem[]) {
       let cost = tValue.price.multiply(tEvent.shares).add(tValue.outlay)
       it.acb = addToAcb(acb, tEvent.shares, cost)
     }
-    if (tEvent.action === 'sell') {
+    if (['sell', 'expire'].includes(tEvent.action)) {
       // sell cost = acb * shares
       let cost = acb.acb.multiply(-tEvent.shares)
       it.acb = addToAcb(acb, -tEvent.shares, cost)
     }
 
     return it.acb ?? acb
-  }, {
-    shares: 0,
-    accShares: 0,
-    cost: money(0),
-    accCost: money(0),
-    acb: money(0),
-  })
+  }, initAcb)
 
   target.reduce((cg, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
     if (!tValue) return cg // No CAD value? Can't calculate gains
     if (!it.acb) return cg // No ACB? Can't calculate gains
-    if (tEvent.action !== 'sell') return cg // No sale? No gains
+    if (!['sell', 'expire'].includes(tEvent.action)) return cg // No sale? No gains
 
     let revenue = tValue.price.multiply(tEvent.shares).subtract(tValue.outlay)
     let gains = revenue.add(it.acb.cost)
     it.cg = addToCapGains(cg, gains)
 
     return it.cg ?? cg
-  }, {
-    gains: money(0),
-    totalGains: money(0),
-  })
+  }, initCg)
 }
 
 export async function convertForex(items: ReportItem[]) {

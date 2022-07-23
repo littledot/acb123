@@ -2,15 +2,19 @@
 import Icon from '@comp/core/Icon.vue'
 import StockEvent from '@comp/StockEvent.vue'
 import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
-import { TradeHistory } from '@store/tradeEvent'
+import { Option, OptionHistory, TradeEvent, TradeHistory } from '@store/tradeEvent'
 import { capitalize } from 'lodash'
+import { DateTime } from 'luxon'
+import { v4 } from 'uuid'
 import OptionEvent from './OptionEvent.vue'
+import { sumShares } from './type'
+import ExpiredOptionsHint from './ExpiredOptionsHintView.vue'
+import OptionHistoryView from './OptionHistoryView.vue'
 
 let props = defineProps<{
   events: TradeHistory
 }>()
 let emits = defineEmits({})
-
 </script>
 
 <template>
@@ -18,41 +22,36 @@ let emits = defineEmits({})
     <div v-if="events.option.size > 0"
          id="options">
 
-      <div v-for="([option, optLots], i) of events.option">
-        <div v-for="(lot, i) of optLots">
+      <div v-for="([_, optHists], i) of events.option">
+        <div v-for="(optHist, j) of optHists">
           <div class="flex flex-row gap-x-4 items-center">
             <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
               <div class="flex flex-row items-center font-semibold text-xl mr-90">
                 <span>
-                  {{ capitalize(lot.contract.type) }} options</span>
+                  {{ capitalize(optHist.contract.type) }} options</span>
                 <Icon class="w-5 h-5 ml-2 mr-1"
                       :path="mdiClockAlertOutline" />
                 <span>
-                  {{ lot.contract.expiryDate.toISODate() }}</span>
+                  {{ optHist.contract.expiryDate.toISODate() }}</span>
                 <Icon class="w-5 h-5 ml-2"
                       :path="mdiCurrencyUsd" />
                 <span>
-                  {{ lot.contract.strike }}</span>
+                  {{ optHist.contract.strike }}</span>
               </div>
             </div>
             <p class="w-[12rem] text-right font-semibold"
-               :class="{ hidden: i > 0 }">Cost</p>
+               :class="{ hidden: i + j > 0 }">Cost</p>
             <p class="w-[12rem] text-right font-semibold"
-               :class="{ hidden: i > 0 }">Shares</p>
+               :class="{ hidden: i + j > 0 }">Shares</p>
             <!-- <p class="w-[12rem] text-right font-semibold"
-             :class="{ hidden: i > 0 }">Shares</p> -->
+             :class="{ hidden: i+j > 0 }">Shares</p> -->
             <p class="w-[12rem] text-right font-semibold"
-               :class="{ hidden: i > 0 }">ACB</p>
+               :class="{ hidden: i + j > 0 }">ACB</p>
             <p class="w-[12rem] text-right font-semibold"
-               :class="{ hidden: i > 0 }">Capital Gains</p>
+               :class="{ hidden: i + j > 0 }">Capital Gains</p>
           </div>
 
-
-          <OptionEvent v-for="(it, i) of lot.trades"
-                       :key="it.tradeEvent.id"
-                       :event="it"
-                       :isFirst="i === 0"
-                       :isLast="i === lot.trades.length - 1" />
+          <OptionHistoryView :history="optHist" />
         </div>
       </div>
     </div>

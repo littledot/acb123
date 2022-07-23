@@ -45,20 +45,10 @@
           "additionalProperties": {
             "$ref": "#/$defs/tradeHistory"
           }
-        },
-        "tradeIds": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
         }
       },
       "required": [
-        "tradeHistory",
-        "tradeIds"
+        "tradeHistory"
       ]
     },
     "tradeHistory": {

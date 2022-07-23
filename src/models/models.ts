@@ -18,7 +18,6 @@ export interface Config {
 
 export interface DbProfile {
     tradeHistory: { [key: string]: DbTradeHistory };
-    tradeIds:     { [key: string]: string[] };
 }
 
 export interface DbTradeHistory {
@@ -270,7 +269,6 @@ const typeMap: any = {
     ], "any"),
     "DbProfile": o([
         { json: "tradeHistory", js: "tradeHistory", typ: m(r("DbTradeHistory")) },
-        { json: "tradeIds", js: "tradeIds", typ: m(a("")) },
     ], "any"),
     "DbTradeHistory": o([
         { json: "option", js: "option", typ: a(r("DbOptionHistory")) },

@@ -1,3 +1,5 @@
+import { ReportItem } from './../components/type'
+import { OptionHistory } from './tradeEvent'
 import * as t from '@comp/type'
 import { Convert } from '@models/models'
 import { Profile, TradeEvent, TradeHistory } from '@store/tradeEvent'
@@ -19,10 +21,9 @@ export const useTradeStore = defineStore('TradeStore', {
   },
   actions: {
     async clear() {
-      this.db.clearTradeEvent()
-
       this.profile.clearTrades()
       this.db.writeProfile(this.profile)
+      this.db.clearTradeEvent()
     },
 
     async init() {
@@ -57,6 +58,14 @@ export const useTradeStore = defineStore('TradeStore', {
       await this.profile.calcGains()
     },
 
+    async insertTradeAtIndex(trade: TradeEvent, array: t.ReportItem[], pos: number) {
+      array.splice(pos, 0, t.newReportRecord2(trade))
+      this.db.writeProfile(this.profile)
+      this.db.writeTradeEvent(trade)
+
+      await this.profile.calcGains()
+    },
+
     importCsvFile(file: File | string) {
       Papa.parse(file, {
         download: true,
@@ -85,8 +94,8 @@ function cleanData(results: ParseResult<string[]>) {
     .slice(1)
     .filter(row => row.length > 16)
     .map((row, i) => t.newQuestradeEvent(uuid(), row))
-    .filter((it) => it.symbol === 'AMZN') // debugging
+    // .filter((it) => it.symbol === 'SLV') // debugging
     .map(it => t.newTradeEvent(it))
-  // .filter(it => it.options) // debugging
+    // .filter(it => it.options) // debugging
   return trades
 }

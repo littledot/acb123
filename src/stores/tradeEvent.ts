@@ -63,7 +63,7 @@ export class Profile {
 
     // Replace old trade at same position
     oldTrade.tradeEvent = trade
-    oldTrade.tradeValue = undefined
+    oldTrade.tradeValue = oldTrade.acb = oldTrade.cg = undefined
   }
 
   _updateOptionTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
@@ -71,9 +71,8 @@ export class Profile {
   }
 
   deleteTrade(trade: TradeEvent) {
-    for (let histories of this.tradeHistory.values()) {
-      if (histories.deleteTrade(trade)) return
-    }
+    this.tradeHistory.get(trade.security)
+      ?.let(it => it.deleteTrade(trade))
   }
 
   clearTrades() {
@@ -81,13 +80,13 @@ export class Profile {
   }
 
   toDbModel() {
-    let th = <any>{}
+    let hist = <any>{}
     for (let [security, history] of this.tradeHistory) {
-      th[security] = history.toDbModel()
+      hist[security] = history.toDbModel()
     }
 
     return <DbProfile>{
-      tradeHistory: th,
+      tradeHistory: hist,
     }
   }
 }
