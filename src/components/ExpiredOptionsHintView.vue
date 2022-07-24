@@ -34,8 +34,7 @@ async function insertExpiredEvent() {
          class="flex flex-row flex-1 gap-x-4 items-center ml-2"
          @click="insertExpiredEvent">
       <div class="flex flex-row flex-[3] items-center">
-        <a class="link-primary text-left"
-           href="#">
+        <a class="link-primary text-left cursor-pointer">
           {{ event.shares }} options are past the contract's expiry date. Click to mark them as expired.</a>
       </div>
     </div>
