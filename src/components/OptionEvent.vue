@@ -82,10 +82,10 @@ const ui = v.computed(() => {
       <div id="title-timeline"
            class="relative flex self-stretch">
         <div id="dot"
-             class="w-5 h-5 m-auto bg-blue-600 rounded-full" />
+             class="w-3 h-3 m-auto bg-blue-600 rounded-full" />
         <div id="line"
              class="absolute
-                    w-1 h-full mx-2
+                    w-1 h-full mx-1
                     bg-blue-600"
              :class="{
                'h-1/2': isFirst || isLast,
@@ -110,11 +110,11 @@ const ui = v.computed(() => {
     <div id="trade-body"
          class="flex flex-row">
       <div id="body-timeline"
-           class="bg-blue-600 w-1 mx-2"
+           class="bg-blue-600 w-1 mx-1"
            :class="{ invisible: isLast }" />
 
       <div id="body-content"
-           class="price-grid gap-x-4 gap-y-2 ml-2 mt-2 mb-4">
+           class="event-grid flex-1 pl-2 mt-2 mb-4">
         <FxMetric class="col-[1/2] row-[1/2]"
                   label="Price"
                   :value="ui.forexPrice"
@@ -170,9 +170,4 @@ const ui = v.computed(() => {
   </div>
 </template>
 <style scoped>
-.price-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 12rem);
-  grid-auto-rows: auto;
-}
 </style>

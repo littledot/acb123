@@ -24,8 +24,8 @@ let emits = defineEmits({})
 
       <div v-for="([_, optHists], i) of events.option">
         <div v-for="(optHist, j) of optHists">
-          <div class="flex flex-row gap-x-4 items-center">
-            <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
+          <div class="event-grid items-center">
+            <div class="col-[1/4] flex flex-row items-center">
               <div class="flex flex-row items-center font-semibold text-xl mr-90">
                 <span>
                   {{ capitalize(optHist.contract.type) }} options</span>
@@ -39,15 +39,15 @@ let emits = defineEmits({})
                   {{ optHist.contract.strike }}</span>
               </div>
             </div>
-            <p class="w-[12rem] text-right font-semibold"
+            <p class="col-[4/5] text-right font-semibold"
                :class="{ hidden: i + j > 0 }">Cost</p>
-            <p class="w-[12rem] text-right font-semibold"
+            <p class="col-[5/6] text-right font-semibold"
                :class="{ hidden: i + j > 0 }">Shares</p>
-            <!-- <p class="w-[12rem] text-right font-semibold"
+            <!-- <p class="col-[5/6] text-right font-semibold"
              :class="{ hidden: i+j > 0 }">Shares</p> -->
-            <p class="w-[12rem] text-right font-semibold"
+            <p class="col-[6/7] text-right font-semibold"
                :class="{ hidden: i + j > 0 }">ACB</p>
-            <p class="w-[12rem] text-right font-semibold"
+            <p class="col-[7/8] text-right font-semibold"
                :class="{ hidden: i + j > 0 }">Capital Gains</p>
           </div>
 
@@ -57,19 +57,19 @@ let emits = defineEmits({})
     </div>
     <div v-if="events.stock.length > 0"
          id="stocks">
-      <div class="flex flex-row gap-x-4 items-center">
-        <div class="w-[calc(36rem+2rem)] flex flex-row items-center mr-7">
+      <div class="event-grid items-center pl-5">
+        <div class="col-[1/4] flex flex-row items-center">
           <p class="text-left font-semibold text-xl">Stocks</p>
         </div>
-        <p class="w-[12rem] text-right font-semibold"
+        <p class="col-[4/5] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Cost</p>
-        <!-- <p class="w-[12rem] text-left text-right font-semibold"
-           :class="{ hidden: events.option.size > 0 }">Accumulated Options</p> -->
-        <p class="w-[12rem] text-right font-semibold"
+        <!-- <p class="col-[5/6] text-left text-right font-semibold"
+           :class="{ hidden: events.option.size > 0 }">Options</p> -->
+        <p class="col-[5/6] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Shares</p>
-        <p class="w-[12rem] text-right font-semibold"
+        <p class="col-[6/7] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">ACB</p>
-        <p class="w-[12rem] text-right font-semibold"
+        <p class="col-[7/8] text-right font-semibold"
            :class="{ hidden: events.option.size > 0 }">Capital Gains</p>
       </div>
 
@@ -82,10 +82,14 @@ let emits = defineEmits({})
     </div>
   </div>
 </template>
-<style scoped>
-.timeline-grid {
+<style>
+.event-grid {
   display: grid;
-  grid-template-columns: [price-l] min-content [price-r cost-l] min-content [cost-r shares-l] min-content [shares-r acb-l] min-content [acb-r cg-l] min-content [cg-r];
+  grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: auto;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
 }
+</style>
+<style scoped>
 </style>
