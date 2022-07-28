@@ -5,6 +5,7 @@ import { onMounted, ref } from 'vue'
 import EventTimeline from '@comp/EventTimeline.vue'
 import Button from '@comp/core/Button.vue'
 import Modal from '@comp/core/Modal.vue'
+import * as u from './util'
 
 let tradeStore = useTradeStore()
 
@@ -55,7 +56,13 @@ let showClearModal = ref(false)
                   data-bs-toggle="collapse"
                   :data-bs-target="'#collapse' + i"
                   aria-expanded="false"
-                  aria-controls="collapseOne5">{{ year }} {{ hists.yearGains }}</button>
+                  aria-controls="collapseOne5">
+            <div class="flex flex-col">
+              <div class="text-xl">{{ year }}</div>
+              <div class="">Capital Gains: {{ hists.yearGains.format() }} </div>
+              <div class="">Trades: {{ u.fmtNum(hists.tradeCount) }}</div>
+            </div>
+          </button>
         </h2>
         <div :id="'collapse' + i"
              class="accordion-collapse collapse"
@@ -72,7 +79,13 @@ let showClearModal = ref(false)
                       data-bs-toggle="collapse"
                       :data-bs-target="`#collapse-${i}-${j}`"
                       aria-expanded="false"
-                      aria-controls="collapseOne5">{{ security }} {{ events.yearGains }}</button>
+                      aria-controls="collapseOne5">
+                <div class="flex flex-col pl-2.5">
+                  <div class="text-xl">{{ security }}</div>
+                  <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
+                  <div class="">Trades: {{ u.fmtNum(events.tradeCount) }}</div>
+                </div>
+              </button>
             </h2>
             <div :id="`collapse-${i}-${j}`"
                  class="accordion-collapse collapse"

@@ -11,6 +11,7 @@ export type Fx = DbFx
 
 export class Profile {
   tradeHistory: Map<string, TradeHistory>
+  tradeReport = <[number, AnnualTradeHistory][]>[]
 
   constructor() {
     this.tradeHistory = new Map()
@@ -70,6 +71,8 @@ export class Profile {
       await t.convertForex(history.stock)
       t.calcGainsForTrades(history.stock)
     }
+
+    this.tradeReport = this.groupByYear()
   }
 
   updateTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
@@ -104,6 +107,7 @@ export class Profile {
 
   clearTrades() {
     this.tradeHistory.clear()
+    this.tradeReport = []
   }
 
   toDbModel() {
@@ -120,23 +124,26 @@ export class Profile {
 
 export class AnnualTradeHistory {
   tickerTrades = new Map<string, TickerTradeHistory>()
+  tradeCount = 0
   yearGains = money(0)
 
   appendStocks(ticker: string, trades: t.ReportItem[]) {
     this._getHist(ticker).appendStocks(trades)
     this.yearGains = this.yearGains.add(t.yearGains(trades))
-
+    this.tradeCount += trades.length
   }
 
   appendOptions(ticker: string, hists: OptionHistory[]) {
     this._getHist(ticker).appendOptions(hists)
     for (let optHist of hists) {
       this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
+      this.tradeCount += optHist.trades.length
     }
   }
 
   appendUnsure(ticker: string, trades: TradeEvent[]) {
     this._getHist(ticker).appendUnsure(trades)
+    this.tradeCount += trades.length
   }
 
   _getHist(ticker: string) {
@@ -150,6 +157,7 @@ export class TickerTradeHistory {
   stock: t.ReportItem[]
   unsure: TradeEvent[]
 
+  tradeCount = 0
   yearGains = money(0)
 
   constructor() {
@@ -161,17 +169,20 @@ export class TickerTradeHistory {
   appendStocks(trades: t.ReportItem[]) {
     this.stock.push(...trades)
     this.yearGains = this.yearGains.add(t.yearGains(trades))
+    this.tradeCount += trades.length
   }
 
   appendOptions(optHists: OptionHistory[]) {
     this.option.push(...optHists)
     for (let optHist of optHists) {
       this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
+      this.tradeCount += optHist.trades.length
     }
   }
 
   appendUnsure(trades: TradeEvent[]) {
     this.unsure.push(...trades)
+    this.tradeCount += trades.length
   }
 }
 

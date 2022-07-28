@@ -18,7 +18,7 @@ export const useTradeStore = defineStore('TradeStore', {
     tradesBySecurity: (state) => {
       return new Map([...state.profile.tradeHistory].sort((a, b) => String(a[0]).localeCompare(b[0])))
     },
-    tradeHistory: (state) => state.profile.groupByYear(),
+    tradeHistory: (state) => state.profile.tradeReport,
   },
   actions: {
     async clear() {
