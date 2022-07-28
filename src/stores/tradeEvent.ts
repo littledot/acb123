@@ -1,3 +1,4 @@
+import { CapGains } from './../components/type'
 import * as t from '@comp/type'
 import * as u from '@comp/util'
 import { DbFx, DbOption, DbOptionHistory, DbProfile, DbTradeEvent, DbTradeHistory } from '@models/models'
@@ -21,6 +22,32 @@ export class Profile {
       history.init(db, dbHistory)
       this.tradeHistory.set(security, history)
     }
+  }
+
+  groupByYear() {
+    let data = new Map<number, AnnualTradeHistory>()
+
+    let tradeHistory = u.sortIter(this.tradeHistory.entries(), (a, b) => String(a[0]).localeCompare(b[0]))
+    for (let [security, history] of tradeHistory) {
+      let { stocks, unsure, options } = history.groupByYear()
+
+      for (let [year, trades] of stocks) {
+        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
+          .appendStocks(security, trades)
+      }
+
+      for (let [year, trades] of unsure) {
+        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
+          .appendUnsure(security, trades)
+      }
+
+      for (let [year, trades] of options) {
+        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
+          .appendOptions(security, trades)
+      }
+    }
+
+    return u.sortIter(data.entries(), (a, b) => b[0] - a[0])
   }
 
   insertTrade(trade: TradeEvent) {
@@ -91,6 +118,63 @@ export class Profile {
   }
 }
 
+export class AnnualTradeHistory {
+  tickerTrades = new Map<string, TickerTradeHistory>()
+  yearGains = money(0)
+
+  appendStocks(ticker: string, trades: t.ReportItem[]) {
+    this._getHist(ticker).appendStocks(trades)
+    this.yearGains = this.yearGains.add(t.yearGains(trades))
+
+  }
+
+  appendOptions(ticker: string, hists: OptionHistory[]) {
+    this._getHist(ticker).appendOptions(hists)
+    for (let optHist of hists) {
+      this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
+    }
+  }
+
+  appendUnsure(ticker: string, trades: TradeEvent[]) {
+    this._getHist(ticker).appendUnsure(trades)
+  }
+
+  _getHist(ticker: string) {
+    return u.mapGetDefault(this.tickerTrades, ticker, () => new TickerTradeHistory())
+  }
+}
+
+
+export class TickerTradeHistory {
+  option: OptionHistory[]
+  stock: t.ReportItem[]
+  unsure: TradeEvent[]
+
+  yearGains = money(0)
+
+  constructor() {
+    this.option = []
+    this.stock = []
+    this.unsure = []
+  }
+
+  appendStocks(trades: t.ReportItem[]) {
+    this.stock.push(...trades)
+    this.yearGains = this.yearGains.add(t.yearGains(trades))
+  }
+
+  appendOptions(optHists: OptionHistory[]) {
+    this.option.push(...optHists)
+    for (let optHist of optHists) {
+      this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
+    }
+  }
+
+  appendUnsure(trades: TradeEvent[]) {
+    this.unsure.push(...trades)
+  }
+}
+
 export class TradeHistory {
   option: Map<string, OptionHistory[]>
   stock: t.ReportItem[]
@@ -116,6 +200,25 @@ export class TradeHistory {
       .map(it => db.readTradeEvent(it))
       .filter(it => it)
       .map(it => it!!)
+  }
+
+  groupByYear() {
+    return {
+      stocks: u.groupBy(this.stock, it => it.tradeEvent.date.year),
+      unsure: u.groupBy(this.unsure, it => it.date.year),
+      options: [...this.option.values()]
+        .flatMap(it => it)
+        .flatMap(optHist =>
+          [...u.groupBy(optHist.trades, it => it.tradeEvent.date.year)
+            .entries()]
+            .map(([year, trades]) => ({
+              y: year,
+              h: { ...optHist, trades: trades }
+            }))
+        )
+        .let(it => u.groupBy(it, it => it.y))
+        .let(it => u.mapValues(it, it => it.map(it => <OptionHistory>it.h)))
+    }
   }
 
   insertTrade(trade: TradeEvent) {

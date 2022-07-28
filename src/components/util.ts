@@ -33,9 +33,40 @@ export function groupBy<T, K extends keyof any>(list: T[], getKey: (item: T) => 
   return list.reduce((map, item) => {
     const group = getKey(item)
     if (!map.has(group)) map.set(group, [])
-    map.get(group).push(item)
+    map.get(group)!!.push(item)
     return map
-  }, new Map())
+  }, new Map<K, T[]>())
+}
+
+export function mapValues<K extends keyof any, V, O>(
+  map: Map<K, V>,
+  mapper: (item: V) => O,
+): Map<K, O> {
+  let out = new Map<K, O>()
+  for (let [key, val] of map.entries()) {
+    out.set(key, mapper(val))
+  }
+  return out
+}
+
+export function mapGetDefault<K, V>(
+  map: Map<K, V>,
+  key: K,
+  backup: () => V,
+): V {
+  let val = map.get(key)
+  if (val === undefined) {
+    val = backup()
+    map.set(key, val)
+  }
+  return val
+}
+
+export function sortIter<T>(
+  iter: IterableIterator<T>,
+  compareFn?: (a: T, b: T) => number,
+): T[] {
+  return [...iter].sort(compareFn)
 }
 
 export const numFmt = new Intl.NumberFormat('en-US')

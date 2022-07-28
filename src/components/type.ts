@@ -117,6 +117,10 @@ export function sumShares(trades: ReportItem[]) {
   }, 0)
 }
 
+export function yearGains(trades: ReportItem[]) {
+  return trades[trades.length - 1]?.cg?.yearGains ?? money(0)
+}
+
 export async function calcGainsForTrades(trades: ReportItem[]) {
   let startIdx = trades.findIndex(it => !it.tradeValue || !it.acb)
   if (startIdx == -1) return // No data missing? No need to recalculate
@@ -133,7 +137,10 @@ export async function calcGainsForTrades(trades: ReportItem[]) {
   let initCg = (startIdx > 0 ? trades[startIdx - 1].cg : null) ?? {
     gains: money(0),
     totalGains: money(0),
+    year: -1,
+    yearGains: money(0),
   }
+
 
   target.reduce((acb, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
@@ -157,11 +164,18 @@ export async function calcGainsForTrades(trades: ReportItem[]) {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
     if (!tValue) return cg // No CAD value? Can't calculate gains
     if (!it.acb) return cg // No ACB? Can't calculate gains
-    if (!['sell', 'expire'].includes(tEvent.action)) return cg // No sale? No gains
+    if (!['sell', 'expire'].includes(tEvent.action)) return cg // No sale? No change to gains
 
     let revenue = tValue.price.multiply(tEvent.shares).subtract(tValue.outlay)
     let gains = revenue.add(it.acb.cost)
-    it.cg = addToCapGains(cg, gains)
+
+    it.cg = {
+      gains: gains,
+      totalGains: cg.totalGains.add(gains),
+      // New year? Reset yearGains
+      year: tEvent.date.year,
+      yearGains: cg.year != tEvent.date.year ? gains : cg.yearGains.add(gains),
+    }
 
     return it.cg ?? cg
   }, initCg)
@@ -241,11 +255,6 @@ export function addToAcb(acb: Acb, shares: number, cost: money) {
 export interface CapGains {
   gains: money
   totalGains: money
-}
-
-export function addToCapGains(cg: CapGains, gains: money) {
-  return {
-    gains: gains,
-    totalGains: cg.totalGains.add(gains)
-  }
+  year: number
+  yearGains: money
 }

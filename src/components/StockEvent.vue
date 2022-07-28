@@ -62,7 +62,7 @@ const ui = v.computed(() => {
     cg: cg ? {
       gains: cg.gains.format({ pattern: `+!#` }),
       gainsColor: `text-${cg.gains.value < 0 ? 'red' : 'green'}-600`,
-      totalGains: cg.totalGains.format(),
+      totalGains: cg.yearGains.format(),
     } : null,
   }
 })
