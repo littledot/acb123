@@ -104,7 +104,7 @@ export const months = new Map([
 ])
 
 export const importFmts = new Map([
-  ['qt', 'Questrade'],
   ['ibkr', 'Interactive Brokers'],
-  ['custom', 'Custom'],
+  ['qt', 'Questrade'],
+  // ['custom', 'Custom'],
 ])

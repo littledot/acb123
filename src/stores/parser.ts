@@ -16,6 +16,10 @@ export abstract class TradeConfirmParser {
   }
 
   abstract parseCsv(_: ParseResult<string[]>): TradeEvent[]
+
+  _readCsv(csv: string[], header: string) {
+    return csv[this.headers.get(header)!!]
+  }
 }
 
 enum QtHeader {
@@ -47,10 +51,6 @@ export class QtParser extends TradeConfirmParser {
         continue
       }
     }
-  }
-
-  _readCsv(csv: string[], s: QtHeader) {
-    return csv[this.headers.get(s)!!]
   }
 
   parseCsv(papaRes: ParseResult<string[]>) {
@@ -90,7 +90,7 @@ export class QtParser extends TradeConfirmParser {
       o.security = symbol
       o.shares *= 100
       o.options = <Option>{
-        type: optType.toLowerCase(),
+        type: optType,
         expiryDate: DateTime.fromFormat(rawExpiration, 'MM/dd/yy'),
         strike: money(u.parseNumber(rawStrike)),
         strikeFx: o.priceFx,
@@ -111,59 +111,98 @@ export class QtParser extends TradeConfirmParser {
   }
 }
 
-export class IbkrParser {
-  static headers = [
-    'currencyprimary',
-    'assetclass',
-    'symbol',
-    'multiplier',
-    'strike',
-    'expiry',
-    'put/call',
-    'settledate',
-    'tradedate',
-    'buy/sell',
-    'quantity',
-    'price',
-    'amount',
-    'proceeds',
-    'commission',
-    'commissioncurrency',
-    'underlyingsymbol'
-  ]
+enum IbkrHeader {
+  PrimaryCurrency = 'currencyprimary',
+  AssetClass = 'assetclass',
+  Symbol = 'symbol',
+  Multiplier = 'multiplier',
+  Strike = 'strike',
+  Expiry = 'expiry',
+  PutCall = 'put/call',
+  SettleDate = 'settledate',
+  TradeDate = 'tradedate',
+  BuySell = 'buy/sell',
+  Quantity = 'quantity',
+  Price = 'price',
+  Commission = 'commission',
+  CommissionCurrency = 'commissioncurrency',
+  UnderlyingSymbol = 'underlyingsymbol',
+}
 
-  static checkHeaders(data: string[][]) {
-    let ans = <HeaderCheck>{
-      headers: new Map(),
-      missing: new Set(IbkrParser.headers),
-    }
+export class IbkrParser extends TradeConfirmParser {
 
-    for (let row of data) {
+  constructor(papaRes: ParseResult<string[]>) {
+    super(Object.values(IbkrHeader), papaRes)
+
+    for (let row of papaRes.data) {
       if (row[0] == 'header') {
-        for (let header of IbkrParser.headers) {
+        for (let header of this.missing) {
           let i = row.findIndex(it => it == header)
           if (i > -1) {
-            ans.headers.set(header, i)
-            ans.missing.delete(header)
+            this.headers.set(header, i)
+            this.missing.delete(header)
           }
         }
         break
       }
     }
-    return ans
   }
 
-  parseCsv(data: string[][]) {
+  parseCsv(papaRes: ParseResult<string[]>) {
+    console.log('parsing csv', this.headers)
 
+    return papaRes.data
+      .filter(it =>
+        it[0] == 'data' &&
+        this._readCsv(it, IbkrHeader.AssetClass) != 'cash'
+      )
+      .map(it => this._csvToTradeEvent(it))
   }
-}
 
-export class CustomParser {
+  _csvToTradeEvent(csv: string[]) {
+    console.log('parsing trade', csv)
 
-}
+    let o = <TradeEvent>{
+      id: v4(),
+      date: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.TradeDate), 'yyyy-MM-dd'),
+      settleDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.SettleDate), 'yyyy-MM-dd'),
+      action: this._readCsv(csv, IbkrHeader.BuySell),
+      shares: Math.abs(
+        u.parseNumber(this._readCsv(csv, IbkrHeader.Quantity)) *
+        u.parseNumber(this._readCsv(csv, IbkrHeader.Multiplier))
+      ),
+      price: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Price))),
+      priceFx: {
+        currency: this._readCsv(csv, IbkrHeader.PrimaryCurrency).toUpperCase(),
+        rate: -1
+      },
+      outlay: money(Math.abs(u.parseNumber(this._readCsv(csv, IbkrHeader.Commission)))),
+      outlayFx: {
+        currency: this._readCsv(csv, IbkrHeader.CommissionCurrency).toUpperCase(),
+        rate: -1
+      },
+      raw: csv.join(','),
+    }
 
-interface HeaderCheck {
-  headers: Map<string, number>
-  missing: Set<string>
-  parser?: TradeConfirmParser
+    let asset = this._readCsv(csv, IbkrHeader.AssetClass)
+    if (asset == 'stk') {
+      o.security = this._readCsv(csv, IbkrHeader.Symbol)
+    } else if (asset == 'opt') {
+      o.security = this._readCsv(csv, IbkrHeader.UnderlyingSymbol)
+      let type = this._readCsv(csv, IbkrHeader.PutCall)
+      o.options = {
+        type: type == 'p' ? 'put' : 'call',
+        expiryDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.Expiry), 'yyyy-MM-dd'),
+        strike: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Strike))),
+        strikeFx: o.priceFx,
+      }
+    }
+
+    if (o.security.startsWith('.')) { // Remove . from CAD tickers
+      o.security = o.security.slice(1)
+    }
+    o.security = o.security.toUpperCase()
+
+    return o
+  }
 }

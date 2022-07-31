@@ -2,7 +2,7 @@
 import Modal from '@comp/core/Modal.vue'
 import SelectInput from '@comp/core/SelectInput.vue'
 import * as u from '@comp/util'
-import { QtParser, TradeConfirmParser } from '@store/parser'
+import { IbkrParser, QtParser, TradeConfirmParser } from '@store/parser'
 import { useTradeStore } from '@store/trade'
 import Papa, { ParseResult } from 'papaparse'
 import * as v from 'vue'
@@ -23,7 +23,7 @@ init()
 
 function init() {
   fileRef.value = undefined
-  fileFormatRef.value = 'custom'
+  fileFormatRef.value = 'ibkr'
   parserRef.value.clear()
 }
 
@@ -33,14 +33,16 @@ v.watch(fileRef, (file) => {
       preview: 5,
       skipEmptyLines: true,
       transform: (s) => s.trim().toLocaleLowerCase(),
-      complete: (results: ParseResult<string[]>) => {
-
-
-
-        let qtParser = new QtParser(results)
-        parserRef.value.set('qt', qtParser)
-        if (qtParser.missing.size == 0) {
-          fileFormatRef.value = 'qt'
+      complete: (result: ParseResult<string[]>) => {
+        parserRef.value = new Map([
+          ['ibkr', new IbkrParser(result)],
+          ['qt', new QtParser(result)],
+        ])
+        for (let [id, parser] of parserRef.value.entries()) {
+          if (parser.missing.size == 0) {
+            fileFormatRef.value = id
+            break
+          }
         }
       }
     })
@@ -55,8 +57,9 @@ let ui = v.computed(() => {
   }
 
   return {
-    fileErr: parser.papaErr.at(0)?.let(it => 'Could not parse file. Are you sure this is a CSV file?'),
-    fileFmtErr: parser.papaErr ? null : parser.missing,
+    fileErr: parser.papaErr.at(0)?.let(it => `Could not parse file. Are you sure this is a CSV file? (${it.message})`),
+    fileFmtErr: parser.papaErr.length > 0 ? null :
+      parser.missing.size > 0 ? `The following columns are missing: ${[...parser.missing.values()].join(', ')}` : null,
   }
 })
 
@@ -82,13 +85,15 @@ function onImport() {
         <FileInput class=""
                    accept=".csv, .tsv"
                    v-model="fileRef" />
-        <div v-if="ui.fileErr">{{ ui.fileErr }}</div>
+        <div v-if="ui.fileErr"
+             class="text-sm text-red-500">{{ ui.fileErr }}</div>
       </div>
       <div class="">File Format</div>
       <div class="flex flex-col w-full">
         <SelectInput :options="u.importFmts"
                      v-model="fileFormatRef" />
-        <div v-if="ui.fileFmtErr">{{ ui.fileFmtErr }}</div>
+        <div v-if="ui.fileFmtErr"
+             class="text-sm text-red-500">{{ ui.fileFmtErr }}</div>
       </div>
     </div>
   </Modal>
