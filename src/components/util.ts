@@ -69,6 +69,9 @@ export function sortIter<T>(
   return [...iter].sort(compareFn)
 }
 
+export const CAD = { forexCode: 'CAD', symbol: "$", precision: 2 }
+export const USD = { forexCode: 'USD', symbol: "US$", precision: 2 }
+
 export const numFmt = new Intl.NumberFormat('en-US')
 export const signNumFmt = new Intl.NumberFormat('en-US', { signDisplay: 'always' })
 
@@ -98,4 +101,10 @@ export const months = new Map([
   [10, 'October'],
   [11, 'November'],
   [12, 'December'],
+])
+
+export const importFmts = new Map([
+  ['qt', 'Questrade'],
+  ['ibkr', 'Interactive Brokers'],
+  ['custom', 'Custom'],
 ])

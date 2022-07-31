@@ -6,6 +6,7 @@ import EventTimeline from '@comp/EventTimeline.vue'
 import Button from '@comp/core/Button.vue'
 import Modal from '@comp/core/Modal.vue'
 import * as u from './util'
+import ImportTradesModal from '@comp/ImportTradesModal.vue'
 
 let tradeStore = useTradeStore()
 
@@ -13,6 +14,7 @@ function importExample() {
   tradeStore.importCsvFile(questradeUrl)
 }
 
+let showImportModal = ref(false)
 let showClearModal = ref(false)
 
 </script>
@@ -30,11 +32,24 @@ let showClearModal = ref(false)
       </Modal>
     </Teleport>
 
+    <Teleport to="body">
+      <ImportTradesModal title="Import Trades"
+                         okLabel="Import"
+                         okStyle="ok"
+                         @ok=""
+                         :show="showImportModal"
+                         @hide="showImportModal = false" />
+    </Teleport>
+
     <div class="flex flex-row">
       <div class="flex-1 flex flex-row">
         <Button type="pri"
                 @click="importExample">
           Import Example
+        </Button>
+        <Button type="pri"
+                @click="showImportModal = true">
+          Import Trades (CSV)
         </Button>
       </div>
       <Button type="err"

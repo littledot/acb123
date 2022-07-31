@@ -19,7 +19,7 @@ const styles = {
 </script>
 <template>
   <button type="button"
-          class="inline-block px-6 py-2.5 font-medium text-xs leading-tight uppercase rounded focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
+          class="inline-block px-6 py-2.5 font-medium text-xs leading-tight uppercase rounded focus:outline-none focus:ring-0 transition duration-150 ease-in-out disabled:opacity-60"
           :class="styles[type as keyof typeof styles]">
     <slot />
   </button>

@@ -1,12 +1,9 @@
-import { ReportItem } from './../components/type'
-import { OptionHistory } from './tradeEvent'
 import * as t from '@comp/type'
-import { Convert } from '@models/models'
-import { Profile, TradeEvent, TradeHistory } from '@store/tradeEvent'
+import { Profile, TradeEvent } from '@store/tradeEvent'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
-import { v4 as uuid } from 'uuid'
 import { Db } from './db'
+import { QtParser, TradeConfirmParser } from './parser'
 
 
 export const useTradeStore = defineStore('TradeStore', {
@@ -67,36 +64,29 @@ export const useTradeStore = defineStore('TradeStore', {
       await this.profile.calcGains()
     },
 
-    importCsvFile(file: File | string) {
+    importCsvFile(file: File | string, parser?: TradeConfirmParser) {
       Papa.parse(file, {
         download: true,
-        transform: (s) => s.trim(),
-        complete: this._onParseCsv,
+        skipEmptyLines: true,
+        transform: it => it.trim().toLocaleLowerCase(),
+        complete: (it: ParseResult<string[]>) =>
+          this._onParseCsv(it, parser ?? new QtParser(it)),
       })
     },
 
     // private
 
-    async _onParseCsv(results: ParseResult<string[]>) {
-      let trades = cleanData(results)
-      trades.forEach(it => {
-        this.profile.insertTrade(it)
-        this.db.writeTradeEvent(it)
-      })
+    async _onParseCsv(results: ParseResult<string[]>, parser: TradeConfirmParser) {
+      parser.parseCsv(results)
+        // .filter(it => it.security == 'SLV') // debugging
+        // .filter(it => it.options) // debugging
+        .forEach(it => {
+          this.profile.insertTrade(it)
+          this.db.writeTradeEvent(it)
+        })
       this.db.writeProfile(this.profile)
 
       await this.profile.calcGains()
     },
   }
 })
-
-function cleanData(results: ParseResult<string[]>) {
-  let trades = results.data
-    .slice(1)
-    .filter(row => row.length > 16)
-    .map((row, i) => t.newQuestradeEvent(uuid(), row))
-    // .filter((it) => it.symbol === 'SLV') // debugging
-    .map(it => t.newTradeEvent(it))
-    // .filter(it => it.options) // debugging
-  return trades
-}

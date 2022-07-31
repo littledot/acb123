@@ -8,6 +8,7 @@ let props = defineProps<{
   title: string,
   okLabel?: string,
   okStyle?: string,
+  okDisabled?: boolean,
   cancelLabel?: string,
   cancelStyle?: string,
   deleteLabel?: string,
@@ -82,6 +83,7 @@ function onClickBg(event: Event) {
               </Button>
               <Button class="ml-1"
                       :type="okStyle ?? 'ok'"
+                      :disabled="okDisabled"
                       @click="onOk">
                 {{ okLabel ?? 'OK' }}
               </Button>
