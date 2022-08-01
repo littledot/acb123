@@ -164,8 +164,8 @@ export class IbkrParser extends TradeConfirmParser {
 
     let o = <TradeEvent>{
       id: v4(),
-      date: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.TradeDate), 'yyyy-MM-dd'),
-      settleDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.SettleDate), 'yyyy-MM-dd'),
+      date: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.TradeDate), 'yyyyMMdd'),
+      settleDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.SettleDate), 'yyyyMMdd'),
       action: this._readCsv(csv, IbkrHeader.BuySell),
       shares: Math.abs(
         u.parseNumber(this._readCsv(csv, IbkrHeader.Quantity)) *
@@ -192,7 +192,7 @@ export class IbkrParser extends TradeConfirmParser {
       let type = this._readCsv(csv, IbkrHeader.PutCall)
       o.options = {
         type: type == 'p' ? 'put' : 'call',
-        expiryDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.Expiry), 'yyyy-MM-dd'),
+        expiryDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.Expiry), 'yyyyMMdd'),
         strike: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Strike))),
         strikeFx: o.priceFx,
       }

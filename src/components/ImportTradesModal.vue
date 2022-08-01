@@ -79,21 +79,105 @@ function onImport() {
          @cancel="init"
          :show="show"
          @hide="emits('hide')">
-    <div class="import-trade-grid items-baseline gap-2">
-      <div class="">File</div>
-      <div class="flex flex-col w-full">
-        <FileInput class=""
-                   accept=".csv, .tsv"
-                   v-model="fileRef" />
-        <div v-if="ui.fileErr"
-             class="text-sm text-red-500">{{ ui.fileErr }}</div>
+    <div class="flex flex-col">
+      <div class="import-trade-grid items-baseline gap-2">
+        <div class="">File</div>
+        <div class="flex flex-col w-full">
+          <FileInput class=""
+                     accept=".csv, .tsv"
+                     v-model="fileRef" />
+          <div v-if="ui.fileErr"
+               class="text-sm text-red-500">{{ ui.fileErr }}</div>
+        </div>
+        <div class="">File Format</div>
+        <div class="flex flex-col w-full">
+          <SelectInput :options="u.importFmts"
+                       v-model="fileFormatRef" />
+          <div v-if="ui.fileFmtErr"
+               class="text-sm text-red-500">{{ ui.fileFmtErr }}</div>
+        </div>
       </div>
-      <div class="">File Format</div>
-      <div class="flex flex-col w-full">
-        <SelectInput :options="u.importFmts"
-                     v-model="fileFormatRef" />
-        <div v-if="ui.fileFmtErr"
-             class="text-sm text-red-500">{{ ui.fileFmtErr }}</div>
+
+      <div id="accordionExample"
+           class="accordion mt-4">
+        <div class="accordion-item bg-white border border-gray-200">
+          <h2 class="accordion-header mb-0"
+              id="headingOne">
+            <button class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne"
+                    aria-expanded="true"
+                    aria-controls="collapseOne">
+              Import Guide
+            </button>
+          </h2>
+          <div id="collapseOne"
+               class="accordion-collapse collapse"
+               aria-labelledby="headingOne"
+               data-bs-parent="#accordionExample">
+
+            <template v-if="fileFormatRef == 'ibkr'">
+              <a href="https://i.imgur.com/blJ3odN.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/blJ3odN.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Click on <b>Performance & Reports</b>.</li>
+                <li>Click on <b>Flex Queries</b>.</li>
+                <li>Click on the <b>plus sign (+)</b> beside <b>Trade Confirmation Flex Query</b>.</li>
+              </div>
+
+              <a href="https://i.imgur.com/SP5R6I5.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/SP5R6I5.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Select <b>CSV</b> for <b>Delivery Configuration > Format</b>.</li>
+                <li>Select <b>Yes</b> for <b>Delivery Configuration > Include section code and line descriptor</b>.</li>
+                <li>Click on <b>Trade Confirmation</b> under <b>Sections</b></li>
+              </div>
+
+              <a href="https://i.imgur.com/6vL9vc3.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/6vL9vc3.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Make sure only <b>Symbol Summary</b> is selected.</li>
+                <li>Click on <b>Select All</b>.</li>
+                <li>You may unselect <b>Account ID</b> & <b>Account Alias</b> if you do not feel comfortable including
+                  it.
+                  This data is not used anyways.</li>
+                <li>Scroll to the bottom and click <b>Save</b>.</li>
+                <li>You should now be at the Flex Query creation page. Scroll to the bottom and click <b>Continue</b>
+                </li>
+                <li>You should now be at the Flex Query confirmation page. Scroll to the bottom and click <b>Save</b>.
+                </li>
+              </div>
+
+              <a href="https://i.imgur.com/rkURyYE.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/rkURyYE.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>You should now be at the Reports page. Click on <b>Run (arrow icon)</b> beside the Trade
+                  Confirmation
+                  Flex Query you just created.</li>
+                <li>Change the <b>From & To dates</b> as you see fit.</li>
+                <li>Click on <b>Run</b>. A CSV file should be downloaded.</li>
+                <li>Upload the CSV file at the very top of this page.</li>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
     </div>
   </Modal>
