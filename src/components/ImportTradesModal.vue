@@ -176,6 +176,52 @@ function onImport() {
                 <li>Upload the CSV file at the very top of this page.</li>
               </div>
             </template>
+
+            <template v-if="fileFormatRef == 'qt'">
+              <a href="https://i.imgur.com/HgnPrxH.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/HgnPrxH.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Click on <b>Accounts</b>.</li>
+              </div>
+
+              <a href="https://i.imgur.com/ULGelLG.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/ULGelLG.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Click on <b>Reports</b>.</li>
+                <li>Click on <b>Trade confirmations</b>.</li>
+              </div>
+
+              <a href="https://i.imgur.com/GzfQ0j3.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/GzfQ0j3.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Select the <b>Account #</b> to analyze.</li>
+                <li>Change the <b>Start & End dates</b> as you see fit.</li>
+                <li>Click on <b>View Report</b>.</li>
+              </div>
+
+              <a href="https://i.imgur.com/tnkwm5h.png"
+                 target="_blank">
+                <img src="https://i.imgur.com/tnkwm5h.png"
+                     alt=""
+                     loading="lazy" />
+              </a>
+              <div class="accordion-body py-4 px-5">
+                <li>Click on <b>Export to CSV</b>. A CSV file should be downloaded.</li>
+                <li>Upload the CSV file at the very top of this page.</li>
+              </div>
+            </template>
           </div>
         </div>
       </div>
