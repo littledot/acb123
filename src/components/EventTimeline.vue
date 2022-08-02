@@ -7,7 +7,7 @@ import { capitalize } from 'lodash'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
 import OptionEvent from './OptionEvent.vue'
-import { sumShares } from './type'
+import * as t from './type'
 import ExpiredOptionsHint from './ExpiredOptionsHintView.vue'
 import OptionHistoryView from './OptionHistoryView.vue'
 
@@ -51,7 +51,6 @@ let emits = defineEmits({})
         </div>
 
         <OptionHistoryView :history="optHist" />
-        <!-- </div> -->
       </div>
     </div>
     <div v-if="events.stock.length > 0"

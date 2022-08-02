@@ -124,7 +124,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Click on <b>Performance & Reports</b>.</li>
                 <li>Click on <b>Flex Queries</b>.</li>
                 <li>Click on the <b>plus sign (+)</b> beside <b>Trade Confirmation Flex Query</b>.</li>
@@ -136,7 +136,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Select <b>CSV</b> for <b>Delivery Configuration > Format</b>.</li>
                 <li>Select <b>Yes</b> for <b>Delivery Configuration > Include section code and line descriptor</b>.</li>
                 <li>Click on <b>Trade Confirmation</b> under <b>Sections</b></li>
@@ -148,7 +148,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Make sure only <b>Symbol Summary</b> is selected.</li>
                 <li>Click on <b>Select All</b>.</li>
                 <li>You may unselect <b>Account ID</b> & <b>Account Alias</b> if you do not feel comfortable including
@@ -167,7 +167,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>You should now be at the Reports page. Click on <b>Run (arrow icon)</b> beside the Trade
                   Confirmation
                   Flex Query you just created.</li>
@@ -184,7 +184,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Click on <b>Accounts</b>.</li>
               </div>
 
@@ -194,7 +194,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Click on <b>Reports</b>.</li>
                 <li>Click on <b>Trade confirmations</b>.</li>
               </div>
@@ -205,7 +205,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Select the <b>Account #</b> to analyze.</li>
                 <li>Change the <b>Start & End dates</b> as you see fit.</li>
                 <li>Click on <b>View Report</b>.</li>
@@ -217,7 +217,7 @@ function onImport() {
                      alt=""
                      loading="lazy" />
               </a>
-              <div class="accordion-body py-4 px-5">
+              <div class="accordion-body py-4 px-5 border-b">
                 <li>Click on <b>Export to CSV</b>. A CSV file should be downloaded.</li>
                 <li>Upload the CSV file at the very top of this page.</li>
               </div>

@@ -18,6 +18,7 @@ export class Profile {
   }
 
   init(db: Db, dbProfile: DbProfile) {
+    // debugger
     for (let [security, dbHistory] of Object.entries(dbProfile.tradeHistory)) {
       let history = new TradeHistory()
       history.init(db, dbHistory)
@@ -207,7 +208,7 @@ export class TradeHistory {
       .filter(it => it)
       .map(it => t.newReportRecord2(it!!))
 
-    this.unsure = dbHistory.stock
+    this.unsure = dbHistory.uncategorized
       .map(it => db.readTradeEvent(it))
       .filter(it => it)
       .map(it => it!!)

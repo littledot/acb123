@@ -25,10 +25,11 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     async init() {
+      console.log('init trade store')
       this.db.readDbProfile()
         ?.also(it => this.profile.init(this.db, it))
       await this.profile.calcGains()
-      console.log('init')
+      console.log('init trade store ok')
     },
 
     async insertTrade(trade: TradeEvent) {
@@ -77,10 +78,13 @@ export const useTradeStore = defineStore('TradeStore', {
     // private
 
     async _onParseCsv(results: ParseResult<string[]>, parser: TradeConfirmParser) {
-      parser.parseCsv(results)
-        // .filter(it => it.security == 'SLV') // debugging
-        // .filter(it => it.options) // debugging
+      let trades = parser.parseCsv(results)
+      // .filter(it => it.security == 'V') // debugging
+      // .filter(it => it.options) // debugging
+
+      trades
         .forEach(it => {
+          // debugger
           this.profile.insertTrade(it)
           this.db.writeTradeEvent(it)
         })
