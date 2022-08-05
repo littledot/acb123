@@ -7,13 +7,16 @@ let props = defineProps<{
   modelValue?: unknown,
 }>()
 let emits = defineEmits({
-  'update:modelValue': (it: unknown) => true,
+  'update:modelValue': (it: unknown, event: Event) => true,
 })
 
-v.watch(() => props.modelValue, (init) => {
-  emits('update:modelValue', init)
-})
+function onChange(event: Event) {
+  let target = event.target as HTMLInputElement
+  if (!target) return
 
+  console.log('selectInput', props.modelValue)
+  emits('update:modelValue', props.modelValue, event)
+}
 
 </script>
 <template>
@@ -33,6 +36,7 @@ v.watch(() => props.modelValue, (init) => {
                   m-0
                   focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
           v-model="modelValue"
+          @change="onChange"
           aria-label="Selector">
     <option value=""
             disabled

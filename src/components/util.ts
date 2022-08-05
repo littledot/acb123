@@ -1,3 +1,4 @@
+import { Option } from '@store/tradeEvent'
 import * as v from 'vue'
 
 export enum DI {
@@ -86,6 +87,10 @@ export function fmtNum(n: number) {
 
 export function fmtMoney(n: number | undefined) {
   return n ? moneyFmt.format(n) : null
+}
+
+export function isUndef(o: any) {
+  return o === void 0
 }
 
 export const months = new Map([

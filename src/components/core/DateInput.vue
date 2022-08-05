@@ -9,36 +9,44 @@ let props = defineProps<{
   modelValue?: DateTime,
 }>()
 let emits = defineEmits({
-  'update:modelValue': (it: DateTime) => true
+  'update:modelValue': (it: DateTime, event: Event) => true
 })
 
-let dayRef = v.ref(props.modelValue?.day)
-let monthRef = v.ref(props.modelValue?.month)
-let yearRef = v.ref(props.modelValue?.year)
+let dayRef = v.ref<number>()
+let monthRef = v.ref<number>()
+let yearRef = v.ref<number>()
+let errRef = v.ref('')
 
-let ui = v.computed(() => {
-  let day = dayRef.value
-  let month = monthRef.value
-  let year = yearRef.value
+v.watchEffect(() => {
+  let m = props.modelValue
+  dayRef.value = m?.day
+  monthRef.value = m?.month
+  yearRef.value = m?.year
+})
 
-  console.log('DateInput', day, month, year)
+function onInputDate(event: Event) {
+  let day = dayRef.value!
+  let month = monthRef.value!
+  let year = yearRef.value!
 
-  if (!day || !month || !year) { // Not all fields set? Don't judge yet
-    return {}
-  }
+  // Not all fields set? Don't emit event
+  if (u.isUndef(day) || u.isUndef(month) || u.isUndef(year)) return
 
   let dt = DateTime.local(year, month, day)
+  console.log('dateInput', day, month, year, dt.invalidExplanation)
 
   if (!dt.isValid) {
-    return { err: dt.invalidExplanation }
+    errRef.value = dt.invalidExplanation ?? ''
+    return
   }
   if (dt > DateTime.now()) {
-    return { err: 'You made a trade in the future? Can I borrow your time machine?' }
+    errRef.value = 'You made a trade in the future? Can I borrow your time machine?'
+    return
   }
+  errRef.value = ''
 
-  emits('update:modelValue', dt)
-  return {}
-})
+  emits('update:modelValue', dt, event)
+}
 
 </script>
 <template>
@@ -48,19 +56,22 @@ let ui = v.computed(() => {
                    hint="Day"
                    :min="0"
                    :maxLen="2"
-                   v-model="dayRef" />
+                   v-model="dayRef"
+                   @update:modelValue="(it, ev) => onInputDate(ev)" />
       <SelectInput class="flex-1"
                    :options="u.months"
-                   v-model="monthRef" />
+                   v-model="monthRef"
+                   @update:modelValue="(it, ev) => onInputDate(ev)" />
       <NumberInput class="flex-1"
                    hint="Year"
                    :min="0"
                    :maxLen="4"
-                   v-model="yearRef" />
+                   v-model="yearRef"
+                   @update:modelValue="(it, ev) => onInputDate(ev)" />
     </div>
-    <div v-if="ui.err"
+    <div v-if="errRef"
          class="text-left text-sm text-red-500">
-      {{ ui.err }}
+      {{ errRef }}
     </div>
   </div>
 </template>

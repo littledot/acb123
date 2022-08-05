@@ -41,7 +41,7 @@ export const useTradeStore = defineStore('TradeStore', {
     },
 
     async updateTrade(trade: TradeEvent, old: t.ReportItem) {
-      debugger
+      // debugger
       this.profile.updateTrade(trade, old)
       this.db.writeProfile(this.profile)
       this.db.writeTradeEvent(trade)

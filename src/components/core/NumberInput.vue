@@ -10,15 +10,13 @@ let props = defineProps({
   modelValue: Number,
 })
 let emits = defineEmits({
-  'update:modelValue': (it: number) => true
+  'update:modelValue': (it: number, event: Event) => true,
 })
 
 function onInput(event: Event) {
   let target = event.target as HTMLInputElement
   if (!target) return
 
-
-  u.log(typeof target.value, target.value)
   target.value = target.value.slice(0, props.maxLen)
 
   let value = +target.value
@@ -26,7 +24,8 @@ function onInput(event: Event) {
   value = Math.max(value, props.min ?? value)
 
   target.value = '' + value
-  emits('update:modelValue', value)
+  console.log('numInput', value)
+  emits('update:modelValue', value, event)
 }
 
 </script>
