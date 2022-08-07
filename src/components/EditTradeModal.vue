@@ -46,6 +46,10 @@ let optionLotRef = v.ref('')
 let errs = {
   tradeDate: v.ref(''),
   settleDate: v.ref(''),
+  shares: v.ref(''),
+  price: v.ref(''),
+  outlay: v.ref(''),
+  strike: v.ref(''),
   optionLot: v.ref(''),
   expiryDate: v.ref(''),
 }
@@ -85,6 +89,8 @@ let optionLotOptionsUi = v.computed(() => {
   return r
 })
 
+v.watchEffect(() => validateForm())
+
 let disableOkUi = v.computed(() => {
   for (let err of Object.values(errs))
     if (err.value) return true
@@ -118,8 +124,6 @@ function init() {
     strikeFxRef.value = u.CAD
   }
   optionLotRef.value = trade.optionLot?.id ?? 'new'
-
-  validateForm(new CustomEvent('init'))
 }
 
 async function onSave() {
@@ -153,12 +157,17 @@ async function onDelete() {
   await tradeStore.deleteTrade(props.trade.tradeEvent)
 }
 
-function validateForm(event: Event) {
+function validateForm() {
+  console.log('validate form')
   let assetClass = assetClassRef.value
   let action = actionRef.value
   let tradeDate = tradeDateRef.value
   let settleDate = settleDateRef.value
   let expiryDate = expiryDateRef.value
+  let shares = sharesRef.value
+  let price = priceRef.value
+  let outlay = outlayRef.value
+  let strike = strikeRef.value
   let lotId = optionLotRef.value
   let tradeLot = props.trade.tradeEvent.optionLot
 
@@ -180,8 +189,21 @@ function validateForm(event: Event) {
   // Validate options expiry date
   if (!expiryDate.isValid)
     errs.expiryDate.value = expiryDate.invalidExplanation ?? ''
-  else if (assetClass == 'option' && expiryDate < tradeDate)
+  else if (expiryDate < tradeDate && assetClass == 'option')
     errs.expiryDate.value = 'Expiry date cannot be earlier than trade date.'
+
+  // Validate number values
+  if (shares < 0)
+    errs.shares.value = 'This value cannot be negative.'
+
+  if (price < 0)
+    errs.price.value = 'This value cannot be negative.'
+
+  if (outlay < 0)
+    errs.outlay.value = 'This value cannot be negative.'
+
+  if (strike < 0 && assetClass == 'option')
+    errs.strike.value = 'This value cannot be negative.'
 
   // Moving buy option event to another lot? Must be head of lot or create new lot
   if (assetClass == 'option' && action == 'buy'
@@ -205,11 +227,11 @@ function validateForm(event: Event) {
         errs.optionLot.value = `Option sale event must not be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${lotHead.date.toISODate()}, which is later than this event.`
     }
   }
+  console.log('validate form ok')
 }
 
 function onUserChangeContract(event: Event) {
   if (event.isTrusted) optionLotRef.value = 'new'
-  validateForm(event)
 }
 
 </script>
@@ -236,42 +258,52 @@ function onUserChangeContract(event: Event) {
 
       <div class="">Action</div>
       <SelectInput v-model="actionRef"
-                   @update:modelValue="(_, ev) => validateForm(ev)"
                    :options="new Map([
                      ['buy', 'Buy'],
                      ['sell', 'Sell']
                    ])" />
 
       <div class="">Trade Date</div>
-      <DateInput v-model="tradeDateRef"
-                 @update:modelValue="(_, ev) => validateForm(ev)" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.tradeDate.value">
+        <DateInput v-model="tradeDateRef" />
+      </InputFeedbackView>
 
       <div class="">Settlement Date</div>
-      <InputFeedbackView :err="errs.settleDate.value">
-        <DateInput v-model="settleDateRef"
-                   @update:modelValue="(_, ev) => validateForm(ev)" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.settleDate.value">
+        <DateInput v-model="settleDateRef" />
       </InputFeedbackView>
 
       <div class="">Shares</div>
-      <NumberInput v-model="sharesRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.shares.value">
+        <NumberInput v-model="sharesRef" />
+      </InputFeedbackView>
 
       <div class="">Price</div>
-      <NumberInput v-model="priceRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.price.value">
+        <NumberInput v-model="priceRef" />
+      </InputFeedbackView>
       <div class="">Price Currency</div>
       <FxInput :date="tradeDateRef"
                v-model="priceFxRef" />
 
       <div class="">Outlay</div>
-      <NumberInput v-model="outlayRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.outlay.value">
+        <NumberInput v-model="outlayRef" />
+      </InputFeedbackView>
       <div class="">Outlay Currency</div>
       <FxInput :date="tradeDateRef"
                v-model="outlayFxRef" />
 
       <template v-if="assetClassRef == 'option'">
         <div class="">Option Lot</div>
-        <InputFeedbackView :err="errs.optionLot.value">
+        <InputFeedbackView class="w-full"
+                           :err="errs.optionLot.value">
           <SelectInput v-model="optionLotRef"
-                       @update:modelValue="(_, ev) => validateForm(ev)"
                        :options="optionLotOptionsUi" />
         </InputFeedbackView>
 
@@ -284,14 +316,18 @@ function onUserChangeContract(event: Event) {
                      ])" />
 
         <div class="">Expiry Date</div>
-        <InputFeedbackView :err="errs.expiryDate.value">
+        <InputFeedbackView class="w-full"
+                           :err="errs.expiryDate.value">
           <DateInput v-model="expiryDateRef"
                      @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
         </InputFeedbackView>
 
         <div class="">Strike</div>
-        <NumberInput v-model="strikeRef"
-                     @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
+        <InputFeedbackView class="w-full"
+                           :err="errs.strike.value">
+          <NumberInput v-model="strikeRef"
+                       @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
+        </InputFeedbackView>
 
         <div class="">Strike Currency</div>
         <FxInput :date="tradeDateRef"
