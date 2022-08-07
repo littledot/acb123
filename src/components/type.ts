@@ -24,6 +24,23 @@ export function sumShares(trades: ReportItem[]) {
   }, 0)
 }
 
+
+export function insertTrade(trades: ReportItem[], trade: TradeEvent) {
+  let it = newReportRecord2(trade)
+
+  if (trades.length === 0) {
+    trades.push(it)
+    return
+  }
+
+  for (let i = trades.length - 1; i >= 0; i--) {
+    if (trade.date >= trades[i].tradeEvent.date) {
+      trades.splice(i + 1, 0, it)
+      return
+    }
+  }
+}
+
 export function yearGains(trades: ReportItem[]) {
   return trades[trades.length - 1]?.cg?.yearGains ?? money(0)
 }

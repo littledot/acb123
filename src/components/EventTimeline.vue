@@ -36,6 +36,8 @@ let emits = defineEmits({})
                     :path="mdiCurrencyUsd" />
               <span>
                 {{ optHist.contract.strike }}</span>
+              <span class="self-center font-normal text-xs ml-2">
+                #{{ optHist.id.slice(-4) }}</span>
             </div>
           </div>
           <p class="col-[4/5] text-right font-semibold"

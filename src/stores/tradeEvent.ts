@@ -77,28 +77,24 @@ export class Profile {
   }
 
   updateTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
-    trade.options
-      ?.also(it => this._updateOptionTrade(trade, oldTrade))
-      ?? this._updateStockTrade(trade, oldTrade)
-  }
-
-  _updateStockTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
     let old = oldTrade.tradeEvent
-    // Security or date change? Treat it like a new trade
-    if (trade.date !== old.date ||
-      trade.security !== old.security) {
+    // Complex change? Treat it like a new trade
+    if (trade.date !== old.date || // Trade date change? Order change
+      trade.security !== old.security || // Security change? Group change
+      trade.optionLot?.id != old.optionLot?.id) {
       this.deleteTrade(old)
-      this.insertTrade(trade)
+
+      if (trade.optionLot) { // Move to specific lot?
+        t.insertTrade(trade.optionLot.trades, trade)
+      } else {
+        this.insertTrade(trade)
+      }
       return
     }
 
     // Replace old trade at same position
     oldTrade.tradeEvent = trade
-    oldTrade.tradeValue = oldTrade.acb = oldTrade.cg = undefined
-  }
-
-  _updateOptionTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
-
+    oldTrade.tradeValue = oldTrade.acb = oldTrade.cg = void 0
   }
 
   deleteTrade(trade: TradeEvent) {
@@ -201,7 +197,7 @@ export class TradeHistory {
   init(db: Db, dbHistory: DbTradeHistory) {
     this.option = dbHistory.option
       .map(it => fromDbOptionHistory(db, it))
-      .let(it => u.groupBy(it, it => this._optionKey(it.contract)))
+      .let(it => u.groupBy(it, it => optionHash(it.contract)))
 
     this.stock = dbHistory.stock
       .map(it => db.readTradeEvent(it))
@@ -239,12 +235,8 @@ export class TradeHistory {
       ?? this._insertStockTrade(trade)
   }
 
-  _optionKey(option: Option) {
-    return Object.values(option).join('|')
-  }
-
   _insertOptionTrade(option: Option, trade: TradeEvent) {
-    let key = this._optionKey(option)
+    let key = optionHash(option)
     let histories = this.option.get(key)
     if (!histories) {
       histories = []
@@ -252,11 +244,12 @@ export class TradeHistory {
     }
 
     if (trade.action == 'buy') { // Buy options? Create new lot
-      histories.push({
+      trade.optionLot = {
         id: v4(),
         contract: option,
         trades: [t.newReportRecord2(trade)],
-      })
+      }
+      histories.push(trade.optionLot)
       return
     }
 
@@ -277,7 +270,8 @@ export class TradeHistory {
         }
 
         // Insert trade to lot
-        this._insertTrade(history.trades, trade)
+        t.insertTrade(history.trades, trade)
+        trade.optionLot = history
         return
       }
 
@@ -288,37 +282,29 @@ export class TradeHistory {
   }
 
   _insertStockTrade(trade: TradeEvent) {
-    this._insertTrade(this.stock, trade)
-  }
-
-  _insertTrade(trades: t.ReportItem[], trade: TradeEvent) {
-    let it = t.newReportRecord2(trade)
-
-    if (trades.length === 0) {
-      trades.push(it)
-      return
-    }
-
-    for (let i = trades.length - 1; i >= 0; i--) {
-      if (trade.date >= trades[i].tradeEvent.date) {
-        trades.splice(i + 1, 0, it)
-        return
-      }
-    }
+    t.insertTrade(this.stock, trade)
   }
 
   deleteTrade(trade: TradeEvent) {
     let i = this.stock.findIndex(it => it.tradeEvent.id === trade.id)
     if (i > -1) {
       this.stock.splice(i, 1)
+      // Force recalculate tv/acb/cg for new item in its place
+      this.stock[i]?.let(it => it.tradeValue = void 0)
       return true
     }
 
     for (let optHists of this.option.values()) {
-      for (let optHist of optHists) {
+      for (let [d, optHist] of optHists.entries()) {
         let i = optHist.trades.findIndex(it => it.tradeEvent.id == trade.id)
         if (i > -1) {
           optHist.trades.splice(i, 1)
+          // Force recalculate tv/acb/cg for new item in its place
+          optHist.trades[i]?.let(it => it.tradeValue = void 0)
+          // Empty lot? Remove it
+          if (optHist.trades.length == 0) {
+            optHists.splice(d, 1)
+          }
           return true
         }
       }
@@ -356,6 +342,7 @@ export interface TradeEvent {
   raw?: string
 
   options?: Option
+  optionLot?: OptionHistory
 }
 
 export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
@@ -399,6 +386,10 @@ export interface Option {
   strikeFx: Fx
 }
 
+export function optionHash(o: Option) {
+  return `${o.strike.value}|${o.type}|${o.expiryDate.toFormat('yyyy-MM-dd')}`
+}
+
 export function fromDbOption(json?: DbOption) {
   return json ? <Option>{
     type: json.type,
@@ -432,11 +423,13 @@ export function toDbOptionHistory(obj?: OptionHistory) {
 }
 
 export function fromDbOptionHistory(db: Db, obj: DbOptionHistory): OptionHistory {
-  return {
+  let r = {
     id: obj.id,
     contract: fromDbOption(obj.contract)!!,
     trades: obj.tradeIds.map(it => db.readTradeEvent(it))
       .filter(it => it)
       .map(it => t.newReportRecord2(it!!))
   }
+  r.trades.forEach(it => it.tradeEvent.optionLot = r)
+  return r
 }

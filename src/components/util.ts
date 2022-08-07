@@ -70,8 +70,14 @@ export function sortIter<T>(
   return [...iter].sort(compareFn)
 }
 
-export const CAD = { forexCode: 'CAD', symbol: "$", precision: 2 }
-export const USD = { forexCode: 'USD', symbol: "US$", precision: 2 }
+export const CAD = {
+  forexCode: 'CAD', symbol: "$", precision: 2, // Intl.NumberFormat
+  currency: 'CAD', rate: -1 // DbFx
+}
+export const USD = {
+  forexCode: 'USD', symbol: "US$", precision: 2,
+  currency: 'USD', rate: -1
+}
 
 export const numFmt = new Intl.NumberFormat('en-US')
 export const signNumFmt = new Intl.NumberFormat('en-US', { signDisplay: 'always' })
