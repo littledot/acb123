@@ -1,14 +1,13 @@
 <script setup lang='ts'>
 import * as u from '@comp/util'
+import * as v from 'vue'
 
-let props = defineProps({
-  hint: String,
-  min: Number,
-  max: Number,
-  maxLen: Number,
+let props = defineProps<{
+  hint?: string,
+  maxLen?: number,
 
-  modelValue: Number,
-})
+  modelValue?: number,
+}>()
 let emits = defineEmits({
   'update:modelValue': (it: number, event: Event) => true,
 })
@@ -17,13 +16,14 @@ function onInput(event: Event) {
   let target = event.target as HTMLInputElement
   if (!target) return
 
+  if (target.value == '') { // '--1', '++1' yields empty string
+    emits('update:modelValue', NaN, event)
+    return
+  }
+
   target.value = target.value.slice(0, props.maxLen)
 
   let value = +target.value
-  value = Math.min(value, props.max ?? value)
-  value = Math.max(value, props.min ?? value)
-
-  target.value = '' + value
   console.log('numInput', value)
   emits('update:modelValue', value, event)
 }

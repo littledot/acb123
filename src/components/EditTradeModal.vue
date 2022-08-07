@@ -195,15 +195,24 @@ function validateForm() {
   // Validate number values
   if (shares < 0)
     errs.shares.value = 'This value cannot be negative.'
+  else if (Number.isNaN(shares))
+    errs.shares.value = 'Please enter a valid number.'
 
   if (price < 0)
     errs.price.value = 'This value cannot be negative.'
+  else if (Number.isNaN(price))
+    errs.price.value = 'Please enter a valid number.'
 
   if (outlay < 0)
     errs.outlay.value = 'This value cannot be negative.'
+  else if (Number.isNaN(outlay))
+    errs.outlay.value = 'Please enter a valid number.'
 
-  if (strike < 0 && assetClass == 'option')
-    errs.strike.value = 'This value cannot be negative.'
+  if (assetClass == 'option')
+    if (strike < 0)
+      errs.strike.value = 'This value cannot be negative.'
+    else if (Number.isNaN(strike))
+      errs.strike.value = 'Please enter a valid number.'
 
   // Moving buy option event to another lot? Must be head of lot or create new lot
   if (assetClass == 'option' && action == 'buy'
