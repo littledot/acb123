@@ -44,6 +44,7 @@ let optionLotRef = v.ref('')
 
 // Errs
 let errs = {
+  tradeDate: v.ref(''),
   settleDate: v.ref(''),
   optionLot: v.ref(''),
   expiryDate: v.ref(''),
@@ -161,15 +162,27 @@ function validateForm(event: Event) {
   let lotId = optionLotRef.value
   let tradeLot = props.trade.tradeEvent.optionLot
 
-  errs.settleDate.value = ''
-  if (settleDate < tradeDate)
-    errs.settleDate.value = 'Settlement date should not be earlier than trade date.'
+  for (let err of Object.values(errs))
+    err.value = ''
 
-  errs.expiryDate.value = ''
-  if (assetClass == 'option' && expiryDate < tradeDate)
-    errs.expiryDate.value = 'Expiry date should not be earlier than trade date.'
+  // Validate trade date
+  if (!tradeDate.isValid)
+    errs.tradeDate.value = tradeDate.invalidExplanation ?? ''
+  else if (tradeDate > DateTime.now())
+    errs.tradeDate.value = 'You made a trade in the future? Can I borrow your time machine?'
 
-  errs.optionLot.value = ''
+  // Validate settlement date
+  if (!settleDate.isValid)
+    errs.settleDate.value = settleDate.invalidExplanation ?? ''
+  else if (settleDate < tradeDate)
+    errs.settleDate.value = 'Settlement date cannot be earlier than trade date.'
+
+  // Validate options expiry date
+  if (!expiryDate.isValid)
+    errs.expiryDate.value = expiryDate.invalidExplanation ?? ''
+  else if (assetClass == 'option' && expiryDate < tradeDate)
+    errs.expiryDate.value = 'Expiry date cannot be earlier than trade date.'
+
   // Moving buy option event to another lot? Must be head of lot or create new lot
   if (assetClass == 'option' && action == 'buy'
     && lotId != 'new'

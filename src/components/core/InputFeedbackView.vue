@@ -6,7 +6,7 @@ let props = defineProps<{
 
 </script>
 <template>
-  <div class="flex flex-col w-full">
+  <div class="flex flex-col">
     <slot />
     <div v-show="err"
          class="text-xs text-red-600">{{ err }}</div>
