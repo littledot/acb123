@@ -10,6 +10,7 @@
 export interface Models {
     "1"?: Config;
     "2"?: DbTradeEvent;
+    "3"?: DbBocFake;
 }
 
 export interface Config {
@@ -48,6 +49,7 @@ export interface DbTradeEvent {
     action:     string;
     date:       Date;
     id:         string;
+    notes?:     string;
     options?:   DbOption;
     outlay:     number;
     outlayFx:   DbFx;
@@ -57,6 +59,10 @@ export interface DbTradeEvent {
     security:   string;
     settleDate: Date;
     shares:     number;
+}
+
+export interface DbBocFake {
+    data: { [key: string]: { [key: string]: string } };
 }
 
 // Converts JSON strings to/from your types
@@ -124,6 +130,14 @@ export class Convert {
 
     public static dbTradeEventToJson(value: DbTradeEvent): string {
         return JSON.stringify(uncast(value, r("DbTradeEvent")), null, 2);
+    }
+
+    public static toDbBocFake(json: string): DbBocFake {
+        return cast(JSON.parse(json), r("DbBocFake"));
+    }
+
+    public static dbBocFakeToJson(value: DbBocFake): string {
+        return JSON.stringify(uncast(value, r("DbBocFake")), null, 2);
     }
 }
 
@@ -263,6 +277,7 @@ const typeMap: any = {
     "Models": o([
         { json: "1", js: "1", typ: u(undefined, r("Config")) },
         { json: "2", js: "2", typ: u(undefined, r("DbTradeEvent")) },
+        { json: "3", js: "3", typ: u(undefined, r("DbBocFake")) },
     ], "any"),
     "Config": o([
         { json: "profiles", js: "profiles", typ: m(r("DbProfile")) },
@@ -294,6 +309,7 @@ const typeMap: any = {
         { json: "action", js: "action", typ: "" },
         { json: "date", js: "date", typ: Date },
         { json: "id", js: "id", typ: "" },
+        { json: "notes", js: "notes", typ: u(undefined, "") },
         { json: "options", js: "options", typ: u(undefined, r("DbOption")) },
         { json: "outlay", js: "outlay", typ: 3.14 },
         { json: "outlayFx", js: "outlayFx", typ: r("DbFx") },
@@ -303,5 +319,8 @@ const typeMap: any = {
         { json: "security", js: "security", typ: "" },
         { json: "settleDate", js: "settleDate", typ: Date },
         { json: "shares", js: "shares", typ: 0 },
+    ], "any"),
+    "DbBocFake": o([
+        { json: "data", js: "data", typ: m(m("")) },
     ], "any"),
 };

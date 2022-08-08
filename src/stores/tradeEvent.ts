@@ -339,6 +339,7 @@ export interface TradeEvent {
   priceFx: Fx
   outlay: money
   outlayFx: Fx
+  notes?: string
   raw?: string
 
   options?: Option
@@ -357,8 +358,9 @@ export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
     priceFx: json.priceFx,
     outlay: money(json.outlay),
     outlayFx: json.outlayFx,
-    options: fromDbOption(json.options),
+    notes: json.notes,
     raw: json.raw,
+    options: fromDbOption(json.options),
   }
 }
 
@@ -374,8 +376,9 @@ export function toDbTradeEvent(obj: TradeEvent): DbTradeEvent {
     priceFx: obj.priceFx,
     outlay: obj.outlay.value,
     outlayFx: obj.outlayFx,
-    options: toDbOption(obj.options),
+    notes: obj.notes,
     raw: obj.raw,
+    options: toDbOption(obj.options),
   }
 }
 

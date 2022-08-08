@@ -9,6 +9,9 @@
     },
     "2": {
       "$ref": "#/$defs/tradeEvent"
+    },
+    "3": {
+      "$ref": "#/$defs/bocFake"
     }
   },
   "$defs": {
@@ -139,17 +142,6 @@
       "title": "dbStockHistory",
       "$ref": "#/$defs/tradeIds"
     },
-    "tradeLots": {
-      "title": "tradeLotsJson",
-      "type": "object",
-      "properties": {
-        "option": {}
-      }
-    },
-    "tradeLot": {
-      "title": "tradeLotJson",
-      "type": "object"
-    },
     "tradeEvent": {
       "title": "DbTradeEvent",
       "type": "object",
@@ -186,6 +178,9 @@
         "outlayFx": {
           "$ref": "#/$defs/fx"
         },
+        "notes": {
+          "type": "string"
+        },
         "options": {
           "$ref": "#/$defs/option"
         },
@@ -205,6 +200,32 @@
         "outlay",
         "outlayFx"
       ]
+    },
+    "bocFake": {
+      "title": "dbBocFake",
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/bocFxObs"
+        }
+      },
+      "required": [
+        "data"
+      ]
+    },
+    "bocFxObs": {
+      "title": "dbBocFxObs",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/bocFxRate"
+      }
+    },
+    "bocFxRate": {
+      "title": "dbBocFxRate",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   }
 }

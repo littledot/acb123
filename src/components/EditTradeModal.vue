@@ -33,6 +33,7 @@ let priceRef = v.ref(0)
 let outlayRef = v.ref(0)
 let priceFxRef = v.ref<Fx>(u.CAD)
 let outlayFxRef = v.ref<Fx>(u.CAD)
+let notesRef = v.ref<string>()
 
 let assetClassRef = v.ref('')
 let optionTypeRef = v.ref('')
@@ -111,6 +112,7 @@ function init() {
   outlayRef.value = trade.outlay.value
   priceFxRef.value = trade.priceFx
   outlayFxRef.value = trade.outlayFx
+  notesRef.value = trade.notes
 
   if (trade.options) {
     let it = trade.options
@@ -141,6 +143,7 @@ async function onSave() {
     outlay: money(outlayRef.value),
     priceFx: priceFxRef.value,
     outlayFx: outlayFxRef.value,
+    notes: notesRef.value,
   }
 
   if (assetClassRef.value == 'option') { // Option? Set option fields
@@ -338,6 +341,9 @@ function onUserChangeContract(event: Event) {
         <FxInput :date="tradeDateRef"
                  v-model="outlayFxRef" />
       </InputFeedbackView>
+
+      <div class="">Notes</div>
+      <TextInput v-model="notesRef" />
 
       <template v-if="assetClassRef == 'option'">
         <div class="">Option Lot</div>
