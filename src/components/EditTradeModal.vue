@@ -50,6 +50,9 @@ let errs = {
   price: v.ref(''),
   outlay: v.ref(''),
   strike: v.ref(''),
+  priceFx: v.ref(''),
+  outlayFx: v.ref(''),
+  strikeFx: v.ref(''),
   optionLot: v.ref(''),
   expiryDate: v.ref(''),
 }
@@ -168,6 +171,9 @@ function validateForm() {
   let price = priceRef.value
   let outlay = outlayRef.value
   let strike = strikeRef.value
+  let priceFx = priceFxRef.value
+  let outlayFx = outlayFxRef.value
+  let strikeFx = strikeFxRef.value
   let lotId = optionLotRef.value
   let tradeLot = props.trade.tradeEvent.optionLot
 
@@ -213,6 +219,22 @@ function validateForm() {
       errs.strike.value = 'This value cannot be negative.'
     else if (Number.isNaN(strike))
       errs.strike.value = 'Please enter a valid number.'
+
+  // Validate fx input
+  if (Number.isNaN(priceFx.rate))
+    errs.priceFx.value = 'Please enter a valid number.'
+  else if (priceFx.rate <= 0 && priceFx.currency == 'custom')
+    errs.priceFx.value = 'This value must be a positive.'
+
+  if (Number.isNaN(outlayFx.rate))
+    errs.outlayFx.value = 'Please enter a valid number.'
+  else if (outlayFx.rate <= 0 && outlayFx.currency == 'custom')
+    errs.outlayFx.value = 'This value must be a positive.'
+
+  if (Number.isNaN(strikeFx.rate))
+    errs.strikeFx.value = 'Please enter a valid number.'
+  else if (strikeFx.rate <= 0 && strikeFx.currency == 'custom')
+    errs.strikeFx.value = 'This value must be a positive.'
 
   // Moving buy option event to another lot? Must be head of lot or create new lot
   if (assetClass == 'option' && action == 'buy'
@@ -295,18 +317,27 @@ function onUserChangeContract(event: Event) {
                          :err="errs.price.value">
         <NumberInput v-model="priceRef" />
       </InputFeedbackView>
+
+
       <div class="">Price Currency</div>
-      <FxInput :date="tradeDateRef"
-               v-model="priceFxRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.priceFx.value">
+        <FxInput :date="tradeDateRef"
+                 v-model="priceFxRef" />
+      </InputFeedbackView>
 
       <div class="">Outlay</div>
       <InputFeedbackView class="w-full"
                          :err="errs.outlay.value">
         <NumberInput v-model="outlayRef" />
       </InputFeedbackView>
+
       <div class="">Outlay Currency</div>
-      <FxInput :date="tradeDateRef"
-               v-model="outlayFxRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.outlayFx.value">
+        <FxInput :date="tradeDateRef"
+                 v-model="outlayFxRef" />
+      </InputFeedbackView>
 
       <template v-if="assetClassRef == 'option'">
         <div class="">Option Lot</div>
@@ -339,9 +370,12 @@ function onUserChangeContract(event: Event) {
         </InputFeedbackView>
 
         <div class="">Strike Currency</div>
-        <FxInput :date="tradeDateRef"
-                 v-model="strikeFxRef"
-                 @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
+        <InputFeedbackView class="w-full"
+                           :err="errs.strikeFx.value">
+          <FxInput :date="tradeDateRef"
+                   v-model="strikeFxRef"
+                   @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
+        </InputFeedbackView>
       </template>
     </form>
   </Modal>

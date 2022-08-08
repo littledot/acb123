@@ -19,22 +19,24 @@ let fxStore = useFxStore()
 
 let currencyRef = v.ref<string>()
 let rateRef = v.ref<number>()
-
 let uiRef = v.ref<{
   err?: string
 }>({})
 
-v.watchEffect(() => {
-  console.log('watchEffect')
-  let m = props.modelValue
-  currencyRef.value = m?.currency
-  rateRef.value = m?.rate
-  resolveRate(props.date)
-})
+init(props.date, props.modelValue)
+v.watch(
+  [() => props.date, () => props.modelValue],
+  ([date, fx]) => init(date, fx)
+)
+
+function init(date?: DateTime, fx?: Fx) {
+  currencyRef.value = fx?.currency
+  rateRef.value = fx?.rate
+  resolveRate(date)
+}
 
 async function resolveRate(date?: DateTime) {
   let currency = currencyRef.value
-  u.log('FxInput', { 'cur': currency, 'date': date })
   let ui: any = {}
 
   if (date && currency && currency != 'custom') {
