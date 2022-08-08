@@ -1,5 +1,6 @@
 import * as t from '@comp/type'
 import { Profile, TradeEvent } from '@store/tradeEvent'
+import { DateTime } from 'luxon'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
 import { Db } from './db'
@@ -71,16 +72,20 @@ export const useTradeStore = defineStore('TradeStore', {
         skipEmptyLines: true,
         transform: it => it.trim().toLocaleLowerCase(),
         complete: (it: ParseResult<string[]>) =>
-          this._onParseCsv(it, parser ?? new QtParser(it)),
+          this._onParseCsv(it, parser ?? new QtParser(it), file),
       })
     },
 
     // private
 
-    async _onParseCsv(results: ParseResult<string[]>, parser: TradeConfirmParser) {
+    async _onParseCsv(results: ParseResult<string[]>, parser: TradeConfirmParser, src: File | string) {
       let trades = parser.parseCsv(results)
       // .filter(it => it.security == 'V') // debugging
       // .filter(it => it.options) // debugging
+
+      if (src instanceof File) {
+        trades.forEach(it => it.notes = `Imported from ${src.name} on ${DateTime.now().toISODate()}`)
+      }
 
       trades
         .forEach(it => {
