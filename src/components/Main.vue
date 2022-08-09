@@ -1,12 +1,15 @@
 <script setup lang='ts'>
 import questradeUrl from '@/assets/questrade1.csv?url'
-import { useTradeStore } from '@store/trade'
-import { onMounted, ref } from 'vue'
-import EventTimeline from '@comp/EventTimeline.vue'
 import Button from '@comp/core/Button.vue'
 import Modal from '@comp/core/Modal.vue'
-import * as u from './util'
+import EventTimeline from '@comp/EventTimeline.vue'
 import ImportTradesModal from '@comp/ImportTradesModal.vue'
+import { mdiPlus } from '@mdi/js'
+import { useTradeStore } from '@store/trade'
+import * as v from 'vue'
+import Icon from './core/Icon.vue'
+import * as u from './util'
+import EditTradeModal from '@comp/EditTradeModal.vue'
 
 let tradeStore = useTradeStore()
 
@@ -14,8 +17,15 @@ function importExample() {
   tradeStore.importCsvFile(questradeUrl)
 }
 
-let showImportModal = ref(false)
-let showClearModal = ref(false)
+let showImportModal = v.ref(false)
+let showClearModal = v.ref(false)
+let showEditModal = v.ref(false)
+let editModalTickerField = v.ref('')
+
+function onShowEditModal(ticker: string) {
+  editModalTickerField.value = ticker
+  showEditModal.value = true
+}
 
 </script>
 <template>
@@ -39,6 +49,12 @@ let showClearModal = ref(false)
                          @ok=""
                          :show="showImportModal"
                          @hide="showImportModal = false" />
+    </Teleport>
+
+    <Teleport to="body">
+      <EditTradeModal :security="editModalTickerField"
+                      :show="showEditModal"
+                      @hide="showEditModal = false" />
     </Teleport>
 
     <div class="flex flex-row">
@@ -72,7 +88,7 @@ let showClearModal = ref(false)
                   :data-bs-target="'#collapse' + i"
                   aria-expanded="false"
                   aria-controls="collapseOne5">
-            <div class="flex flex-col">
+            <div class="flex flex-col flex-1">
               <div class="text-xl">{{ year }}</div>
               <div class="">Capital Gains: {{ hists.yearGains.format() }} </div>
               <div class="">Trades: {{ u.fmtNum(hists.tradeCount) }}</div>
@@ -95,11 +111,18 @@ let showClearModal = ref(false)
                       :data-bs-target="`#collapse-${i}-${j}`"
                       aria-expanded="false"
                       aria-controls="collapseOne5">
-                <div class="flex flex-col pl-2.5">
+                <div class="flex flex-col flex-1 pl-2.5">
                   <div class="text-xl">{{ security }}</div>
                   <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
                   <div class="">Trades: {{ u.fmtNum(events.tradeCount) }}</div>
                 </div>
+                <!-- @click.stop does not work!? -->
+                <!-- https://stackoverflow.com/a/70664716 -->
+                <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
+                      :path="mdiPlus"
+                      @click="onShowEditModal(security)"
+                      data-bs-toggle="collapse"
+                      data-bs-target />
               </button>
             </h2>
             <div :id="`collapse-${i}-${j}`"

@@ -13,10 +13,12 @@ import { DateTime } from 'luxon'
 import * as v from 'vue'
 import { ReportItem } from './type'
 import InputFeedbackView from './core/InputFeedbackView.vue'
+import { v4 } from 'uuid'
 
 let props = defineProps<{
   show: boolean,
-  trade: ReportItem,
+  trade?: ReportItem,
+  security?: string,
 }>()
 let emits = defineEmits({
   hide: () => true,
@@ -58,8 +60,12 @@ let errs = {
   expiryDate: v.ref(''),
 }
 
+v.watchEffect(() => validateForm())
+
+v.watch(() => props.show, (show) => { if (show) init() })
+
 v.watch(securityRef, (security) => { // Show all option lots for ticker
-  let optLot = props.trade.tradeEvent.optionLot
+  let optLot = props.trade?.tradeEvent.optionLot
   // debugger
   optionLotOptionsRef.value.clear()
   optionLotRef.value = 'new'
@@ -93,47 +99,60 @@ let optionLotOptionsUi = v.computed(() => {
   return r
 })
 
-v.watchEffect(() => validateForm())
-
 let disableOkUi = v.computed(() => {
   for (let err of Object.values(errs))
     if (err.value) return true
 })
 
-init()
 function init() {
-  let trade = props.trade.tradeEvent
-  securityRef.value = trade.security
-  actionRef.value = trade.action
-  tradeDateRef.value = trade.date
-  settleDateRef.value = trade.settleDate
-  sharesRef.value = trade.shares
-  priceRef.value = trade.price.value
-  outlayRef.value = trade.outlay.value
-  priceFxRef.value = trade.priceFx
-  outlayFxRef.value = trade.outlayFx
-  notesRef.value = trade.notes
+  console.log('init called')
+  assetClassRef.value = 'stock'
+  securityRef.value = ''
+  actionRef.value = 'buy'
+  tradeDateRef.value = DateTime.now()
+  settleDateRef.value = DateTime.now()
+  sharesRef.value = 0
+  priceRef.value = 0
+  outlayRef.value = 0
+  priceFxRef.value = u.CAD
+  outlayFxRef.value = u.CAD
+  notesRef.value = `Created on ${DateTime.now().toISODate()}.`
 
-  if (trade.options) {
-    let it = trade.options
-    assetClassRef.value = 'option'
-    optionTypeRef.value = it.type
-    expiryDateRef.value = it.expiryDate
-    strikeRef.value = it.strike.value
-    strikeFxRef.value = it.strikeFx
-  } else {
-    assetClassRef.value = 'stock'
-    optionTypeRef.value = 'call'
-    expiryDateRef.value = DateTime.now()
-    strikeRef.value = 0
-    strikeFxRef.value = u.CAD
-  }
-  optionLotRef.value = trade.optionLot?.id ?? 'new'
+  optionLotRef.value = 'new'
+  optionLotOptionsRef.value = new Map()
+  optionTypeRef.value = 'call'
+  expiryDateRef.value = DateTime.now()
+  strikeRef.value = 0
+  strikeFxRef.value = u.CAD
+
+  props.trade?.tradeEvent?.let(it => {
+    securityRef.value = it.security
+    actionRef.value = it.action
+    tradeDateRef.value = it.date
+    settleDateRef.value = it.settleDate
+    sharesRef.value = it.shares
+    priceRef.value = it.price.value
+    outlayRef.value = it.outlay.value
+    priceFxRef.value = it.priceFx
+    outlayFxRef.value = it.outlayFx
+    notesRef.value = it.notes
+
+    it.options?.let(it => {
+      assetClassRef.value = 'option'
+      optionTypeRef.value = it.type
+      expiryDateRef.value = it.expiryDate
+      strikeRef.value = it.strike.value
+      strikeFxRef.value = it.strikeFx
+    })
+    it.optionLot?.let(it => optionLotRef.value = it.id)
+  })
+
+  props.security?.let(it => securityRef.value = it)
 }
 
 async function onSave() {
   let newTrade = <TradeEvent>{
-    id: props.trade.tradeEvent.id,
+    id: props.trade?.tradeEvent.id ?? v4(),
     security: securityRef.value,
     action: actionRef.value,
     date: tradeDateRef.value,
@@ -156,11 +175,15 @@ async function onSave() {
     }
   }
 
-  await tradeStore.updateTrade(newTrade, props.trade)
+  if (props.trade)
+    await tradeStore.updateTrade(newTrade, props.trade)
+  else
+    tradeStore.insertTrade(newTrade)
 }
 
 async function onDelete() {
-  await tradeStore.deleteTrade(props.trade.tradeEvent)
+  if (props.trade)
+    await tradeStore.deleteTrade(props.trade.tradeEvent)
 }
 
 function validateForm() {
@@ -178,7 +201,7 @@ function validateForm() {
   let outlayFx = outlayFxRef.value
   let strikeFx = strikeFxRef.value
   let lotId = optionLotRef.value
-  let tradeLot = props.trade.tradeEvent.optionLot
+  let tradeLot = props.trade?.tradeEvent.optionLot
 
   for (let err of Object.values(errs))
     err.value = ''
@@ -270,10 +293,9 @@ function onUserChangeContract(event: Event) {
 
 </script>
 <template>
-  <Modal title="Edit Trade"
+  <Modal :title="trade ? 'Edit Trade' : 'New Trade'"
          @ok="onSave"
          :okDisabled="disableOkUi"
-         @cancel="init"
          @delete="onDelete"
          :show="show"
          @hide="emits('hide')">
