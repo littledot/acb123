@@ -47,6 +47,7 @@ let optionLotRef = v.ref('')
 
 // Errs
 let errs = {
+  security: v.ref(''),
   tradeDate: v.ref(''),
   settleDate: v.ref(''),
   shares: v.ref(''),
@@ -195,6 +196,7 @@ async function onDelete() {
 function validateForm() {
   console.log('validate form')
   let assetClass = assetClassRef.value
+  let security = securityRef.value
   let action = actionRef.value
   let tradeDate = tradeDateRef.value
   let settleDate = settleDateRef.value
@@ -211,6 +213,9 @@ function validateForm() {
 
   for (let err of Object.values(errs))
     err.value = ''
+
+  if (!security)
+    errs.security.value = 'This field cannot be empty.'
 
   // Validate trade date
   if (!tradeDate.isValid)
@@ -322,7 +327,10 @@ function onNewDate(it: DateTime, dateField: u.DateField) {
                    ])" />
 
       <div class="">Security</div>
-      <TextInput v-model="securityRef" />
+      <InputFeedbackView class="w-full"
+                         :err="errs.security.value">
+        <TextInput v-model="securityRef" />
+      </InputFeedbackView>
 
       <div class="">Action</div>
       <SelectInput v-model="actionRef"
