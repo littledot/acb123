@@ -1,16 +1,16 @@
 <script setup lang='ts'>
-import Icon from '@comp/core/Icon.vue'
-import StockEvent from '@comp/StockEvent.vue'
+import Icon from '@c/core/Icon.vue'
+import StockEvent from '@c/StockEvent.vue'
 import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
-import { Option, OptionHistory, TradeEvent, TickerTradeHistory } from '@store/tradeEvent'
+import { Option, OptionHistory, TradeEvent, TickerTradeHistory } from '@m/stores/tradeEvent'
 import { capitalize } from 'lodash'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
-import OptionEvent from './OptionEvent.vue'
-import * as t from './type'
-import * as u from './util'
-import ExpiredOptionsHint from './ExpiredOptionsHintView.vue'
-import OptionHistoryView from './OptionHistoryView.vue'
+import OptionEvent from '@c/OptionEvent.vue'
+import * as t from '@m/type'
+import * as u from '@m/util'
+import ExpiredOptionsHint from '@c/ExpiredOptionsHintView.vue'
+import OptionHistoryView from '@c/OptionHistoryView.vue'
 
 let props = defineProps<{
   events: TickerTradeHistory
@@ -32,7 +32,7 @@ let emits = defineEmits({})
               <Icon class="w-5 h-5 ml-2 mr-1"
                     :path="mdiClockAlertOutline" />
               <span>
-                {{ u.fmt(optHist.contract.expiryDate)) }}</span>
+                {{ u.fmt(optHist.contract.expiryDate) }}</span>
               <Icon class="w-5 h-5 ml-2"
                     :path="mdiCurrencyUsd" />
               <span>

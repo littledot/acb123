@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import Popper from '@comp/core/Popper.vue'
+import Popper from '@c/core/Popper.vue'
 
 const props = defineProps<{
   label?: string,

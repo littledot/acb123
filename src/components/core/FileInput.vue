@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import * as u from '@comp/util'
+import * as u from '@m/util'
 
 let props = defineProps<{
   accept?: string

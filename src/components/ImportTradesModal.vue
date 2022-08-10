@@ -1,12 +1,12 @@
 <script setup lang='ts'>
-import Modal from '@comp/core/Modal.vue'
-import SelectInput from '@comp/core/SelectInput.vue'
-import * as u from '@comp/util'
-import { IbkrParser, QtParser, TradeConfirmParser } from '@store/parser'
-import { useTradeStore } from '@store/trade'
+import Modal from '@c/core/Modal.vue'
+import SelectInput from '@c/core/SelectInput.vue'
+import * as u from '@m/util'
+import { IbkrParser, QtParser, TradeConfirmParser } from '@m/stores/parser'
+import { useTradeStore } from '@m/stores/trade'
 import Papa, { ParseResult } from 'papaparse'
 import * as v from 'vue'
-import FileInput from './core/FileInput.vue'
+import FileInput from '@c/core/FileInput.vue'
 
 let props = defineProps<{
   show: boolean,

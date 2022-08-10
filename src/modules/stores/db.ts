@@ -1,6 +1,7 @@
-import { Profile, toDbTradeEvent, TradeEvent } from '@store/tradeEvent'
-import { Convert } from '@models/models'
-import { fromDbTradeEvent } from './tradeEvent'
+import { Convert } from '@m/models/models'
+import { Profile, toDbTradeEvent, TradeEvent } from '@m/stores/tradeEvent'
+import { BocForexObs } from '@m/stores/fx'
+import { fromDbTradeEvent } from '@m/stores/tradeEvent'
 
 export class Db {
   namespace = ['default']

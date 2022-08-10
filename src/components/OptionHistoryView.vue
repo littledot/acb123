@@ -1,12 +1,12 @@
 <script setup lang='ts'>
-import { OptionHistory } from '@store/tradeEvent'
+import { OptionHistory } from '@m/stores/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
 import * as v from 'vue'
-import ExpiredOptionsHintView from './ExpiredOptionsHintView.vue'
-import OptionEvent from './OptionEvent.vue'
-import { sumShares } from './type'
+import ExpiredOptionsHintView from '@c/ExpiredOptionsHintView.vue'
+import OptionEvent from '@c/OptionEvent.vue'
+import { sumShares } from '@m/type'
 
 let props = defineProps<{
   history: OptionHistory

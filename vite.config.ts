@@ -8,9 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@comp': fileURLToPath(new URL('./src/components', import.meta.url)),
-      '@models': fileURLToPath(new URL('./src/models', import.meta.url)),
-      '@store': fileURLToPath(new URL('./src/stores', import.meta.url)),
+      '@c': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@m': fileURLToPath(new URL('./src/modules', import.meta.url)),
     },
   }
 })

@@ -1,11 +1,11 @@
-import * as t from '@comp/type'
-import * as u from '@comp/util'
-import { Profile, TradeEvent } from '@store/tradeEvent'
+import * as t from '@m/type'
+import * as u from '@m/util'
+import { Profile, TradeEvent } from '@m/stores/tradeEvent'
 import { DateTime } from 'luxon'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
-import { Db } from './db'
-import { QtParser, TradeConfirmParser } from './parser'
+import { Db } from '@m/stores/db'
+import { QtParser, TradeConfirmParser } from '@m/stores/parser'
 
 
 export const useTradeStore = defineStore('TradeStore', {
@@ -14,9 +14,6 @@ export const useTradeStore = defineStore('TradeStore', {
     profile: new Profile(),
   }),
   getters: {
-    tradesBySecurity: (state) => {
-      return new Map([...state.profile.tradeHistory].sort((a, b) => String(a[0]).localeCompare(b[0])))
-    },
     tradeHistory: (state) => state.profile.tradeReport,
   },
   actions: {

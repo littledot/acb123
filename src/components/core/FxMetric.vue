@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { mdiClose } from '@mdi/js'
-import Icon from '@comp/core/Icon.vue'
-import Popper from '@comp/core/Popper.vue'
+import Icon from '@c/core/Icon.vue'
+import Popper from '@c/core/Popper.vue'
 
 let props = defineProps<{
   label?: string,

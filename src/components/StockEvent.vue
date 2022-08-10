@@ -1,14 +1,14 @@
 <script setup lang='ts'>
-import Icon from '@comp/core/Icon.vue'
+import Icon from '@c/core/Icon.vue'
 import { mdiPencil, mdiAlert } from '@mdi/js'
 import _ from 'lodash'
 import * as v from 'vue'
-import FxMetric from './core/FxMetric.vue'
-import Metric from './core/Metric.vue'
-import EditTradeModal from './EditTradeModal.vue'
-import * as t from './type'
-import * as u from './util'
-import Popper from './core/Popper.vue'
+import FxMetric from '@c/core/FxMetric.vue'
+import Metric from '@c/core/Metric.vue'
+import EditTradeModal from '@c/EditTradeModal.vue'
+import * as t from '@m/type'
+import * as u from '@m/util'
+import Popper from '@c/core/Popper.vue'
 
 let props = defineProps<{
   event: t.ReportItem,

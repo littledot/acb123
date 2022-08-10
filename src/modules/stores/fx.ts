@@ -1,18 +1,20 @@
-import { Fx } from '@store/tradeEvent'
+import { Fx } from '@m/stores/tradeEvent'
 import axios from 'axios'
 import { DateTime } from 'luxon'
 import { defineStore } from 'pinia'
+import { Db } from '@m/stores/db'
 
-interface BocForexObs {
+export interface BocForexObs {
   [currencyCode: string]: BocForexRate
 }
 
-interface BocForexRate {
+export interface BocForexRate {
   [date: string]: string
 }
 
 export const useFxStore = defineStore('FxStore', {
   state: () => ({
+    db: new Db(),
     boc: new Map<number, BocForexObs>(),
   }),
   actions: {
@@ -25,11 +27,11 @@ export const useFxStore = defineStore('FxStore', {
     },
 
     async getRate2(currency: string, date: DateTime) {
-      if (currency === 'CAD') return 1
+      if (currency == 'CAD') return 1
 
       let code = `FX${currency}CAD`
       let rates = await this._getRatesByYear(date)
-      let rate = rates[code]?.[date.toISODate()]
+      let rate = rates?.let(it => it[code]?.[date.toISODate()])
       if (rate) {
         return parseFloat(rate)
       }

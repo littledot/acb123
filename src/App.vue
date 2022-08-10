@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import Main from '@/components/Main.vue'
-import Nav from "@/components/Nav.vue"
-import { useFxStore } from '@store/fx'
-import { useTradeStore } from '@store/trade'
+import Main from '@c/Main.vue'
+import Nav from "@c//Nav.vue"
+import { useFxStore } from '@m/stores/fx'
+import { useTradeStore } from '@m/stores/trade'
 import { onBeforeMount } from 'vue'
 
 onBeforeMount(async () => {

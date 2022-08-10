@@ -1,15 +1,15 @@
 <script setup lang='ts'>
 import questradeUrl from '@/assets/questrade1.csv?url'
-import Button from '@comp/core/Button.vue'
-import Modal from '@comp/core/Modal.vue'
-import EventTimeline from '@comp/EventTimeline.vue'
-import ImportTradesModal from '@comp/ImportTradesModal.vue'
+import Button from '@c/core/Button.vue'
+import Modal from '@c/core/Modal.vue'
+import EventTimeline from '@c/EventTimeline.vue'
+import ImportTradesModal from '@c/ImportTradesModal.vue'
 import { mdiPlus } from '@mdi/js'
-import { useTradeStore } from '@store/trade'
+import { useTradeStore } from '@m/stores/trade'
 import * as v from 'vue'
-import Icon from './core/Icon.vue'
-import * as u from './util'
-import EditTradeModal from '@comp/EditTradeModal.vue'
+import Icon from '@c/core/Icon.vue'
+import * as u from '@m/util'
+import EditTradeModal from '@c/EditTradeModal.vue'
 
 let tradeStore = useTradeStore()
 

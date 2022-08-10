@@ -1,5 +1,5 @@
-import { useFxStore } from '@store/fx'
-import { TradeEvent } from '@store/tradeEvent'
+import { useFxStore } from '@m/stores/fx'
+import { TradeEvent } from '@m/stores/tradeEvent'
 import money from 'currency.js'
 
 export interface ReportItem {

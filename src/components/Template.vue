@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import * as v from 'vue'
-import * as u from '@comp/util'
+import * as u from '@m/util'
 
 let props = defineProps<{
   modelValue?: any

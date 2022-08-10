@@ -1,11 +1,10 @@
-import { CapGains } from './../components/type'
-import * as t from '@comp/type'
-import * as u from '@comp/util'
-import { DbFx, DbOption, DbOptionHistory, DbProfile, DbTradeEvent, DbTradeHistory } from '@models/models'
+import { DbFx, DbOption, DbOptionHistory, DbProfile, DbTradeEvent, DbTradeHistory } from '@m/models/models'
+import { Db } from '@m/stores/db'
+import * as t from '@m/type'
+import * as u from '@m/util'
 import money from 'currency.js'
 import { DateTime } from "luxon"
 import { v4 } from 'uuid'
-import { Db } from './db'
 
 export type Fx = DbFx
 
@@ -71,6 +70,8 @@ export class Profile {
       }
       await t.convertForex(history.stock)
       t.calcGainsForTrades(history.stock)
+      // debugger
+      // await t.convertForex(history.unsure)
     }
 
     this.tradeReport = this.groupByYear()
@@ -204,7 +205,8 @@ export class TradeHistory {
       .filter(it => it)
       .map(it => t.newReportRecord2(it!!))
 
-    this.unsure = dbHistory.uncategorized
+    this.unsure = dbHistory.stock
+      // this.unsure = dbHistory.uncategorized
       .map(it => db.readTradeEvent(it))
       .filter(it => it)
       .map(it => it!!)
