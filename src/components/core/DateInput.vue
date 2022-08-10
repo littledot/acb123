@@ -32,7 +32,7 @@ function onInputDate(event: Event) {
   if (u.isUndef(day) || u.isUndef(month) || u.isUndef(year)) return
 
   let dt = DateTime.local(year, month, day)
-  console.log('dateInput', day, month, year, dt.invalidExplanation)
+  console.log('dateInput', day, month, year, dt)
 
   emits('update:modelValue', dt, event)
 }
@@ -41,20 +41,18 @@ function onInputDate(event: Event) {
 <template>
   <div class="flex flex-row">
     <NumberInput class="flex-1"
-                 hint="Day"
-                 :min="0"
-                 :maxLen="2"
-                 v-model="dayRef"
+                 hint="Year"
+                 :maxLen="4"
+                 v-model="yearRef"
                  @update:modelValue="(it, ev) => onInputDate(ev)" />
     <SelectInput class="flex-1"
                  :options="u.months"
                  v-model="monthRef"
                  @update:modelValue="(it, ev) => onInputDate(ev)" />
     <NumberInput class="flex-1"
-                 hint="Year"
-                 :min="0"
-                 :maxLen="4"
-                 v-model="yearRef"
+                 hint="Day"
+                 :maxLen="2"
+                 v-model="dayRef"
                  @update:modelValue="(it, ev) => onInputDate(ev)" />
   </div>
 </template>

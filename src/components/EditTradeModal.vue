@@ -123,7 +123,7 @@ function init() {
   outlayRef.value = 0
   priceFxRef.value = u.CAD
   outlayFxRef.value = u.CAD
-  notesRef.value = `Created on ${DateTime.now().toISODate()}.`
+  notesRef.value = `Created on ${u.fmt(DateTime.now())}.`
 
   optionLotRef.value = 'new'
   optionLotOptionsRef.value = new Map()
@@ -281,7 +281,7 @@ function validateForm() {
     if (lotHead.action == 'buy')
       errs.optionLot.value = 'Option purchase event must be the first event in a lot. Cannot move to this lot as this lot already has an option purchase event as its first event.'
     else if (lotHead.date < tradeDate)
-      errs.optionLot.value = `Option purchase event must be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${lotHead.date.toISODate()}, which is earlier than this event.`
+      errs.optionLot.value = `Option purchase event must be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)}, which is earlier than this event.`
   }
 
   // Moving sell option event to another lot? Must not be head of lot
@@ -292,7 +292,7 @@ function validateForm() {
     else {
       let lotHead = optionLotOptionsRef.value.get(lotId)!.trades[0].tradeEvent
       if (lotHead.date > tradeDate)
-        errs.optionLot.value = `Option sale event must not be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${lotHead.date.toISODate()}, which is later than this event.`
+        errs.optionLot.value = `Option sale event must not be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)} which is later than this event.`
     }
   }
   console.log('validate form ok')

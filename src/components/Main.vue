@@ -91,7 +91,7 @@ function onShowEditModal(ticker: string) {
             <div class="flex flex-col flex-1">
               <div class="text-xl">{{ year }}</div>
               <div class="">Capital Gains: {{ hists.yearGains.format() }} </div>
-              <div class="">Trades: {{ u.fmtNum(hists.tradeCount) }}</div>
+              <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
             </div>
           </button>
         </h2>
@@ -114,7 +114,7 @@ function onShowEditModal(ticker: string) {
                 <div class="flex flex-col flex-1 pl-2.5">
                   <div class="text-xl">{{ security }}</div>
                   <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
-                  <div class="">Trades: {{ u.fmtNum(events.tradeCount) }}</div>
+                  <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
                 </div>
                 <!-- @click.stop does not work!? -->
                 <!-- https://stackoverflow.com/a/70664716 -->

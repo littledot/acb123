@@ -1,4 +1,5 @@
 import * as t from '@comp/type'
+import * as u from '@comp/util'
 import { Profile, TradeEvent } from '@store/tradeEvent'
 import { DateTime } from 'luxon'
 import Papa, { ParseResult } from "papaparse"
@@ -84,7 +85,7 @@ export const useTradeStore = defineStore('TradeStore', {
       // .filter(it => it.options) // debugging
 
       if (src instanceof File) {
-        trades.forEach(it => it.notes = `Imported from ${src.name} on ${DateTime.now().toISODate()}`)
+        trades.forEach(it => it.notes = `Imported from ${src.name} on ${u.fmt(DateTime.now())}`)
       }
 
       trades

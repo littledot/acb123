@@ -43,7 +43,7 @@ async function resolveRate(date?: DateTime) {
     rateRef.value = await fxStore.getRate2(currency, date)
       .catch((e) => {
         u.err('fx.getRate() failed.', e)
-        ui.err = `Failed to query ${currency} exchange rate on ${props.date?.toISODate()}. Please enter it manually.`
+        ui.err = `Failed to query ${currency} exchange rate on ${u.fmt(props.date)}. Please enter it manually.`
         return undefined
       })
   }

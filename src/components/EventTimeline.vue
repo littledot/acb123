@@ -8,6 +8,7 @@ import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
 import OptionEvent from './OptionEvent.vue'
 import * as t from './type'
+import * as u from './util'
 import ExpiredOptionsHint from './ExpiredOptionsHintView.vue'
 import OptionHistoryView from './OptionHistoryView.vue'
 
@@ -31,7 +32,7 @@ let emits = defineEmits({})
               <Icon class="w-5 h-5 ml-2 mr-1"
                     :path="mdiClockAlertOutline" />
               <span>
-                {{ optHist.contract.expiryDate.toISODate() }}</span>
+                {{ u.fmt(optHist.contract.expiryDate)) }}</span>
               <Icon class="w-5 h-5 ml-2"
                     :path="mdiCurrencyUsd" />
               <span>

@@ -30,7 +30,7 @@ const ui = v.computed(() => {
   let total = cad?.price.multiply(trade.shares).add(cad.outlay)
 
   return {
-    title: `${trade.date.toISODate()}: ${capitalize(trade.action)} ${trade.shares} options`,
+    title: `${u.fmt(trade.date)}: ${capitalize(trade.action)} ${trade.shares} options`,
     showForex: isForex,
     forexPrice: trade.price.format(),
     forexPriceCurrency: trade.priceFx.currency,
@@ -45,7 +45,7 @@ const ui = v.computed(() => {
     acb: acb ? {
       shares: u.signNumFmt.format(acb.shares),
       sharesColor: `text-${acb.shares < 0 ? 'red' : 'green'}-600`,
-      totalShares: u.fmtNum(acb.accShares),
+      totalShares: u.fmt(acb.accShares),
       cost: acb.cost.format({ pattern: `+!#` }),
       costColor: `text-${acb.cost.value < 0 ? 'red' : 'green'}-600`,
       totalCost: acb.accCost.format(),

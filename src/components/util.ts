@@ -1,8 +1,13 @@
 import { Option } from '@store/tradeEvent'
+import { DateTime } from 'luxon'
 import * as v from 'vue'
 
 export enum DI {
   Fx = 'fx'
+}
+export interface DateField {
+  date: v.Ref<DateTime>
+  err: v.Ref<string>
 }
 
 export function vueModel(props: any, emit: any, name = 'modelValue') {
@@ -10,6 +15,19 @@ export function vueModel(props: any, emit: any, name = 'modelValue') {
     get: () => props[name],
     set: (value) => emit(`update:${name}`, value)
   })
+}
+
+export function debugVue(tag?: string, dbg?: boolean) {
+  return {
+    onTrack(e: any) {
+      console.log({ tag: tag, onTrack: e })
+      if (dbg) debugger
+    },
+    onTrigger(e: any) {
+      console.log({ tag: tag, onTrigger: e })
+      if (dbg) debugger
+    }
+  }
 }
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -87,8 +105,12 @@ export const moneyFmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-export function fmtNum(n: number) {
-  return Number.isNaN(n) ? null : numFmt.format(n)
+export function fmt(it: undefined | DateTime | number): string {
+  if (it instanceof DateTime)
+    return it.toISODate()
+  if (typeof it === 'number')
+    return numFmt.format(it)
+  return ''
 }
 
 export function fmtMoney(n: number | undefined) {
