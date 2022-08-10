@@ -60,6 +60,12 @@ let errs = {
   expiryDate: v.ref(''),
 }
 
+let dateFields = {
+  trade: { date: tradeDateRef, err: errs.tradeDate },
+  settle: { date: settleDateRef, err: errs.settleDate },
+  expiry: { date: expiryDateRef, err: errs.expiryDate },
+}
+
 v.watchEffect(() => validateForm())
 
 v.watch(() => props.show, (show) => { if (show) init() })
@@ -291,6 +297,12 @@ function onUserChangeContract(event: Event) {
   if (event.isTrusted) optionLotRef.value = 'new'
 }
 
+function onNewDate(it: DateTime, dateField: u.DateField) {
+  dateField.err.value = it.invalidExplanation ?? ''
+  if (it.isValid)
+    dateField.date.value = it
+}
+
 </script>
 <template>
   <Modal :title="trade ? 'Edit Trade' : 'New Trade'"
@@ -322,13 +334,15 @@ function onUserChangeContract(event: Event) {
       <div class="">Trade Date</div>
       <InputFeedbackView class="w-full"
                          :err="errs.tradeDate.value">
-        <DateInput v-model="tradeDateRef" />
+        <DateInput :modelValue="tradeDateRef"
+                   @update:modelValue="it => onNewDate(it, dateFields.trade)" />
       </InputFeedbackView>
 
       <div class="">Settlement Date</div>
       <InputFeedbackView class="w-full"
                          :err="errs.settleDate.value">
-        <DateInput v-model="settleDateRef" />
+        <DateInput :modelValue="settleDateRef"
+                   @update:modelValue="it => onNewDate(it, dateFields.settle)" />
       </InputFeedbackView>
 
       <div class="">Shares</div>
@@ -386,8 +400,11 @@ function onUserChangeContract(event: Event) {
         <div class="">Expiry Date</div>
         <InputFeedbackView class="w-full"
                            :err="errs.expiryDate.value">
-          <DateInput v-model="expiryDateRef"
-                     @update:modelValue="(_, ev) => onUserChangeContract(ev)" />
+          <DateInput :modelValue="expiryDateRef"
+                     @update:modelValue="(it, ev) => {
+                       onUserChangeContract(ev)
+                       onNewDate(it, dateFields.expiry)
+                     }" />
         </InputFeedbackView>
 
         <div class="">Strike</div>
