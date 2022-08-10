@@ -90,11 +90,11 @@ export function sortIter<T>(
 
 export const CAD = {
   forexCode: 'CAD', symbol: "$", precision: 2, // Intl.NumberFormat
-  currency: 'CAD', rate: -1 // DbFx
+  currency: 'CAD', rate: 0 // DbFx
 }
 export const USD = {
   forexCode: 'USD', symbol: "US$", precision: 2,
-  currency: 'USD', rate: -1
+  currency: 'USD', rate: 0
 }
 
 export const numFmt = new Intl.NumberFormat('en-US')

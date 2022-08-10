@@ -81,7 +81,7 @@ export class QtParser extends TradeConfirmParser {
     if (rawCurrency.startsWith('u.s.')) {
       currency = u.USD
     }
-    o.priceFx = o.outlayFx = { currency: currency.forexCode, rate: -1 }
+    o.priceFx = o.outlayFx = { currency: currency.forexCode, rate: 0 }
 
     let desc = this._readCsv(csv, QtHeader.Desc)
     let optionsMatch = QtOptionsRegex.exec(desc)
@@ -174,12 +174,12 @@ export class IbkrParser extends TradeConfirmParser {
       price: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Price))),
       priceFx: {
         currency: this._readCsv(csv, IbkrHeader.PrimaryCurrency).toUpperCase(),
-        rate: -1
+        rate: 0,
       },
       outlay: money(Math.abs(u.parseNumber(this._readCsv(csv, IbkrHeader.Commission)))),
       outlayFx: {
         currency: this._readCsv(csv, IbkrHeader.CommissionCurrency).toUpperCase(),
-        rate: -1
+        rate: 0,
       },
       raw: csv.join(','),
     }
