@@ -39,6 +39,9 @@ export function insertTrade(trades: ReportItem[], trade: TradeEvent) {
       return
     }
   }
+
+  // New trade has the earliest trade date? Insert at head
+  trades.splice(0, 0, it)
 }
 
 export function yearGains(trades: ReportItem[]) {

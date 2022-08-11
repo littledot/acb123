@@ -11,8 +11,8 @@ export let fakeFx = () => ({
 export let fakeTrade = () => ({
   id: '1',
   security: 'A',
-  date: DateTime.local(2000, 1, 1),
-  settleDate: DateTime.local(2000, 1, 2),
+  date: DateTime.local(2000, 6, 1),
+  settleDate: DateTime.local(2000, 6, 2),
   action: 'buy',
   shares: 100,
   price: money(10),
@@ -22,22 +22,33 @@ export let fakeTrade = () => ({
 })
 
 describe('sumShares', () => {
-  it('should add/minus shares', () => {
-    let a = { tradeEvent: { ...fakeTrade() } }
-    let b = { tradeEvent: { ...fakeTrade(), action: 'sell', shares: 10, } }
+  it("should add trades' shares", () => {
+    let trades = [
+      fakeTrade(),
+      { ...fakeTrade(), action: 'sell', shares: 10, },
+    ].map(it => t.newReportRecord2(it))
 
-    expect(t.sumShares([a, b])).toEqual(90)
+    expect(t.sumShares(trades)).toEqual(90)
   })
 })
 
 describe('insertTrade', () => {
-  it('should push new event when list is empty', () => {
+  it("should insert trades with earlier trade date in front of trades with later trade date", () => {
     let out = <t.ReportItem[]>[]
-    let trade = { id: '123' }
+    let trade = fakeTrade()
+    let trade1 = { ...fakeTrade(), date: DateTime.local(2000, 5, 1) }
+    let trade2 = { ...fakeTrade(), date: DateTime.local(2000, 5, 15) }
 
     t.insertTrade(out, trade)
-
-    expect(out.length).toEqual(1)
     expect(out[0].tradeEvent).toBe(trade)
+
+    t.insertTrade(out, trade1)
+    expect(out[0].tradeEvent).toBe(trade1)
+    expect(out[1].tradeEvent).toBe(trade)
+
+    t.insertTrade(out, trade2)
+    expect(out[0].tradeEvent).toBe(trade1)
+    expect(out[1].tradeEvent).toBe(trade2)
+    expect(out[2].tradeEvent).toBe(trade)
   })
 })
