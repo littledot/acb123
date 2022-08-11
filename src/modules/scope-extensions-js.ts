@@ -157,7 +157,6 @@ declare global {
   }
 }
 
-
 Object.defineProperty(Object.prototype, "let", {
   value(block) {
     return block(this!)
@@ -168,7 +167,7 @@ Object.defineProperty(Object.prototype, "let", {
 
 Object.defineProperty(Object.prototype, "also", {
   value(block) {
-    block(this!)
+    block(this)
     return this
   },
   configurable: true,
@@ -183,14 +182,15 @@ Object.defineProperty(Object.prototype, "run", {
   writable: true,
 })
 
-Object.defineProperty(Object.prototype, "apply", {
-  value(block) {
-    block.call(this!)
-    return this!
-  },
-  configurable: true,
-  writable: true,
-})
+// TODO(L): Breaks vitest
+// Object.defineProperty(Object.prototype, "apply", {
+//   value(block) {
+//     block.call(this)
+//     return this
+//   },
+//   configurable: true,
+//   writable: true,
+// })
 
 Object.defineProperty(Object.prototype, "takeIf", {
   value(predicate) {

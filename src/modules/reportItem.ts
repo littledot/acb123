@@ -19,7 +19,7 @@ export function newReportRecord2(te: TradeEvent) {
 
 export function sumShares(trades: ReportItem[]) {
   return trades.reduce((sum, it) => {
-    let n = it.tradeEvent.action.let(it => it === 'buy' ? 1 : -1)
+    let n = it.tradeEvent.action === 'buy' ? 1 : -1
     return sum + it.tradeEvent.shares * n
   }, 0)
 }

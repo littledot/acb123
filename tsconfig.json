@@ -11,14 +11,16 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
-    "baseUrl": "src",
+    "types": ["vitest/globals"],
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["/*"],
-      "@c/*": ["components/*"],
-      "@m/*": ["modules/*"],
+      "@/*": ["src/*"],
+      "@c/*": ["src/components/*"],
+      "@m/*": ["src/modules/*"],
     },
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["src/**/__tests__/*"],
   "references": [{
     "path": "./tsconfig.node.json"
   }]
