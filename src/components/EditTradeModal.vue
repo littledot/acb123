@@ -11,7 +11,7 @@ import { Fx, OptionHistory, TradeEvent } from '@m/stores/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import * as v from 'vue'
-import { ReportItem } from '@m/type'
+import { ReportItem } from '@m/reportItem'
 import InputFeedbackView from '@c/core/InputFeedbackView.vue'
 import { v4 } from 'uuid'
 

@@ -1,6 +1,6 @@
 import { DbFx, DbOption, DbOptionHistory, DbProfile, DbTradeEvent, DbTradeHistory } from '@m/models/models'
 import { Db } from '@m/stores/db'
-import * as t from '@m/type'
+import * as t from '@m/reportItem'
 import * as u from '@m/util'
 import money from 'currency.js'
 import { DateTime } from "luxon"

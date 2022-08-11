@@ -124,11 +124,6 @@ export async function convertForex(items: ReportItem[]) {
   return items
 }
 
-export interface Fx {
-  currency: string
-  rate: number
-}
-
 export interface TradeValue {
   price: money
   priceForex: number
