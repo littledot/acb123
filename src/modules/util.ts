@@ -105,6 +105,7 @@ export const moneyFmt = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+// For basic fmt needs
 export function fmt(it: undefined | DateTime | number): string {
   if (it instanceof DateTime)
     return it.toISODate()

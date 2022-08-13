@@ -65,11 +65,11 @@ export class Profile {
       for (let optHistory of history.option.values()) {
         for (let optTrades of optHistory) {
           await t.convertForex(optTrades.trades)
-          t.calcGainsForTrades(optTrades.trades)
+          t.calcGainsForTrades(optTrades.trades, t.OptCalc)
         }
       }
       await t.convertForex(history.stock)
-      t.calcGainsForTrades(history.stock)
+      t.calcGainsForTrades(history.stock, t.StockCalc)
       // debugger
       // await t.convertForex(history.unsure)
     }

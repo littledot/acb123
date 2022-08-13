@@ -7,6 +7,8 @@ export interface ReportItem {
   tradeValue?: TradeValue // CAD
   acb?: Acb
   cg?: CapGains
+  optAcb?: Acb
+  optCg?: CapGains
   warn: string[]
 }
 
@@ -48,63 +50,129 @@ export function yearGains(trades: ReportItem[]) {
   return trades[trades.length - 1]?.cg?.yearGains ?? money(0)
 }
 
-export async function calcGainsForTrades(trades: ReportItem[]) {
-  let startIdx = trades.findIndex(it => !it.tradeValue || !it.acb)
+interface AssetCalc {
+  setAcb(ri: ReportItem, acb: Acb): void
+  getAcb(ri: ReportItem): Acb | undefined
+  setCg(ri: ReportItem, cg: CapGains): void
+  getCg(ri: ReportItem): CapGains | undefined
+
+}
+export const OptCalc: AssetCalc = {
+  setAcb: (ri: ReportItem, it: Acb) => ri.optAcb = it,
+  getAcb: (ri: ReportItem) => ri.optAcb,
+  setCg: (ri: ReportItem, it: CapGains) => ri.optCg = it,
+  getCg: (ri: ReportItem) => ri.optCg,
+}
+export const StockCalc: AssetCalc = {
+  setAcb: (ri: ReportItem, it: Acb) => ri.acb = it,
+  getAcb: (ri: ReportItem) => ri.acb,
+  setCg: (ri: ReportItem, it: CapGains) => ri.cg = it,
+  getCg: (ri: ReportItem) => ri.cg,
+}
+
+export async function calcGainsForTrades(trades: ReportItem[], assetType: AssetCalc) {
+  let startIdx = trades.findIndex(it => !it.tradeValue || !assetType.getAcb(it))
   if (startIdx == -1) return // No data missing? No need to recalculate
   let target = trades.slice(startIdx)
 
   // Find last known good acb & cg
-  let initAcb = (startIdx > 0 ? trades[startIdx - 1].acb : null) ?? {
+  let initAcb = (startIdx > 0 ? assetType.getAcb(trades[startIdx - 1]) : null) ?? {
     shares: 0,
     accShares: 0,
     cost: money(0),
     accCost: money(0),
     acb: money(0),
   }
-  let initCg = (startIdx > 0 ? trades[startIdx - 1].cg : null) ?? {
+  let initCg = (startIdx > 0 ? assetType.getCg(trades[startIdx - 1]) : null) ?? {
     gains: money(0),
     totalGains: money(0),
     year: -1,
     yearGains: money(0),
   }
 
-
+  target.forEach(it => it.warn = []) // Reset warnings
   target.reduce((acb, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
+    let opt = tEvent.options
     if (!tValue) return acb // No CAD value? Can't calculate ACB
 
-    if (tEvent.action === 'buy') {
+    if (tEvent.action == 'buy') {
       // buy cost = price * shares + outlay
       let cost = tValue.price.multiply(tEvent.shares).add(tValue.outlay)
-      it.acb = addToAcb(acb, tEvent.shares, cost)
+      assetType.setAcb(it, addToAcb(acb, tEvent.shares, cost))
     }
+
     if (['sell', 'expire'].includes(tEvent.action)) {
       // sell cost = acb * shares
       let cost = acb.acb.multiply(-tEvent.shares)
-      it.acb = addToAcb(acb, -tEvent.shares, cost)
+      assetType.setAcb(it, addToAcb(acb, -tEvent.shares, cost))
     }
 
-    return it.acb ?? acb
+    if (tEvent.action == 'exercise') {
+      if (!opt) {
+        console.error(`exercise action missing opt`)
+        it.warn.push(`'opt' data missing`)
+        return acb
+      }
+
+      if (opt.type == 'call' && assetType === StockCalc) {
+        if (!it.optAcb) {
+          console.error('exercise call missing optAcb')
+          it.warn.push(`'optAcb' data missing`)
+          return acb
+        }
+        // Exercise call, stock side: spent $ to acquire shares
+        // cost = $strike * shares + outlay + (cost to acquire option)
+        let cost = it.optAcb.cost.multiply(-1)
+          .add(tValue.strike.multiply(tEvent.shares).add(tValue.outlay))
+        it.acb = addToAcb(acb, tEvent.shares, cost)
+      } else {
+        // Exercise call & put, option side: used up options
+        // Exercise put, stock side: sold shares at $strike
+        // Effect: decrease cost in proportion to shares
+        let cost = acb.acb.multiply(-tEvent.shares)
+        assetType.setAcb(it, addToAcb(acb, -tEvent.shares, cost))
+      }
+    }
+
+    return assetType.getAcb(it) ?? acb
   }, initAcb)
 
   target.reduce((cg, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
+    let opt = tEvent.options
+    // debugger
     if (!tValue) return cg // No CAD value? Can't calculate gains
-    if (!it.acb) return cg // No ACB? Can't calculate gains
-    if (!['sell', 'expire'].includes(tEvent.action)) return cg // No sale? No change to gains
 
-    let revenue = tValue.price.multiply(tEvent.shares).subtract(tValue.outlay)
-    let gains = revenue.add(it.acb.cost)
+    if (tEvent.action == 'exercise' && opt?.type == 'put' && assetType === StockCalc) {
+      if (!it.acb) {
+        console.error(`exercise put missing opt`)
+        return cg
+      }
+      if (!it.optAcb) {
+        console.error('exercise put missing optAcb')
+        return cg
+      }
 
-    it.cg = {
-      gains: gains,
-      totalGains: cg.totalGains.add(gains),
-      // New year? Reset yearGains
-      year: tEvent.date.year,
-      yearGains: cg.year != tEvent.date.year ? gains : cg.yearGains.add(gains),
+      let strikeRev = tValue.strike.multiply(tEvent.shares).subtract(tValue.outlay)
+      let buyOptCost = it.optAcb.cost.multiply(-1)
+      let stockCost = it.acb.acb.multiply(tEvent.shares)
+      let gains = strikeRev.subtract(buyOptCost.add(stockCost))
+      assetType.setCg(it, addToCg(cg, tEvent, gains))
     }
 
-    return it.cg ?? cg
+    if (['sell', 'expire'].includes(tEvent.action)) {
+      let acb = assetType.getAcb(it)
+      if (!acb) {
+        console.error('acb missing')
+        return cg
+      }
+      let revenue = tValue.price.multiply(tEvent.shares).subtract(tValue.outlay)
+      let gains = revenue.add(acb.cost)
+      assetType.setCg(it, addToCg(cg, tEvent, gains))
+    }
+
+    return assetType.getCg(it) ?? cg
   }, initCg)
 }
 
@@ -114,15 +182,24 @@ export async function convertForex(items: ReportItem[]) {
     let te = it.tradeEvent
 
     let fxStore = useFxStore()
-    let priceForex = await fxStore.getRate(te.priceFx, it.tradeEvent.date)
-    let outlayForex = await fxStore.getRate(te.outlayFx, it.tradeEvent.date)
+    let priceForex = await fxStore.getRate(te.priceFx, te.date)
+    let outlayForex = await fxStore.getRate(te.outlayFx, te.date)
 
-    it.tradeValue = {
+    let tv = {
       price: te.price.multiply(priceForex),
       priceForex: priceForex,
       outlay: te.outlay.multiply(outlayForex),
       outlayForex: outlayForex,
+      strike: money(0),
+      strikeForex: 0,
     }
+
+    if (te.options) {
+      tv.strikeForex = await fxStore.getRate(te.options.strikeFx, te.date)
+      tv.strike = te.options.strike.multiply(tv.strikeForex)
+    }
+
+    it.tradeValue = tv
   }
   return items
 }
@@ -132,6 +209,8 @@ export interface TradeValue {
   priceForex: number
   outlay: money
   outlayForex: number
+  strike: money
+  strikeForex: number
 }
 
 export interface Acb {
@@ -161,4 +240,14 @@ export interface CapGains {
   totalGains: money
   year: number
   yearGains: money
+}
+
+export function addToCg(cg: CapGains, tEvent: TradeEvent, gains: money) {
+  return {
+    gains: gains,
+    totalGains: cg.totalGains.add(gains),
+    // New year? Reset yearGains
+    year: tEvent.date.year,
+    yearGains: cg.year != tEvent.date.year ? gains : cg.yearGains.add(gains),
+  }
 }

@@ -21,7 +21,7 @@ let showEditModal = v.ref(false)
 let isHover = v.ref(false)
 
 const ui = v.computed(() => {
-  let { tradeEvent: trade, tradeValue: cad, acb, cg, warn } = props.event
+  let { tradeEvent: trade, tradeValue: cad, optAcb: acb, optCg: cg, warn: warn } = props.event
   let option = trade.options
 
   let isForex = v.toRaw(trade.priceFx.currency) !== 'CAD'
