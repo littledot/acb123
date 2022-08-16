@@ -67,14 +67,14 @@
         "stock": {
           "$ref": "#/$defs/stockHistory"
         },
-        "uncategorized": {
+        "orphan": {
           "$ref": "#/$defs/tradeIds"
         }
       },
       "required": [
         "option",
         "stock",
-        "uncategorized"
+        "orphan"
       ]
     },
     "optionHistory": {

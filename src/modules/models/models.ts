@@ -22,9 +22,9 @@ export interface DbProfile {
 }
 
 export interface DbTradeHistory {
-    option:        DbOptionHistory[];
-    stock:         string[];
-    uncategorized: string[];
+    option: DbOptionHistory[];
+    orphan: string[];
+    stock:  string[];
 }
 
 export interface DbOptionHistory {
@@ -287,8 +287,8 @@ const typeMap: any = {
     ], "any"),
     "DbTradeHistory": o([
         { json: "option", js: "option", typ: a(r("DbOptionHistory")) },
+        { json: "orphan", js: "orphan", typ: a("") },
         { json: "stock", js: "stock", typ: a("") },
-        { json: "uncategorized", js: "uncategorized", typ: a("") },
     ], "any"),
     "DbOptionHistory": o([
         { json: "contract", js: "contract", typ: r("DbOption") },

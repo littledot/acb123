@@ -30,22 +30,21 @@ export class Profile {
 
     let tradeHistory = u.sortIter(this.tradeHistory.entries(), (a, b) => String(a[0]).localeCompare(b[0]))
     for (let [security, history] of tradeHistory) {
-      let { stocks, unsure, options } = history.groupByYear()
+      let { stocks, options } = history.groupByYear()
 
       for (let [year, trades] of stocks) {
         u.mapGetDefault(data, year, () => new AnnualTradeHistory())
           .appendStocks(security, trades)
       }
 
-      for (let [year, trades] of unsure) {
-        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
-          .appendUnsure(security, trades)
-      }
-
       for (let [year, trades] of options) {
         u.mapGetDefault(data, year, () => new AnnualTradeHistory())
           .appendOptions(security, trades)
       }
+
+      // Do not group orphans by year
+      u.mapGetDefault(data, 0, () => new AnnualTradeHistory())
+        .appendOrphan(security, history.orphan)
     }
 
     return u.sortIter(data.entries(), (a, b) => b[0] - a[0])
@@ -70,8 +69,6 @@ export class Profile {
       }
       await t.convertForex(history.stock)
       t.calcGainsForTrades(history.stock, t.StockCalc)
-      // debugger
-      // await t.convertForex(history.unsure)
     }
 
     this.tradeReport = this.groupByYear()
@@ -139,9 +136,11 @@ export class AnnualTradeHistory {
     }
   }
 
-  appendUnsure(ticker: string, trades: TradeEvent[]) {
-    this._getHist(ticker).appendUnsure(trades)
-    this.tradeCount += trades.length
+  appendOrphan(ticker: string, trades: TradeEvent[]) {
+    if (trades.length > 0) {
+      this._getHist(ticker).appendOrphan(trades)
+      this.tradeCount += trades.length
+    }
   }
 
   _getHist(ticker: string) {
@@ -153,7 +152,7 @@ export class AnnualTradeHistory {
 export class TickerTradeHistory {
   option: OptionHistory[]
   stock: t.ReportItem[]
-  unsure: TradeEvent[]
+  orphan: TradeEvent[]
 
   tradeCount = 0
   yearGains = money(0)
@@ -161,7 +160,7 @@ export class TickerTradeHistory {
   constructor() {
     this.option = []
     this.stock = []
-    this.unsure = []
+    this.orphan = []
   }
 
   appendStocks(trades: t.ReportItem[]) {
@@ -178,8 +177,8 @@ export class TickerTradeHistory {
     }
   }
 
-  appendUnsure(trades: TradeEvent[]) {
-    this.unsure.push(...trades)
+  appendOrphan(trades: TradeEvent[]) {
+    this.orphan.push(...trades)
     this.tradeCount += trades.length
   }
 }
@@ -187,12 +186,12 @@ export class TickerTradeHistory {
 export class TradeHistory {
   option: Map<string, OptionHistory[]>
   stock: t.ReportItem[]
-  unsure: TradeEvent[]
+  orphan: TradeEvent[]
 
   constructor() {
     this.option = new Map()
     this.stock = []
-    this.unsure = []
+    this.orphan = []
   }
 
   init(db: Db, dbHistory: DbTradeHistory) {
@@ -205,8 +204,7 @@ export class TradeHistory {
       .filter(it => it)
       .map(it => t.newReportRecord2(it!!))
 
-    this.unsure = dbHistory.stock
-      // this.unsure = dbHistory.uncategorized
+    this.orphan = dbHistory.orphan
       .map(it => db.readTradeEvent(it))
       .filter(it => it)
       .map(it => it!!)
@@ -215,7 +213,7 @@ export class TradeHistory {
   groupByYear() {
     return {
       stocks: u.groupBy(this.stock, it => it.tradeEvent.date.year),
-      unsure: u.groupBy(this.unsure, it => it.date.year),
+      // orphan: u.groupBy(this.orphan, it => it.date.year),
       options: [...this.option.values()]
         .flatMap(it => it)
         .flatMap(optHist =>
@@ -231,13 +229,13 @@ export class TradeHistory {
     }
   }
 
-  insertTrade(trade: TradeEvent) {
-    trade.options
-      ?.also(it => this._insertOptionTrade(it, trade))
+  insertTrade(trade: TradeEvent): boolean {
+    return trade.options
+      ?.let(it => this._insertOptionTrade(it, trade))
       ?? this._insertStockTrade(trade)
   }
 
-  _insertOptionTrade(option: Option, trade: TradeEvent) {
+  _insertOptionTrade(option: Option, trade: TradeEvent): boolean {
     let key = optionHash(option)
     let histories = this.option.get(key)
     if (!histories) {
@@ -252,7 +250,7 @@ export class TradeHistory {
         trades: [t.newReportRecord2(trade)],
       }
       histories.push(trade.optionLot)
-      return
+      return true
     }
 
     // Sell options? Find a lot to append to
@@ -274,17 +272,19 @@ export class TradeHistory {
         // Insert trade to lot
         t.insertTrade(history.trades, trade)
         trade.optionLot = history
-        return
+        return true
       }
 
-      // Couldn't find any lots? Add to unsure pile
-      this.unsure.push(trade)
-      return
+      // Couldn't find any lots? Add to orphan pile
+      this.orphan.push(trade)
+      return false
     }
+    return false
   }
 
   _insertStockTrade(trade: TradeEvent) {
     t.insertTrade(this.stock, trade)
+    return true
   }
 
   deleteTrade(trade: TradeEvent) {
@@ -325,7 +325,7 @@ export class TradeHistory {
     return <DbTradeHistory>{
       option: options,
       stock: this.stock.map(it => it.tradeEvent.id),
-      uncategorized: this.unsure.map(it => it.id),
+      orphan: this.orphan.map(it => it.id),
     }
   }
 }

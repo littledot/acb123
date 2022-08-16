@@ -10,6 +10,7 @@ import * as v from 'vue'
 import Icon from '@c/core/Icon.vue'
 import * as u from '@m/util'
 import EditTradeModal from '@c/EditTradeModal.vue'
+import Accordion from '@c/core/Accordion.vue'
 
 let tradeStore = useTradeStore()
 
@@ -21,6 +22,11 @@ let showImportModal = v.ref(false)
 let showClearModal = v.ref(false)
 let showEditModal = v.ref(false)
 let editModalTickerField = v.ref('')
+
+let ui = v.computed(() => ({
+  tradeHistory: tradeStore.tradeHistory.filter(it => it[0] != 0),
+  orphanTrades: tradeStore.tradeHistory.filter(it => it[0] == 0),
+}))
 
 function onShowEditModal(ticker: string) {
   editModalTickerField.value = ticker
@@ -76,67 +82,82 @@ function onShowEditModal(ticker: string) {
     </div>
 
     <div id="tradeAccordion"
-         class="accordion flex flex-col">
-      <div v-for="([year, hists], i) of tradeStore.tradeHistory"
-           :key="year"
-           class="accordion-item bg-white border border-gray-200">
-        <h2 :id="'heading' + i"
-            class="accordion-header mb-0">
-          <button class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  :data-bs-target="'#collapse' + i"
-                  aria-expanded="false"
-                  aria-controls="collapseOne5">
-            <div class="flex flex-col flex-1">
-              <div class="text-xl">{{ year }}</div>
-              <div class="">Capital Gains: {{ hists.yearGains.format() }} </div>
-              <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
-            </div>
-          </button>
-        </h2>
-        <div :id="'collapse' + i"
-             class="accordion-collapse collapse"
-             :class="{ show: i == 0 }"
-             :aria-labelledby="'collapse' + i">
+         class="accordion">
+      <Accordion v-for="([__, hists], i) of ui.orphanTrades"
+                 id="orphan">
+        <template #header>
+          <div class="flex flex-col flex-1">
+            <div class="text-xl">Ungrouped Trades</div>
+            <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
+          </div>
+        </template>
 
-          <div v-for="([security, events], j) of hists.tickerTrades"
-               :key="security"
-               class="accordion-item bg-white border border-gray-200">
-            <h2 :id="`heading-${i}-${j}`"
-                class="accordion-header mb-0">
-              <button class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      :data-bs-target="`#collapse-${i}-${j}`"
-                      aria-expanded="false"
-                      aria-controls="collapseOne5">
-                <div class="flex flex-col flex-1 pl-2.5">
-                  <div class="text-xl">{{ security }}</div>
-                  <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
-                  <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
-                </div>
-                <!-- @click.stop does not work!? -->
-                <!-- https://stackoverflow.com/a/70664716 -->
-                <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
-                      :path="mdiPlus"
-                      @click="onShowEditModal(security)"
-                      data-bs-toggle="collapse"
-                      data-bs-target />
-              </button>
-            </h2>
-            <div :id="`collapse-${i}-${j}`"
-                 class="accordion-collapse collapse"
-                 :class="{ show: j == 0 }"
-                 :aria-labelledby="`collapse-${i}-${j}`">
+        <template #body>
+          <Accordion v-for="([security, events], j) of hists.tickerTrades"
+                     :id="`orphan-${i}-${j}`"
+                     :key="security">
+            <template #header>
+              <div class="flex flex-col flex-1 pl-2.5">
+                <div class="text-xl">{{ security }}</div>
+                <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
+                <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
+              </div>
+              <!-- @click.stop does not work!? -->
+              <!-- https://stackoverflow.com/a/70664716 -->
+              <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
+                    :path="mdiPlus"
+                    @click="onShowEditModal(security)"
+                    data-bs-toggle="collapse"
+                    data-bs-target />
+            </template>
 
+            <template #body>
               <div class="accordion-body py-4 px-5">
                 <EventTimeline :events="events" />
               </div>
-            </div>
+            </template>
+          </Accordion>
+        </template>
+      </Accordion>
+
+      <Accordion v-for="([year, hists], i) of ui.tradeHistory"
+                 :id="`` + i"
+                 :key="year">
+        <template #header>
+          <div class="flex flex-col flex-1">
+            <div class="text-xl">{{ year }}</div>
+            <div class="">Capital Gains: {{ hists.yearGains.format() }} </div>
+            <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
           </div>
-        </div>
-      </div>
+        </template>
+
+        <template #body>
+          <Accordion v-for="([security, events], j) of hists.tickerTrades"
+                     :id="`${i}-${j}`"
+                     :key="security">
+            <template #header>
+              <div class="flex flex-col flex-1 pl-2.5">
+                <div class="text-xl">{{ security }}</div>
+                <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
+                <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
+              </div>
+              <!-- @click.stop does not work!? -->
+              <!-- https://stackoverflow.com/a/70664716 -->
+              <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
+                    :path="mdiPlus"
+                    @click="onShowEditModal(security)"
+                    data-bs-toggle="collapse"
+                    data-bs-target />
+            </template>
+
+            <template #body>
+              <div class="accordion-body py-4 px-5">
+                <EventTimeline :events="events" />
+              </div>
+            </template>
+          </Accordion>
+        </template>
+      </Accordion>
     </div>
   </div>
 </template>
