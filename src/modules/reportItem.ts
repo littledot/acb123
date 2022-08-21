@@ -29,21 +29,26 @@ export function sumShares(trades: ReportItem[]) {
 
 export function insertTrade(trades: ReportItem[], trade: TradeEvent) {
   let it = newReportRecord2(trade)
+  insertTradeNode(trades, it)
+}
+
+export function insertTradeNode(trades: ReportItem[], node: ReportItem) {
+  let trade = node.tradeEvent
 
   if (trades.length === 0) {
-    trades.push(it)
+    trades.push(node)
     return
   }
 
   for (let i = trades.length - 1; i >= 0; i--) {
     if (trade.date >= trades[i].tradeEvent.date) {
-      trades.splice(i + 1, 0, it)
+      trades.splice(i + 1, 0, node)
       return
     }
   }
 
   // New trade has the earliest trade date? Insert at head
-  trades.splice(0, 0, it)
+  trades.splice(0, 0, node)
 }
 
 export function yearGains(trades: ReportItem[]) {
@@ -121,6 +126,7 @@ export async function calcGainsForTrades(trades: ReportItem[], assetType: AssetC
           it.warn.push(`'optAcb' data missing`)
           return acb
         }
+
         // Exercise call, stock side: spent $ to acquire shares
         // cost = $strike * shares + outlay + (cost to acquire option)
         let cost = it.optAcb.cost.multiply(-1)

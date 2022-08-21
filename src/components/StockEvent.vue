@@ -23,6 +23,8 @@ let isHover = v.ref(false)
 const ui = v.computed(() => {
   let trade = props.event.tradeEvent
   let action = _.capitalize(trade.action)
+  let asset = trade.options ? `options` : `shares`
+  let optLot = trade.optionLot?.let(it => `(lot ${it.id})`) ?? ''
   let date = u.fmt(trade.date)
 
 
@@ -36,7 +38,7 @@ const ui = v.computed(() => {
   let cg = props.event.cg
 
   return {
-    title: `${date}: ${action} ${trade.shares} shares`,
+    title: `${date}: ${action} ${trade.shares} ${asset} ${optLot}`,
     showForex: isForex,
     forexPrice: trade.price.format(),
     forexPriceCurrency: trade.priceFx.currency,

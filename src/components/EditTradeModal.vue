@@ -343,7 +343,8 @@ function onNewDate(it: DateTime, dateField: u.DateField) {
       <SelectInput v-model="actionRef"
                    :options="new Map([
                      ['buy', 'Buy'],
-                     ['sell', 'Sell']
+                     ['sell', 'Sell'],
+                     ['exercise', 'Exercise']
                    ])" />
 
       <div class="">Trade Date</div>
