@@ -1,7 +1,7 @@
 import { Convert } from '@m/models/models'
-import { Profile, toDbTradeEvent, TradeEvent } from '@m/stores/tradeEvent'
+import { Profile, toDbTradeEvent, TradeEvent } from '@/modules/tradeEvent'
 import { BocForexObs } from '@m/stores/fx'
-import { fromDbTradeEvent } from '@m/stores/tradeEvent'
+import { fromDbTradeEvent } from '@/modules/tradeEvent'
 
 export class Db {
   namespace = ['default']

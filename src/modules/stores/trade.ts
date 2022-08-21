@@ -1,6 +1,6 @@
 import * as t from '@m/reportItem'
 import * as u from '@m/util'
-import { Profile, TradeEvent } from '@m/stores/tradeEvent'
+import { Profile, TradeEvent } from '@/modules/tradeEvent'
 import { DateTime } from 'luxon'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"

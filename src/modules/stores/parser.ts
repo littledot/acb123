@@ -1,5 +1,5 @@
 import * as u from '@m/util'
-import { Option, TradeEvent } from '@m/stores/tradeEvent'
+import { Option, TradeEvent } from '@/modules/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import { ParseResult } from 'papaparse'

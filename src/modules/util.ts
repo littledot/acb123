@@ -1,4 +1,4 @@
-import { Option } from '@m/stores/tradeEvent'
+import { Option } from '@/modules/tradeEvent'
 import { DateTime } from 'luxon'
 import * as v from 'vue'
 

@@ -1,4 +1,4 @@
-import { Fx } from '@m/stores/tradeEvent'
+import { Fx } from '@/modules/tradeEvent'
 import axios from 'axios'
 import { DateTime } from 'luxon'
 import { defineStore } from 'pinia'
