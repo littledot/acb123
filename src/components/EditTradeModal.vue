@@ -18,7 +18,9 @@ import { v4 } from 'uuid'
 let props = defineProps<{
   show: boolean,
   trade?: ReportItem,
+
   security?: string,
+  date?: DateTime,
 }>()
 let emits = defineEmits({
   hide: () => true,
@@ -155,10 +157,15 @@ function init() {
   })
 
   props.security?.let(it => securityRef.value = it)
+  props.date?.let(it => {
+    tradeDateRef.value = it
+    settleDateRef.value = it
+    expiryDateRef.value = it
+  })
 }
 
 async function onSave() {
-  let newTrade = <TradeEvent>{
+  let newTrade = {
     id: props.trade?.tradeEvent.id ?? v4(),
     security: securityRef.value,
     action: actionRef.value,
@@ -170,7 +177,7 @@ async function onSave() {
     priceFx: priceFxRef.value,
     outlayFx: outlayFxRef.value,
     notes: notesRef.value,
-  }
+  } as TradeEvent
 
   if (assetClassRef.value == 'option') { // Option? Set option fields
     newTrade.optionLot = optionLotOptionsRef.value.get(optionLotRef.value)

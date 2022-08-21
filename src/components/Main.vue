@@ -11,6 +11,8 @@ import Icon from '@c/core/Icon.vue'
 import * as u from '@m/util'
 import EditTradeModal from '@c/EditTradeModal.vue'
 import Accordion from '@c/core/Accordion.vue'
+import { DateTime } from 'luxon'
+
 
 let tradeStore = useTradeStore()
 
@@ -22,14 +24,16 @@ let showImportModal = v.ref(false)
 let showClearModal = v.ref(false)
 let showEditModal = v.ref(false)
 let editModalTickerField = v.ref('')
+let editModalDateField = v.ref(DateTime.now())
 
 let ui = v.computed(() => ({
   tradeHistory: tradeStore.tradeHistory.filter(it => it[0] != 0),
   orphanTrades: tradeStore.tradeHistory.filter(it => it[0] == 0),
 }))
 
-function onShowEditModal(ticker: string) {
+function onShowEditModal(ticker: string, date: DateTime) {
   editModalTickerField.value = ticker
+  editModalDateField.value = date
   showEditModal.value = true
 }
 
@@ -59,6 +63,7 @@ function onShowEditModal(ticker: string) {
 
     <Teleport to="body">
       <EditTradeModal :security="editModalTickerField"
+                      :date="editModalDateField"
                       :show="showEditModal"
                       @hide="showEditModal = false" />
     </Teleport>
@@ -102,13 +107,6 @@ function onShowEditModal(ticker: string) {
                 <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
                 <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
               </div>
-              <!-- @click.stop does not work!? -->
-              <!-- https://stackoverflow.com/a/70664716 -->
-              <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
-                    :path="mdiPlus"
-                    @click="onShowEditModal(security)"
-                    data-bs-toggle="collapse"
-                    data-bs-target />
             </template>
 
             <template #body>
@@ -145,7 +143,7 @@ function onShowEditModal(ticker: string) {
               <!-- https://stackoverflow.com/a/70664716 -->
               <Icon class="w-6 h-6 ml-2 mr-1 fill-blue-600"
                     :path="mdiPlus"
-                    @click="onShowEditModal(security)"
+                    @click="onShowEditModal(security, DateTime.local(year, 1, 1))"
                     data-bs-toggle="collapse"
                     data-bs-target />
             </template>
