@@ -1,6 +1,7 @@
-import * as t from '@m/reportItem'
+import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
-import { Profile, TradeEvent } from '@/modules/tradeEvent'
+import { TradeEvent } from '@/modules/tradeEvent'
+import { Profile } from "@/modules/profile"
 import { DateTime } from 'luxon'
 import Papa, { ParseResult } from "papaparse"
 import { defineStore } from "pinia"
@@ -39,7 +40,7 @@ export const useTradeStore = defineStore('TradeStore', {
       await this.profile.calcGains()
     },
 
-    async updateTrade(trade: TradeEvent, old: t.ReportItem) {
+    async updateTrade(trade: TradeEvent, old: t.TradeNode) {
       // debugger
       this.profile.updateTrade(trade, old)
       this.db.writeProfile(this.profile)
@@ -56,8 +57,8 @@ export const useTradeStore = defineStore('TradeStore', {
       await this.profile.calcGains()
     },
 
-    async insertTradeAtIndex(trade: TradeEvent, array: t.ReportItem[], pos: number) {
-      array.splice(pos, 0, t.newReportRecord2(trade))
+    async insertTradeAtIndex(trade: TradeEvent, array: t.TradeNode[], pos: number) {
+      array.splice(pos, 0, t.newTradeNode(trade))
       this.db.writeProfile(this.profile)
       this.db.writeTradeEvent(trade)
 

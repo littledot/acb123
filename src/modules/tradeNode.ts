@@ -2,7 +2,7 @@ import { useFxStore } from '@m/stores/fx'
 import { TradeEvent } from '@/modules/tradeEvent'
 import money from 'currency.js'
 
-export interface ReportItem {
+export interface TradeNode {
   tradeEvent: TradeEvent
   tradeValue?: TradeValue // CAD
   acb?: Acb
@@ -12,14 +12,14 @@ export interface ReportItem {
   warn: string[]
 }
 
-export function newReportRecord2(te: TradeEvent) {
-  return <ReportItem>{
+export function newTradeNode(te: TradeEvent) {
+  return <TradeNode>{
     tradeEvent: te,
     warn: [],
   }
 }
 
-export function sumShares(trades: ReportItem[]) {
+export function sumShares(trades: TradeNode[]) {
   return trades.reduce((sum, it) => {
     let n = it.tradeEvent.action === 'buy' ? 1 : -1
     return sum + it.tradeEvent.shares * n
@@ -27,12 +27,12 @@ export function sumShares(trades: ReportItem[]) {
 }
 
 
-export function insertTrade(trades: ReportItem[], trade: TradeEvent) {
-  let it = newReportRecord2(trade)
+export function insertTrade(trades: TradeNode[], trade: TradeEvent) {
+  let it = newTradeNode(trade)
   insertTradeNode(trades, it)
 }
 
-export function insertTradeNode(trades: ReportItem[], node: ReportItem) {
+export function insertTradeNode(trades: TradeNode[], node: TradeNode) {
   let trade = node.tradeEvent
 
   if (trades.length === 0) {
@@ -51,31 +51,31 @@ export function insertTradeNode(trades: ReportItem[], node: ReportItem) {
   trades.splice(0, 0, node)
 }
 
-export function yearGains(trades: ReportItem[]) {
+export function yearGains(trades: TradeNode[]) {
   return trades[trades.length - 1]?.cg?.yearGains ?? money(0)
 }
 
 interface AssetCalc {
-  setAcb(ri: ReportItem, acb: Acb): void
-  getAcb(ri: ReportItem): Acb | undefined
-  setCg(ri: ReportItem, cg: CapGains): void
-  getCg(ri: ReportItem): CapGains | undefined
+  setAcb(ri: TradeNode, acb: Acb): void
+  getAcb(ri: TradeNode): Acb | undefined
+  setCg(ri: TradeNode, cg: CapGains): void
+  getCg(ri: TradeNode): CapGains | undefined
 
 }
 export const OptCalc: AssetCalc = {
-  setAcb: (ri: ReportItem, it: Acb) => ri.optAcb = it,
-  getAcb: (ri: ReportItem) => ri.optAcb,
-  setCg: (ri: ReportItem, it: CapGains) => ri.optCg = it,
-  getCg: (ri: ReportItem) => ri.optCg,
+  setAcb: (ri: TradeNode, it: Acb) => ri.optAcb = it,
+  getAcb: (ri: TradeNode) => ri.optAcb,
+  setCg: (ri: TradeNode, it: CapGains) => ri.optCg = it,
+  getCg: (ri: TradeNode) => ri.optCg,
 }
 export const StockCalc: AssetCalc = {
-  setAcb: (ri: ReportItem, it: Acb) => ri.acb = it,
-  getAcb: (ri: ReportItem) => ri.acb,
-  setCg: (ri: ReportItem, it: CapGains) => ri.cg = it,
-  getCg: (ri: ReportItem) => ri.cg,
+  setAcb: (ri: TradeNode, it: Acb) => ri.acb = it,
+  getAcb: (ri: TradeNode) => ri.acb,
+  setCg: (ri: TradeNode, it: CapGains) => ri.cg = it,
+  getCg: (ri: TradeNode) => ri.cg,
 }
 
-export async function calcGainsForTrades(trades: ReportItem[], assetType: AssetCalc) {
+export async function calcGainsForTrades(trades: TradeNode[], assetType: AssetCalc) {
   let startIdx = trades.findIndex(it => !it.tradeValue || !assetType.getAcb(it))
   if (startIdx == -1) return // No data missing? No need to recalculate
   let target = trades.slice(startIdx)
@@ -182,7 +182,7 @@ export async function calcGainsForTrades(trades: ReportItem[], assetType: AssetC
   }, initCg)
 }
 
-export async function convertForex(items: ReportItem[]) {
+export async function convertForex(items: TradeNode[]) {
   for (let it of items) {
     if (it.tradeValue) continue
     let te = it.tradeEvent

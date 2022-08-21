@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { createPinia, setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 import { beforeAll, describe, expect, it } from 'vitest'
-import * as t from '../reportItem'
+import * as t from '../tradeNode'
 
 beforeAll(() => { setActivePinia(createPinia()) })
 
@@ -37,7 +37,7 @@ describe(`sumShares`, async () => {
     let trades = [
       { ...fakeTrade(), action: `buy`, shares: 100, },
       { ...fakeTrade(), action: `sell`, shares: 10, },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
 
     expect(t.sumShares(trades)).toEqual(90)
   })
@@ -45,7 +45,7 @@ describe(`sumShares`, async () => {
 
 describe(`insertTrade`, async () => {
   it(`should insert trades with earlier trade date in front of trades with later trade date`, async () => {
-    let out = <t.ReportItem[]>[]
+    let out = <t.TradeNode[]>[]
     let trade0 = { ...fakeTrade(), date: DateTime.local(2000, 6, 1) }
     let trade1 = { ...fakeTrade(), date: DateTime.local(2000, 5, 1) }
     let trade2 = { ...fakeTrade(), date: DateTime.local(2000, 5, 15) }
@@ -68,7 +68,7 @@ describe(`insertTrade`, async () => {
 describe(`convertForex`, async () => {
   it(`should calculate tradeValue`, async () => {
     let trade = { ...fakeTrade(), price: $(1), outlay: $(2), options: { ...fakeOption(), strike: $(3) } }
-    let inp = t.newReportRecord2(trade)
+    let inp = t.newTradeNode(trade)
 
     await t.convertForex([inp])
 
@@ -85,7 +85,7 @@ describe(`calcGains`, () => {
     let inp = [
       { ...fakeTrade(), shares: 10, price: $(2), outlay: $(0) },
       { ...fakeTrade(), shares: 20, price: $(3), outlay: $(0) },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
 
     await t.convertForex(inp)
     t.calcGainsForTrades(inp, t.StockCalc)
@@ -108,7 +108,7 @@ describe(`calcGains`, () => {
       { ...fakeTrade(), shares: 1, price: $(0), outlay: $(0) },
       { ...fakeTrade(), shares: 2, price: $(1), outlay: $(0) },
       { ...fakeTrade(), shares: 3, price: $(3), outlay: $(0), action: `sell` },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
 
     await t.convertForex(inp)
     t.calcGainsForTrades(inp, t.StockCalc)
@@ -133,7 +133,7 @@ describe(`calcGains`, () => {
       { ...fakeTrade(), shares: 3, price: $(1), outlay: $(3), action: `sell` },
       // Sale in diff year should reset yearGains
       { ...fakeTrade(), shares: 2, price: $(1), outlay: $(3), action: `sell`, date: DateTime.local(2, 1, 1), },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
 
     await t.convertForex(inp)
     t.calcGainsForTrades(inp, t.StockCalc)
@@ -180,7 +180,7 @@ describe(`calcGains`, () => {
     let optHist = [
       { ...fakeTrade(), shares: 10, price: $(10), outlay: $(5), options: opt, },
       { ...fakeTrade(), shares: 10, price: $(20), outlay: $(10), action: `exercise`, options: opt },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
     let stockHist = [optHist[1]]
 
     await t.convertForex(optHist)
@@ -211,9 +211,9 @@ describe(`calcGains`, () => {
     let optHist = [
       { ...fakeTrade(), shares: 10, price: $(10), outlay: $(4), options: opt, },
       { ...fakeTrade(), shares: 10, price: $(20), outlay: $(5), action: `exercise`, options: opt },
-    ].map(t.newReportRecord2)
+    ].map(t.newTradeNode)
     let stockHist = [
-      t.newReportRecord2({ ...fakeTrade(), shares: 20, price: $(30), outlay: $(10) }),
+      t.newTradeNode({ ...fakeTrade(), shares: 20, price: $(30), outlay: $(10) }),
       optHist[1],
     ]
 

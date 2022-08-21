@@ -6,7 +6,7 @@ import { v4 } from 'uuid'
 import * as v from 'vue'
 import ExpiredOptionsHintView from '@c/ExpiredOptionsHintView.vue'
 import OptionEvent from '@c/OptionEvent.vue'
-import { sumShares } from '@m/reportItem'
+import { sumShares } from '@/modules/tradeNode'
 
 let props = defineProps<{
   history: OptionHistory

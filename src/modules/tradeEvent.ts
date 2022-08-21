@@ -1,6 +1,6 @@
-import { DbFx, DbOption, DbOptionHistory, DbProfile, DbTradeEvent, DbTradeHistory } from '@m/models/models'
+import { DbFx, DbOption, DbOptionHistory, DbTradeEvent, DbTradeHistory } from '@m/models/models'
 import { Db } from '@m/stores/db'
-import * as t from '@m/reportItem'
+import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
 import money from 'currency.js'
 import { DateTime } from "luxon"
@@ -8,115 +8,12 @@ import { v4 } from 'uuid'
 
 export type Fx = DbFx
 
-export class Profile {
-  tradeHistory: Map<string, TradeHistory>
-  tradeReport = <[number, AnnualTradeHistory][]>[]
-
-  constructor() {
-    this.tradeHistory = new Map()
-  }
-
-  init(db: Db, dbProfile: DbProfile) {
-    // debugger
-    for (let [security, dbHistory] of Object.entries(dbProfile.tradeHistory)) {
-      let history = new TradeHistory()
-      history.init(db, dbHistory)
-      this.tradeHistory.set(security, history)
-    }
-  }
-
-  groupByYear() {
-    let data = new Map<number, AnnualTradeHistory>()
-
-    let tradeHistory = u.sortIter(this.tradeHistory.entries(), (a, b) => String(a[0]).localeCompare(b[0]))
-    for (let [security, history] of tradeHistory) {
-      let { stocks, options } = history.groupByYear()
-
-      for (let [year, trades] of stocks) {
-        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
-          .appendStocks(security, trades)
-      }
-
-      for (let [year, trades] of options) {
-        u.mapGetDefault(data, year, () => new AnnualTradeHistory())
-          .appendOptions(security, trades)
-      }
-
-      // Do not group orphans by year
-      u.mapGetDefault(data, 0, () => new AnnualTradeHistory())
-        .appendOrphan(security, history.orphan)
-    }
-
-    return u.sortIter(data.entries(), (a, b) => b[0] - a[0])
-  }
-
-  insertTrade(trade: TradeEvent) {
-    let history = u.mapGetDefault(this.tradeHistory, trade.security,
-      () => new TradeHistory())
-    history.insertTrade(trade)
-  }
-
-  async calcGains() {
-    for (let history of this.tradeHistory.values()) {
-      for (let optHistory of history.option.values()) {
-        for (let optTrades of optHistory) {
-          await t.convertForex(optTrades.trades)
-          t.calcGainsForTrades(optTrades.trades, t.OptCalc)
-        }
-      }
-      await t.convertForex(history.stock)
-      t.calcGainsForTrades(history.stock, t.StockCalc)
-    }
-
-    this.tradeReport = this.groupByYear()
-  }
-
-  updateTrade(trade: TradeEvent, oldTrade: t.ReportItem) {
-    let old = oldTrade.tradeEvent
-    // Complex change? Treat it like a new trade
-    if (trade.date !== old.date // Trade date change? Order change
-      || trade.security !== old.security  // Security change? Group change
-      || trade.optionLot?.id != old.optionLot?.id // Option lot change?
-      || trade.action != old.action // Action change?
-    ) {
-      this.deleteTrade(old)
-      this.insertTrade(trade)
-      return
-    }
-
-    // Replace old trade at same position
-    oldTrade.tradeEvent = trade
-    oldTrade.tradeValue = oldTrade.acb = oldTrade.optAcb = void 0
-  }
-
-  deleteTrade(trade: TradeEvent) {
-    this.tradeHistory.get(trade.security)
-      ?.let(it => it.deleteTrade(trade))
-  }
-
-  clearTrades() {
-    this.tradeHistory.clear()
-    this.tradeReport = []
-  }
-
-  toDbModel() {
-    let hist = <any>{}
-    for (let [security, history] of this.tradeHistory) {
-      hist[security] = history.toDbModel()
-    }
-
-    return <DbProfile>{
-      tradeHistory: hist,
-    }
-  }
-}
-
 export class AnnualTradeHistory {
   tickerTrades = new Map<string, TickerTradeHistory>()
   tradeCount = 0
   yearGains = money(0)
 
-  appendStocks(ticker: string, trades: t.ReportItem[]) {
+  appendStocks(ticker: string, trades: t.TradeNode[]) {
     this._getHist(ticker).appendStocks(trades)
     this.yearGains = this.yearGains.add(t.yearGains(trades))
     this.tradeCount += trades.length
@@ -145,7 +42,7 @@ export class AnnualTradeHistory {
 
 export class TickerTradeHistory {
   option: OptionHistory[]
-  stock: t.ReportItem[]
+  stock: t.TradeNode[]
   orphan: TradeEvent[]
 
   tradeCount = 0
@@ -157,7 +54,7 @@ export class TickerTradeHistory {
     this.orphan = []
   }
 
-  appendStocks(trades: t.ReportItem[]) {
+  appendStocks(trades: t.TradeNode[]) {
     this.stock.push(...trades)
     this.yearGains = this.yearGains.add(t.yearGains(trades))
     this.tradeCount += trades.length
@@ -179,7 +76,7 @@ export class TickerTradeHistory {
 
 export class TradeHistory {
   option: Map<string, OptionHistory[]>
-  stock: t.ReportItem[]
+  stock: t.TradeNode[]
   orphan: TradeEvent[]
 
   constructor() {
@@ -189,7 +86,7 @@ export class TradeHistory {
   }
 
   init(db: Db, dbHistory: DbTradeHistory) {
-    let cache = new Map<string, t.ReportItem>()
+    let cache = new Map<string, t.TradeNode>()
 
     this.option = dbHistory.option
       .map(it => fromDbOptionHistory(db, cache, it))
@@ -197,8 +94,8 @@ export class TradeHistory {
 
     this.stock = dbHistory.stock
       .map(it => u.mapGetDefault(cache, it, () => db.readTradeEvent(it)
-        ?.let(it => t.newReportRecord2(it))))
-      .filter(it => it) as t.ReportItem[]
+        ?.let(it => t.newTradeNode(it))))
+      .filter(it => it) as t.TradeNode[]
 
     this.orphan = dbHistory.orphan
       .map(it => db.readTradeEvent(it))
@@ -225,7 +122,7 @@ export class TradeHistory {
   }
 
   insertTrade(trade: TradeEvent, optLot?: OptionHistory) {
-    let node = t.newReportRecord2(trade)
+    let node = t.newTradeNode(trade)
 
     optLot
       ?.also(it => { // Move to specific lot?
@@ -241,7 +138,7 @@ export class TradeHistory {
     }
   }
 
-  _insertOptionTrade(option: Option, node: t.ReportItem): boolean {
+  _insertOptionTrade(option: Option, node: t.TradeNode): boolean {
     let trade = node.tradeEvent
     let key = optionHash(option)
     let histories = this.option.get(key)
@@ -288,7 +185,7 @@ export class TradeHistory {
     return false
   }
 
-  _insertStockTrade(node: t.ReportItem) {
+  _insertStockTrade(node: t.TradeNode) {
     t.insertTradeNode(this.stock, node)
     return true
   }
@@ -421,7 +318,7 @@ export function toDbOption(obj?: Option) {
 export interface OptionHistory {
   id: string
   contract: Option
-  trades: t.ReportItem[]
+  trades: t.TradeNode[]
 }
 
 export function toDbOptionHistory(obj?: OptionHistory) {
@@ -432,7 +329,7 @@ export function toDbOptionHistory(obj?: OptionHistory) {
   } : void 0
 }
 
-export function fromDbOptionHistory(db: Db, cache: Map<string, t.ReportItem>, obj: DbOptionHistory): OptionHistory {
+export function fromDbOptionHistory(db: Db, cache: Map<string, t.TradeNode>, obj: DbOptionHistory): OptionHistory {
   let r = {
     id: obj.id,
     contract: fromDbOption(obj.contract)!,
@@ -442,7 +339,7 @@ export function fromDbOptionHistory(db: Db, cache: Map<string, t.ReportItem>, ob
     ?.also(it => it.optionLot = r)
   )
     .filter(it => it)
-    .map(it => t.newReportRecord2(it!))
+    .map(it => t.newTradeNode(it!))
 
   r.trades.forEach(it => cache.set(it.tradeEvent.id, it))
 

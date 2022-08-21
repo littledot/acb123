@@ -1,5 +1,6 @@
 import { Convert } from '@m/models/models'
-import { Profile, toDbTradeEvent, TradeEvent } from '@/modules/tradeEvent'
+import { toDbTradeEvent, TradeEvent } from '@/modules/tradeEvent'
+import { Profile } from "@/modules/profile"
 import { BocForexObs } from '@m/stores/fx'
 import { fromDbTradeEvent } from '@/modules/tradeEvent'
 

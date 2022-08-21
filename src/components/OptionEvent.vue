@@ -7,11 +7,11 @@ import * as v from 'vue'
 import FxMetric from '@c/core/FxMetric.vue'
 import Metric from '@c/core/Metric.vue'
 import EditTradeModal from '@c/EditTradeModal.vue'
-import * as t from '@m/reportItem'
+import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
 
 let props = defineProps<{
-  event: t.ReportItem,
+  event: t.TradeNode,
 
   isFirst: boolean,
   isLast: boolean,
