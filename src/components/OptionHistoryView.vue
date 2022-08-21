@@ -27,8 +27,8 @@ let ui = v.computed(() => {
       shares: sumShares(oh.trades),
       price: money(0),
       outlay: money(0),
-      raw: undefined,
-    } : undefined
+      raw: void 0,
+    } : void 0
   }
 })
 

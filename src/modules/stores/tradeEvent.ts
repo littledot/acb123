@@ -406,7 +406,7 @@ export function fromDbOption(json?: DbOption) {
     expiryDate: DateTime.fromJSDate(json.expiryDate),
     strike: money(json.strike),
     strikeFx: json.strikeFx,
-  } : undefined
+  } : void 0
 }
 
 export function toDbOption(obj?: Option) {
@@ -415,7 +415,7 @@ export function toDbOption(obj?: Option) {
     expiryDate: obj.expiryDate.toJSDate(),
     strike: obj.strike.value,
     strikeFx: obj.strikeFx,
-  } : undefined
+  } : void 0
 }
 
 export interface OptionHistory {
@@ -429,7 +429,7 @@ export function toDbOptionHistory(obj?: OptionHistory) {
     id: obj.id,
     contract: toDbOption(obj.contract),
     tradeIds: obj.trades.map(it => it.tradeEvent.id),
-  } : undefined
+  } : void 0
 }
 
 export function fromDbOptionHistory(db: Db, cache: Map<string, t.ReportItem>, obj: DbOptionHistory): OptionHistory {

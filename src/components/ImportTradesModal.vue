@@ -22,7 +22,7 @@ let parserRef = v.ref(new Map<string, TradeConfirmParser>())
 init()
 
 function init() {
-  fileRef.value = undefined
+  fileRef.value = void 0
   fileFormatRef.value = 'ibkr'
   parserRef.value.clear()
 }

@@ -74,7 +74,7 @@ export function mapGetDefault<K, V>(
   backup: () => V,
 ): V {
   let val = map.get(key)
-  if (val === undefined) {
+  if (val === void 0) {
     val = backup()
     map.set(key, val)
   }

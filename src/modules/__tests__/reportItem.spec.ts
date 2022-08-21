@@ -100,7 +100,7 @@ describe(`calcGains`, () => {
       acb: $(2.67),
     }])
 
-    expect(inp.map(it => it.cg)).toEqual([undefined, undefined])
+    expect(inp.map(it => it.cg)).toEqual([void 0, void 0])
   })
 
   it(`should zero out acb when all shares are sold`, async () => {
@@ -157,7 +157,7 @@ describe(`calcGains`, () => {
     }])
 
     expect(inp.map(it => it.cg)).toEqual([
-      undefined, {
+      void 0, {
         gains: $(5 * 1 - 3 - 5 * 11), // -53
         totalGains: $(-53),
         year: 1,
@@ -196,14 +196,14 @@ describe(`calcGains`, () => {
       cost: $(-105), accCost: $(0),
       acb: $(0),
     }])
-    expect(optHist.map(it => it.optCg)).toEqual([undefined, undefined])
+    expect(optHist.map(it => it.optCg)).toEqual([void 0, void 0])
 
     expect(stockHist.map(it => it.acb)).toEqual([{
       shares: 10, accShares: 10,
       cost: $(315), accCost: $(315),
       acb: $(31.5),
     }])
-    expect(stockHist.map(it => it.cg)).toEqual([undefined])
+    expect(stockHist.map(it => it.cg)).toEqual([void 0])
   })
 
   it(`exercise put options`, async () => {
@@ -231,7 +231,7 @@ describe(`calcGains`, () => {
       cost: $(-104), accCost: $(0),
       acb: $(0),
     }])
-    expect(optHist.map(it => it.optCg)).toEqual([undefined, undefined])
+    expect(optHist.map(it => it.optCg)).toEqual([void 0, void 0])
 
     expect(stockHist.map(it => it.acb)).toEqual([{
       shares: 20, accShares: 20,
@@ -243,7 +243,7 @@ describe(`calcGains`, () => {
       acb: $(30.5),
     }])
     expect(stockHist.map(it => it.cg)).toEqual([
-      undefined, {
+      void 0, {
         gains: $(-214),
         totalGains: $(-214),
         year: 1,

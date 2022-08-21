@@ -44,7 +44,7 @@ async function resolveRate(date?: DateTime) {
       .catch((e) => {
         u.err('fx.getRate() failed.', e)
         ui.err = `Failed to query ${currency} exchange rate on ${u.fmt(props.date)}. Please enter it manually.`
-        return undefined
+        return void 0
       })
   }
 
