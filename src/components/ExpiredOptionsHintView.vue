@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { mdiInformationOutline } from '@mdi/js'
 import { useTradeStore } from '@m/stores/trade'
-import { OptionHistory, TradeEvent } from '@m/stores/tradeEvent'
+import { OptionHistory, TradeEvent } from '@m/tradeEvent'
 import * as v from 'vue'
 import Icon from '@c/core/Icon.vue'
 

@@ -3,7 +3,7 @@ import NumberInput from '@c/core/NumberInput.vue'
 import SelectInput from '@c/core/SelectInput.vue'
 import * as u from '@m/util'
 import { useFxStore } from '@m/stores/fx'
-import { Fx } from '@m/stores/tradeEvent'
+import { Fx } from '@m/tradeEvent'
 import { DateTime } from 'luxon'
 import * as v from 'vue'
 

@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { OptionHistory } from '@m/stores/tradeEvent'
+import { OptionHistory } from '@m/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'

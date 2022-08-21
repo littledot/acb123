@@ -2,7 +2,7 @@
 import Icon from '@c/core/Icon.vue'
 import StockEvent from '@c/StockEvent.vue'
 import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
-import { Option, OptionHistory, TradeEvent, TickerTradeHistory } from '@m/stores/tradeEvent'
+import { Option, OptionHistory, TradeEvent, TickerTradeHistory } from '@m/tradeEvent'
 import { capitalize } from 'lodash'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
