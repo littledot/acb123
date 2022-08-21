@@ -75,15 +75,10 @@ export class TickerTradeHistory {
 }
 
 export class TradeHistory {
-  option: Map<string, OptionHistory[]>
-  stock: t.TradeNode[]
-  orphan: TradeEvent[]
+  option = new Map<string, OptionHistory[]>()
+  stock = [] as t.TradeNode[]
+  orphan = [] as TradeEvent[]
 
-  constructor() {
-    this.option = new Map()
-    this.stock = []
-    this.orphan = []
-  }
 
   init(db: Db, dbHistory: DbTradeHistory) {
     let cache = new Map<string, t.TradeNode>()
@@ -134,18 +129,14 @@ export class TradeHistory {
 
     if (!trade.options // No contract? Stock event
       || trade.action == 'exercise') { // Exercise event? Insert to both
-      this._insertStockTrade(node)
+      t.insertTradeNode(this.stock, node)
     }
   }
 
   _insertOptionTrade(option: Option, node: t.TradeNode): boolean {
     let trade = node.tradeEvent
     let key = optionHash(option)
-    let histories = this.option.get(key)
-    if (!histories) {
-      histories = []
-      this.option.set(key, histories)
-    }
+    let histories = u.mapGetDefault(this.option, key, () => [])
 
     if (trade.action == 'buy') { // Buy options? Create new lot
       trade.optionLot = {
@@ -183,11 +174,6 @@ export class TradeHistory {
       return false
     }
     return false
-  }
-
-  _insertStockTrade(node: t.TradeNode) {
-    t.insertTradeNode(this.stock, node)
-    return true
   }
 
   deleteTrade(trade: TradeEvent) {
