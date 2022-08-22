@@ -116,19 +116,18 @@ export class TradeHistory {
     }
   }
 
-  insertTrade(trade: TradeEvent, optLot?: OptionHistory) {
+  insertTrade(trade: TradeEvent) {
     let node = t.newTradeNode(trade)
 
-    optLot
-      ?.also(it => { // Move to specific lot?
-        t.insertTradeNode(it.trades, node)
-        trade.optionLot = it
-      })
-      // Lot not specified? Find a lot to insert into
-      ?? trade.options?.also(it => this._insertOptionTrade(it, node))
+    // option event? Insert into option lot
+    if (trade.optionLot?.id == 'new') {
+      this._insertOptionTrade(trade.optionLot.contract, node)
+    } else if (trade.optionLot) {
+      t.insertTradeNode(trade.optionLot.trades, node)
+    }
 
-    if (!trade.options // No contract? Stock event
-      || trade.action == 'exercise') { // Exercise event? Insert to both
+    // stock or exercise event? Insert into stock lot
+    if (!trade.optionLot || trade.action == 'exercise') {
       t.insertTradeNode(this.stock, node)
     }
   }
@@ -232,7 +231,6 @@ export interface TradeEvent {
   notes?: string
   raw?: string
 
-  options?: Option
   optionLot?: OptionHistory
 }
 
@@ -250,7 +248,6 @@ export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
     outlayFx: json.outlayFx,
     notes: json.notes,
     raw: json.raw,
-    options: fromDbOption(json.options),
   }
 }
 
@@ -268,7 +265,7 @@ export function toDbTradeEvent(obj: TradeEvent): DbTradeEvent {
     outlayFx: obj.outlayFx,
     notes: obj.notes,
     raw: obj.raw,
-    options: toDbOption(obj.options),
+    options: toDbOption(obj.optionLot?.contract),
   }
 }
 

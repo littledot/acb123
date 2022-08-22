@@ -1,5 +1,5 @@
+import { TradeEvent } from '@/modules/tradeEvent'
 import * as u from '@m/util'
-import { Option, TradeEvent } from '@/modules/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import { ParseResult } from 'papaparse'
@@ -89,11 +89,15 @@ export class QtParser extends TradeConfirmParser {
       let [_, optType, symbol, rawExpiration, rawStrike] = optionsMatch
       o.security = symbol
       o.shares *= 100
-      o.options = <Option>{
-        type: optType,
-        expiryDate: DateTime.fromFormat(rawExpiration, 'MM/dd/yy'),
-        strike: money(u.parseNumber(rawStrike)),
-        strikeFx: o.priceFx,
+      o.optionLot = {
+        id: `new`,
+        contract: {
+          type: optType,
+          expiryDate: DateTime.fromFormat(rawExpiration, 'MM/dd/yy'),
+          strike: money(u.parseNumber(rawStrike)),
+          strikeFx: o.priceFx,
+        },
+        trades: [],
       }
     } else {
       let symbol = this._readCsv(csv, QtHeader.Symbol)
@@ -190,11 +194,15 @@ export class IbkrParser extends TradeConfirmParser {
     } else if (asset == 'opt') {
       o.security = this._readCsv(csv, IbkrHeader.UnderlyingSymbol)
       let type = this._readCsv(csv, IbkrHeader.PutCall)
-      o.options = {
-        type: type == 'p' ? 'put' : 'call',
-        expiryDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.Expiry), 'yyyyMMdd'),
-        strike: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Strike))),
-        strikeFx: o.priceFx,
+      o.optionLot = {
+        id: `new`,
+        contract: {
+          type: type == 'p' ? 'put' : 'call',
+          expiryDate: DateTime.fromFormat(this._readCsv(csv, IbkrHeader.Expiry), 'yyyyMMdd'),
+          strike: money(u.parseNumber(this._readCsv(csv, IbkrHeader.Strike))),
+          strikeFx: o.priceFx,
+        },
+        trades: [],
       }
     }
 

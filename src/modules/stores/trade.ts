@@ -40,9 +40,10 @@ export const useTradeStore = defineStore('TradeStore', {
       await this.profile.calcGains()
     },
 
-    async updateTrade(trade: TradeEvent, old: t.TradeNode) {
+    async updateTrade(trade: TradeEvent, old?: t.TradeNode) {
       // debugger
-      this.profile.updateTrade(trade, old)
+      if (old) this.profile.updateTrade(trade, old)
+      else this.profile.insertTrade(trade)
       this.db.writeProfile(this.profile)
       this.db.writeTradeEvent(trade)
 

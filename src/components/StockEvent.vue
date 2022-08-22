@@ -23,7 +23,7 @@ let isHover = v.ref(false)
 const ui = v.computed(() => {
   let trade = props.event.tradeEvent
   let action = _.capitalize(trade.action)
-  let asset = trade.options ? `options` : `shares`
+  let asset = trade.optionLot ? `options` : `shares`
   let optLot = trade.optionLot?.let(it => `(lot ${it.id})`) ?? ''
   let date = u.fmt(trade.date)
 

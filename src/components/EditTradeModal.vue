@@ -146,14 +146,17 @@ function init() {
     outlayFxRef.value = it.outlayFx
     notesRef.value = it.notes
 
-    it.options?.let(it => {
-      assetClassRef.value = 'option'
-      optionTypeRef.value = it.type
-      expiryDateRef.value = it.expiryDate
-      strikeRef.value = it.strike.value
-      strikeFxRef.value = it.strikeFx
+    it.optionLot?.let(it => {
+      optionLotRef.value = it.id
+
+      it.contract.let(it => {
+        assetClassRef.value = 'option'
+        optionTypeRef.value = it.type
+        expiryDateRef.value = it.expiryDate
+        strikeRef.value = it.strike.value
+        strikeFxRef.value = it.strikeFx
+      })
     })
-    it.optionLot?.let(it => optionLotRef.value = it.id)
   })
 
   props.security?.let(it => securityRef.value = it)
@@ -180,19 +183,19 @@ async function onSave() {
   } as TradeEvent
 
   if (assetClassRef.value == 'option') { // Option? Set option fields
-    newTrade.optionLot = optionLotOptionsRef.value.get(optionLotRef.value)
-    newTrade.options = newTrade.optionLot?.contract ?? {
-      type: optionTypeRef.value,
-      expiryDate: expiryDateRef.value,
-      strike: money(strikeRef.value),
-      strikeFx: strikeFxRef.value,
+    newTrade.optionLot = optionLotOptionsRef.value.get(optionLotRef.value) ?? {
+      id: 'new',
+      contract: {
+        type: optionTypeRef.value,
+        expiryDate: expiryDateRef.value,
+        strike: money(strikeRef.value),
+        strikeFx: strikeFxRef.value,
+      },
+      trades: [],
     }
   }
 
-  if (props.trade)
-    await tradeStore.updateTrade(newTrade, props.trade)
-  else
-    tradeStore.insertTrade(newTrade)
+  await tradeStore.updateTrade(newTrade, props.trade)
 }
 
 async function onDelete() {

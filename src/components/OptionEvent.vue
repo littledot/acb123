@@ -22,7 +22,6 @@ let isHover = v.ref(false)
 
 const ui = v.computed(() => {
   let { tradeEvent: trade, tradeValue: cad, optAcb: acb, optCg: cg, warn: warn } = props.event
-  let option = trade.options
 
   let isForex = v.toRaw(trade.priceFx.currency) !== 'CAD'
     || v.toRaw(trade.outlayFx.currency) !== 'CAD'

@@ -98,7 +98,7 @@ export async function calcGainsForTrades(trades: TradeNode[], assetType: AssetCa
   target.forEach(it => it.warn = []) // Reset warnings
   target.reduce((acb, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
-    let opt = tEvent.options
+    let opt = tEvent.optionLot?.contract
     if (!tValue) return acb // No CAD value? Can't calculate ACB
 
     if (tEvent.action == 'buy') {
@@ -146,7 +146,7 @@ export async function calcGainsForTrades(trades: TradeNode[], assetType: AssetCa
 
   target.reduce((cg, it) => {
     let { tradeEvent: tEvent, tradeValue: tValue } = it
-    let opt = tEvent.options
+    let opt = tEvent.optionLot?.contract
     // debugger
     if (!tValue) return cg // No CAD value? Can't calculate gains
 
@@ -200,9 +200,10 @@ export async function convertForex(items: TradeNode[]) {
       strikeForex: 0,
     }
 
-    if (te.options) {
-      tv.strikeForex = await fxStore.getRate(te.options.strikeFx, te.date)
-      tv.strike = te.options.strike.multiply(tv.strikeForex)
+    let opt = te.optionLot?.contract
+    if (opt) {
+      tv.strikeForex = await fxStore.getRate(opt.strikeFx, te.date)
+      tv.strike = opt.strike.multiply(tv.strikeForex)
     }
 
     it.tradeValue = tv

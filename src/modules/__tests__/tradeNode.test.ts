@@ -1,8 +1,8 @@
 import $ from 'currency.js'
 import { DateTime } from 'luxon'
 import { createPinia, setActivePinia } from 'pinia'
-import { createTestingPinia } from '@pinia/testing'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { Option } from '../tradeEvent'
 import * as t from '../tradeNode'
 
 beforeAll(() => { setActivePinia(createPinia()) })
@@ -17,6 +17,12 @@ let fakeOption = () => ({
   expiryDate: DateTime.local(1, 1, 1),
   strike: $(0),
   strikeFx: fakeFx(),
+})
+
+let fakeOptionLot = (contract?: Option) => ({
+  id: `2`,
+  contract: contract ?? fakeOption(),
+  trades: [],
 })
 
 let fakeTrade = () => ({
@@ -67,7 +73,10 @@ describe(`insertTrade`, async () => {
 
 describe(`convertForex`, async () => {
   it(`should calculate tradeValue`, async () => {
-    let trade = { ...fakeTrade(), price: $(1), outlay: $(2), options: { ...fakeOption(), strike: $(3) } }
+    let trade = {
+      ...fakeTrade(), price: $(1), outlay: $(2),
+      optionLot: fakeOptionLot({ ...fakeOption(), strike: $(3) }),
+    }
     let inp = t.newTradeNode(trade)
 
     await t.convertForex([inp])
@@ -176,10 +185,10 @@ describe(`calcGains`, () => {
   })
 
   it(`exercise call options`, async () => {
-    let opt = { ...fakeOption(), type: `call`, strike: $(20), }
+    let opt = fakeOptionLot({ ...fakeOption(), type: `call`, strike: $(20), })
     let optHist = [
-      { ...fakeTrade(), shares: 10, price: $(10), outlay: $(5), options: opt, },
-      { ...fakeTrade(), shares: 10, price: $(20), outlay: $(10), action: `exercise`, options: opt },
+      { ...fakeTrade(), shares: 10, price: $(10), outlay: $(5), optionLot: opt, },
+      { ...fakeTrade(), shares: 10, price: $(20), outlay: $(10), action: `exercise`, optionLot: opt },
     ].map(t.newTradeNode)
     let stockHist = [optHist[1]]
 
@@ -207,10 +216,10 @@ describe(`calcGains`, () => {
   })
 
   it(`exercise put options`, async () => {
-    let opt = { ...fakeOption(), type: `put`, strike: $(20), }
+    let opt = fakeOptionLot({ ...fakeOption(), type: `put`, strike: $(20), })
     let optHist = [
-      { ...fakeTrade(), shares: 10, price: $(10), outlay: $(4), options: opt, },
-      { ...fakeTrade(), shares: 10, price: $(20), outlay: $(5), action: `exercise`, options: opt },
+      { ...fakeTrade(), shares: 10, price: $(10), outlay: $(4), optionLot: opt, },
+      { ...fakeTrade(), shares: 10, price: $(20), outlay: $(5), action: `exercise`, optionLot: opt },
     ].map(t.newTradeNode)
     let stockHist = [
       t.newTradeNode({ ...fakeTrade(), shares: 20, price: $(30), outlay: $(10) }),

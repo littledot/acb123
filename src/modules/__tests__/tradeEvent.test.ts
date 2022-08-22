@@ -1,11 +1,9 @@
 import $ from 'currency.js'
 import { DateTime } from 'luxon'
 import { createPinia, setActivePinia } from 'pinia'
-import { createTestingPinia } from '@pinia/testing'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import * as t from '../tradeEvent'
-import * as TradeNode from '../tradeNode'
 import * as Uuid from 'uuid'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
+import * as t from '../tradeEvent'
 
 
 beforeAll(() => { setActivePinia(createPinia()) })
@@ -20,6 +18,12 @@ let fakeOption = () => ({
   expiryDate: DateTime.local(1, 1, 1),
   strike: $(0),
   strikeFx: fakeFx(),
+})
+
+let fakeOptionLot = () => ({
+  id: `new`,
+  contract: fakeOption(),
+  trades: [],
 })
 
 let fakeTrade = () => ({
@@ -50,8 +54,8 @@ describe(`TradeHistory.insertTrade()`, async () => {
 
   it(`should create new lot when inserting option buy`, async () => {
     vi.spyOn(Uuid, 'v4').mockImplementation(() => 'rand-uuid')
-    let opt = fakeOption()
-    let trade = { ...fakeTrade(), options: opt }
+    let opt = { ...fakeOptionLot() }
+    let trade = { ...fakeTrade(), optionLot: opt }
 
     let ans = new t.TradeHistory()
     ans.insertTrade(trade)
@@ -60,16 +64,23 @@ describe(`TradeHistory.insertTrade()`, async () => {
     expect(ans.option.size).toBe(1)
     expect(ans.orphan.length).toBe(0)
 
-    let lot = ans.option.get(t.optionHash(opt))![0]
+    let lot = ans.option.get(t.optionHash(opt.contract))![0]
     expect(lot.id).toBe('rand-uuid')
-    expect(lot.contract).toBe(opt)
+    expect(lot.contract).toBe(opt.contract)
     expect(lot.trades[0].tradeEvent).toBe(trade)
+
+    // should append to existing lot with same id
+    let trade1 = { ...fakeTrade(), optionLot: lot }
+
+    ans.insertTrade(trade1)
+
+    expect(lot.trades[1].tradeEvent).toBe(trade1)
   })
 
   it(`should append option sale to matching lot`, async () => {
-    let opt = { ...fakeOption(), }
-    let trade0 = { ...fakeTrade(), options: opt }
-    let trade1 = { ...fakeTrade(), options: opt, action: 'sell' }
+    let opt = { ...fakeOptionLot(), }
+    let trade0 = { ...fakeTrade(), optionLot: opt }
+    let trade1 = { ...fakeTrade(), optionLot: opt, action: 'sell' }
 
     let ans = new t.TradeHistory()
     ans.insertTrade(trade0)
@@ -79,15 +90,15 @@ describe(`TradeHistory.insertTrade()`, async () => {
     expect(ans.option.size).toBe(1)
     expect(ans.orphan.length).toBe(0)
 
-    let lot = ans.option.get(t.optionHash(opt))![0]
+    let lot = ans.option.get(t.optionHash(opt.contract))![0]
     expect(lot.trades[0].tradeEvent).toBe(trade0)
     expect(lot.trades[1].tradeEvent).toBe(trade1)
   })
 
   it(`should append option sale to orphan lot when date is earlier than buy`, async () => {
-    let opt = { ...fakeOption(), }
-    let trade0 = { ...fakeTrade(), options: opt, date: DateTime.local(2000, 1, 2) }
-    let trade1 = { ...fakeTrade(), options: opt, date: DateTime.local(2000, 1, 1), action: 'sell' }
+    let opt = { ...fakeOptionLot(), }
+    let trade0 = { ...fakeTrade(), optionLot: opt, date: DateTime.local(2000, 1, 2) }
+    let trade1 = { ...fakeTrade(), optionLot: opt, date: DateTime.local(2000, 1, 1), action: 'sell' }
 
     let ans = new t.TradeHistory()
     ans.insertTrade(trade0)
@@ -99,9 +110,9 @@ describe(`TradeHistory.insertTrade()`, async () => {
   })
 
   it(`should append option sale to oprhan lot when lot has insufficient shares for sale`, async () => {
-    let opt = { ...fakeOption() }
-    let trade0 = { ...fakeTrade(), options: opt, }
-    let trade1 = { ...fakeTrade(), options: opt, action: 'sell', shares: 1 }
+    let opt = { ...fakeOptionLot() }
+    let trade0 = { ...fakeTrade(), optionLot: opt, }
+    let trade1 = { ...fakeTrade(), optionLot: opt, action: 'sell', shares: 1 }
 
     let ans = new t.TradeHistory()
     ans.insertTrade(trade0)
@@ -113,9 +124,9 @@ describe(`TradeHistory.insertTrade()`, async () => {
   })
 
   it(`should insert exercise option to both option and stock lots`, async () => {
-    let opt = { ...fakeOption() }
-    let trade0 = { ...fakeTrade(), options: opt, }
-    let trade1 = { ...fakeTrade(), options: opt, action: 'exercise' }
+    let opt = { ...fakeOptionLot() }
+    let trade0 = { ...fakeTrade(), optionLot: opt, }
+    let trade1 = { ...fakeTrade(), optionLot: opt, action: 'exercise' }
 
     let ans = new t.TradeHistory()
     ans.insertTrade(trade0)
@@ -125,7 +136,7 @@ describe(`TradeHistory.insertTrade()`, async () => {
     expect(ans.option.size).toBe(1)
     expect(ans.orphan.length).toBe(0)
 
-    let lot = ans.option.get(t.optionHash(opt))![0]
+    let lot = ans.option.get(t.optionHash(opt.contract))![0]
     expect(lot.trades[0].tradeEvent).toBe(trade0)
     expect(lot.trades[1].tradeEvent).toBe(trade1)
   })
