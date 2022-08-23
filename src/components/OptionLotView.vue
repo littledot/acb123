@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { OptionHistory } from '@m/tradeEvent'
+import { OptionLot } from '@m/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
@@ -9,22 +9,22 @@ import OptionEvent from '@c/OptionEvent.vue'
 import { sumShares } from '@/modules/tradeNode'
 
 let props = defineProps<{
-  history: OptionHistory
+  optionLot: OptionLot
 }>()
 let emits = defineEmits({})
 
 let ui = v.computed(() => {
-  let oh = props.history
-  let expiredOpt = hasExpiredOptions(oh)
+  let ol = props.optionLot
+  let expiredOpt = hasExpiredOptions(ol)
 
   return {
     expiredHint: expiredOpt > 0 ? {
-      ...oh.trades[0].tradeEvent,
+      ...ol.trades[0].tradeEvent,
       id: v4(),
-      date: oh.contract.expiryDate,
-      settleDate: oh.contract.expiryDate,
+      date: ol.contract.expiryDate,
+      settleDate: ol.contract.expiryDate,
       action: 'expire',
-      shares: sumShares(oh.trades),
+      shares: sumShares(ol.trades),
       price: money(0),
       outlay: money(0),
       raw: void 0,
@@ -32,7 +32,7 @@ let ui = v.computed(() => {
   }
 })
 
-function hasExpiredOptions(oh: OptionHistory): number {
+function hasExpiredOptions(oh: OptionLot): number {
   if (DateTime.now() <= oh.contract.expiryDate) {
     return 0
   }
@@ -43,13 +43,13 @@ function hasExpiredOptions(oh: OptionHistory): number {
 </script>
 
 <template>
-  <OptionEvent v-for="(it, i) of history.trades"
+  <OptionEvent v-for="(it, i) of optionLot.trades"
                :key="it.tradeEvent.id"
                :event="it"
                :isFirst="i === 0"
-               :isLast="i === history.trades.length - 1" />
+               :isLast="i === optionLot.trades.length - 1" />
   <ExpiredOptionsHintView v-if="ui.expiredHint"
-                          :history="history"
+                          :option-lot="optionLot"
                           :event="ui.expiredHint" />
 </template>
 <style scoped>

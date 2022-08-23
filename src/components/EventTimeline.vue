@@ -2,7 +2,7 @@
 import Icon from '@c/core/Icon.vue'
 import StockEvent from '@c/StockEvent.vue'
 import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
-import { Option, OptionHistory, TradeEvent, TickerTradeHistory } from '@m/tradeEvent'
+import { Option, OptionLot, TradeEvent, TickerTradeHistory } from '@m/tradeEvent'
 import { capitalize } from 'lodash'
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
@@ -10,7 +10,7 @@ import OptionEvent from '@c/OptionEvent.vue'
 import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
 import ExpiredOptionsHint from '@c/ExpiredOptionsHintView.vue'
-import OptionHistoryView from '@c/OptionHistoryView.vue'
+import OptionLotView from '@c/OptionLotView.vue'
 
 let props = defineProps<{
   events: TickerTradeHistory
@@ -23,22 +23,22 @@ let emits = defineEmits({})
     <div v-if="events.option.length > 0"
          id="options">
 
-      <div v-for="(optHist, i) of events.option">
+      <div v-for="(optLot, i) of events.option">
         <div class="event-grid items-center">
           <div class="col-[1/4] flex items-center">
             <div class="flex items-center font-semibold text-xl mr-90">
               <span>
-                {{ capitalize(optHist.contract.type) }} options</span>
+                {{ capitalize(optLot.contract.type) }} options</span>
               <Icon class="w-5 h-5 ml-2 mr-1"
                     :path="mdiClockAlertOutline" />
               <span>
-                {{ u.fmt(optHist.contract.expiryDate) }}</span>
+                {{ u.fmt(optLot.contract.expiryDate) }}</span>
               <Icon class="w-5 h-5 ml-2"
                     :path="mdiCurrencyUsd" />
               <span>
-                {{ optHist.contract.strike }}</span>
+                {{ optLot.contract.strike }}</span>
               <span class="self-center font-normal text-xs ml-2">
-                #{{ optHist.id.slice(-4) }}</span>
+                #{{ optLot.id.slice(-4) }}</span>
             </div>
           </div>
           <p class="col-[4/5] text-right font-semibold"
@@ -53,7 +53,7 @@ let emits = defineEmits({})
              :class="{ hidden: i > 0 }">Capital Gains</p>
         </div>
 
-        <OptionHistoryView :history="optHist" />
+        <OptionLotView :option-lot="optLot" />
       </div>
     </div>
     <div v-if="events.stock.length > 0"

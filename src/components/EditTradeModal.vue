@@ -7,7 +7,7 @@ import SelectInput from '@c/core/SelectInput.vue'
 import TextInput from '@c/core/TextInput.vue'
 import * as u from '@m/util'
 import { useTradeStore } from '@m/stores/trade'
-import { Fx, OptionHistory, TradeEvent } from '@m/tradeEvent'
+import { Fx, OptionLot, TradeEvent } from '@m/tradeEvent'
 import money from 'currency.js'
 import { DateTime } from 'luxon'
 import * as v from 'vue'
@@ -44,7 +44,7 @@ let optionTypeRef = v.ref('')
 let expiryDateRef = v.ref(DateTime.now())
 let strikeRef = v.ref(0)
 let strikeFxRef = v.ref<Fx>(u.CAD)
-let optionLotOptionsRef = v.ref(new Map<string, OptionHistory>())
+let optionLotOptionsRef = v.ref(new Map<string, OptionLot>())
 let optionLotRef = v.ref('')
 
 // Errs
@@ -71,7 +71,7 @@ let dateFields = {
 
 v.watchEffect(() => validateForm())
 
-v.watch(() => props.show, (show) => { if (show) init() })
+v.watch(() => props.show, init)
 
 v.watch(securityRef, (security) => { // Show all option lots for ticker
   let optLot = props.trade?.tradeEvent.optionLot
@@ -113,7 +113,9 @@ let disableOkUi = v.computed(() => {
     if (err.value) return true
 })
 
-function init() {
+function init(show: boolean) {
+  if (!show) return
+
   console.log('init called')
   assetClassRef.value = 'stock'
   securityRef.value = ''

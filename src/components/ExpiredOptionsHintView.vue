@@ -1,12 +1,12 @@
 <script setup lang='ts'>
 import { mdiInformationOutline } from '@mdi/js'
 import { useTradeStore } from '@m/stores/trade'
-import { OptionHistory, TradeEvent } from '@m/tradeEvent'
+import { OptionLot, TradeEvent } from '@m/tradeEvent'
 import * as v from 'vue'
 import Icon from '@c/core/Icon.vue'
 
 let props = defineProps<{
-  history: OptionHistory,
+  optionLot: OptionLot,
   event: TradeEvent,
   modelValue?: any,
 }>()
@@ -21,7 +21,7 @@ let ui = v.computed(() => {
 })
 
 async function insertExpiredEvent() {
-  await useTradeStore().insertTradeAtIndex(props.event, props.history.trades, props.history.trades.length)
+  await useTradeStore().insertTradeAtIndex(props.event, props.optionLot.trades, props.optionLot.trades.length)
 }
 
 </script>

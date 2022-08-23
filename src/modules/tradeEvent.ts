@@ -19,9 +19,9 @@ export class AnnualTradeHistory {
     this.tradeCount += trades.length
   }
 
-  appendOptions(ticker: string, hists: OptionHistory[]) {
-    this._getHist(ticker).appendOptions(hists)
-    for (let optHist of hists) {
+  appendOptions(ticker: string, lots: OptionLot[]) {
+    this._getHist(ticker).appendOptions(lots)
+    for (let optHist of lots) {
       this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
       this.tradeCount += optHist.trades.length
     }
@@ -41,7 +41,7 @@ export class AnnualTradeHistory {
 
 
 export class TickerTradeHistory {
-  option: OptionHistory[]
+  option: OptionLot[]
   stock: t.TradeNode[]
   orphan: TradeEvent[]
 
@@ -60,11 +60,11 @@ export class TickerTradeHistory {
     this.tradeCount += trades.length
   }
 
-  appendOptions(optHists: OptionHistory[]) {
-    this.option.push(...optHists)
-    for (let optHist of optHists) {
-      this.yearGains = this.yearGains.add(t.yearGains(optHist.trades))
-      this.tradeCount += optHist.trades.length
+  appendOptions(lots: OptionLot[]) {
+    this.option.push(...lots)
+    for (let lot of lots) {
+      this.yearGains = this.yearGains.add(t.yearGains(lot.trades))
+      this.tradeCount += lot.trades.length
     }
   }
 
@@ -75,7 +75,7 @@ export class TickerTradeHistory {
 }
 
 export class TradeHistory {
-  option = new Map<string, OptionHistory[]>()
+  option = new Map<string, OptionLot[]>()
   stock = [] as t.TradeNode[]
   orphan = [] as TradeEvent[]
 
@@ -108,11 +108,11 @@ export class TradeHistory {
             .entries()]
             .map(([year, trades]) => ({
               y: year,
-              h: { ...optHist, trades: trades }
+              l: { ...optHist, trades: trades }
             }))
         )
         .let(it => u.groupBy(it, it => it.y))
-        .let(it => u.mapValues(it, it => it.map(it => <OptionHistory>it.h)))
+        .let(it => u.mapValues(it, it => it.map(it => <OptionLot>it.l)))
     }
   }
 
@@ -231,7 +231,7 @@ export interface TradeEvent {
   notes?: string
   raw?: string
 
-  optionLot?: OptionHistory
+  optionLot?: OptionLot
 }
 
 export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
@@ -298,13 +298,13 @@ export function toDbOption(obj?: Option) {
   } : void 0
 }
 
-export interface OptionHistory {
+export interface OptionLot {
   id: string
   contract: Option
   trades: t.TradeNode[]
 }
 
-export function toDbOptionHistory(obj?: OptionHistory) {
+export function toDbOptionHistory(obj?: OptionLot) {
   return obj ? <DbOptionHistory>{
     id: obj.id,
     contract: toDbOption(obj.contract),
@@ -312,11 +312,11 @@ export function toDbOptionHistory(obj?: OptionHistory) {
   } : void 0
 }
 
-export function fromDbOptionHistory(db: Db, cache: Map<string, t.TradeNode>, obj: DbOptionHistory): OptionHistory {
+export function fromDbOptionHistory(db: Db, cache: Map<string, t.TradeNode>, obj: DbOptionHistory): OptionLot {
   let r = {
     id: obj.id,
     contract: fromDbOption(obj.contract)!,
-  } as OptionHistory
+  } as OptionLot
 
   r.trades = obj.tradeIds.map(it => db.readTradeEvent(it)
     ?.also(it => it.optionLot = r)
