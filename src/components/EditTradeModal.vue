@@ -69,8 +69,6 @@ let dateFields = {
   expiry: { date: expiryDateRef, err: errs.expiryDate },
 }
 
-v.watchEffect(() => validateForm())
-
 v.watch(() => props.show, init)
 
 v.watch(securityRef, (security) => { // Show all option lots for ticker
@@ -113,8 +111,13 @@ let disableOkUi = v.computed(() => {
     if (err.value) return true
 })
 
+let stopValidateForm: v.WatchStopHandle | undefined
+
 function init(show: boolean) {
-  if (!show) return
+  if (!show) {
+    stopValidateForm?.()
+    return
+  }
 
   console.log('init called')
   assetClassRef.value = 'stock'
@@ -167,6 +170,8 @@ function init(show: boolean) {
     settleDateRef.value = it
     expiryDateRef.value = it
   })
+
+  stopValidateForm = v.watchEffect(() => validateForm())
 }
 
 async function onSave() {
