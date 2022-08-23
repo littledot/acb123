@@ -90,35 +90,38 @@ function onShowEditModal(ticker: string, date: DateTime) {
 
       <div id="tradeAccordion"
            class="accordion w-full mt-4">
-        <Accordion v-for="([__, hists], i) of ui.orphanTrades"
-                   id="orphan">
-          <template #header>
-            <div class="flex-col flex-1">
-              <div class="text-xl">Ungrouped Trades</div>
-              <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
-            </div>
-          </template>
 
-          <template #body>
-            <Accordion v-for="([security, events], j) of hists.tickerTrades"
-                       :id="`orphan-${i}-${j}`"
-                       :key="security">
-              <template #header>
-                <div class="flex-col flex-1 pl-2.5">
-                  <div class="text-xl">{{ security }}</div>
-                  <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
-                  <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
-                </div>
-              </template>
+        <template v-for="([__, hists], i) of ui.orphanTrades">
+          <Accordion v-if="hists.tradeCount > 0"
+                     id="orphan">
+            <template #header>
+              <div class="flex-col flex-1">
+                <div class="text-xl">Ungrouped Trades</div>
+                <div class="">Trades: {{ u.fmt(hists.tradeCount) }}</div>
+              </div>
+            </template>
 
-              <template #body>
-                <div class="accordion-body py-4 px-5">
-                  <EventTimeline :events="events" />
-                </div>
-              </template>
-            </Accordion>
-          </template>
-        </Accordion>
+            <template #body>
+              <Accordion v-for="([security, events], j) of hists.tickerTrades"
+                         :id="`orphan-${i}-${j}`"
+                         :key="security">
+                <template #header>
+                  <div class="flex-col flex-1 pl-2.5">
+                    <div class="text-xl">{{ security }}</div>
+                    <div class="">Capital Gains: {{ events.yearGains.format() }} </div>
+                    <div class="">Trades: {{ u.fmt(events.tradeCount) }}</div>
+                  </div>
+                </template>
+
+                <template #body>
+                  <div class="accordion-body py-4 px-5">
+                    <EventTimeline :events="events" />
+                  </div>
+                </template>
+              </Accordion>
+            </template>
+          </Accordion>
+        </template>
 
         <Accordion v-for="([year, hists], i) of ui.tradeHistory"
                    :id="`` + i"
