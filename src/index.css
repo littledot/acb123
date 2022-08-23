@@ -15,3 +15,8 @@
 .text-red-600 {
   color: rgb(220 38 38);
 }
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}

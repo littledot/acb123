@@ -16,9 +16,9 @@ let props = defineProps<{
 
 </script>
 <template>
-  <div class="flex flex-col place-items-start">
-    <div class="flex flex-row items-center gap-x-1">
-      <div class="flex flex-col place-items-start">
+  <div class="flex-col place-items-start">
+    <div class="flex items-center gap-x-1">
+      <div class="flex-col place-items-start">
         <Popper :content="labelTooltip"
                 :placement="labelTooltipPlacement"
                 :disabled="!!!labelTooltip">
@@ -37,7 +37,7 @@ let props = defineProps<{
             :path="mdiClose" />
 
       <div id="fx-label"
-           class="flex flex-col place-items-start">
+           class="flex-col place-items-start">
         <Popper :content="labelTooltip"
                 :placement="labelTooltipPlacement"
                 :disabled="!!!labelTooltip">

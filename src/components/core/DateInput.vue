@@ -39,7 +39,7 @@ function onInputDate(event: Event) {
 
 </script>
 <template>
-  <div class="flex flex-row">
+  <div class="flex">
     <NumberInput class="flex-1"
                  hint="Year"
                  :maxLen="4"

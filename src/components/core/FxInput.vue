@@ -72,8 +72,8 @@ function emitEvent(event: Event) {
 
 </script>
 <template>
-  <div class="flex flex-col">
-    <div class="flex flex-row">
+  <div class="flex-col">
+    <div class="flex">
       <SelectInput v-model="currencyRef"
                    @update:modelValue="(_, ev) => onChange(ev)"
                    :options="new Map([

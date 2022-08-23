@@ -79,13 +79,13 @@ const ui = v.computed(() => {
   </Teleport>
 
   <div v-bind="$attrs"
-       class="flex flex-col"
+       class="flex-col"
        @dblclick="showEditModal = true"
        @mouseover="isHover = true"
        @mouseleave="isHover = false">
 
     <div id="trade-title"
-         class="flex flex-row items-center">
+         class="flex items-center">
 
       <div id="title-timeline"
            class="relative flex self-stretch">
@@ -103,8 +103,8 @@ const ui = v.computed(() => {
       </div>
 
       <div id="title-content"
-           class="flex flex-row flex-1 gap-x-4 items-center ml-2">
-        <div class="flex flex-row flex-[3] items-center">
+           class="flex flex-1 gap-x-4 items-center ml-2">
+        <div class="flex flex-[3] items-center">
           <h4 class="text-left text-gray-800 font-semibold text-xl">
             {{ ui.title }}</h4>
           <Icon :path="mdiPencil"
@@ -116,7 +116,7 @@ const ui = v.computed(() => {
     </div>
 
     <div id="trade-body"
-         class="flex flex-row">
+         class="flex">
       <div id="body-timeline"
            class="bg-blue-600 w-1 mx-1"
            :class="{ invisible: isLast }" />
@@ -140,17 +140,17 @@ const ui = v.computed(() => {
                 :value="ui.cadTotal" />
 
         <div v-if="ui.acb"
-             class="col-[4/5] row-[1/2] flex flex-col justify-end text-right">
+             class="col-[4/5] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
                 :class="ui.acb.costColor">{{ ui.acb.cost }}</span>
           <span class="text-xl">{{ ui.acb.totalCost }}</span>
         </div>
 
         <div v-if="ui.acb"
-             class="col-[5/6] row-[1/2] flex flex-col justify-end text-right">
+             class="col-[5/6] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
                 :class="ui.acb.sharesColor">{{ ui.acb.shares }}</span>
-          <div class="flex flex-row justify-end items-center">
+          <div class="flex justify-end items-center">
             <Popper v-if="ui.acb.showNegativeSharesAlert">
               <Icon :path="mdiAlert"
                     class="w-6 h-6 mx-1 fill-yellow-500" />
@@ -163,12 +163,12 @@ const ui = v.computed(() => {
           </div>
         </div>
 
-        <div class="col-[6/7] row-[1/2] flex flex-col justify-end text-right">
+        <div class="col-[6/7] row-[1/2] flex-col justify-end text-right">
           <span class="text-xl">{{ ui.acb?.acb }}</span>
         </div>
 
         <div v-if="ui.cg"
-             class="col-[7/8] row-[1/2] flex flex-col justify-end text-right">
+             class="col-[7/8] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
                 :class="ui.cg.gainsColor">{{ ui.cg.gains }}</span>
           <span class="text-xl">{{ ui.cg.totalGains }}</span>

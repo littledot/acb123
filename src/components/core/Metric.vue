@@ -10,7 +10,7 @@ const props = defineProps<{
 
 </script>
 <template>
-  <div class="flex flex-col place-items-start justify-between">
+  <div class="flex-col place-items-start justify-between">
     <Popper :content="labelTooltip"
             :placement="labelTooltipPlacement"
             :disabled="!!!labelTooltip">
@@ -20,7 +20,7 @@ const props = defineProps<{
       </div>
     </Popper>
     <div id="value"
-         class="flex flex-row center-items">
+         class="flex center-items">
       <span class="text-xl">{{ value }}</span>
       <slot name="valueRight" />
     </div>

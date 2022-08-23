@@ -90,10 +90,10 @@ function onImport() {
          :ok-no-emit-hide="true"
          :show="show"
          @hide="emits('hide')">
-    <div class="flex flex-col">
+    <div class="flex-col">
       <div class="import-trade-grid items-baseline gap-2">
         <div class="">File</div>
-        <div class="flex flex-col w-full">
+        <div class="flex-col w-full">
           <FileInput class=""
                      accept=".csv, .tsv"
                      v-model="fileRef" />
@@ -101,7 +101,7 @@ function onImport() {
                class="text-sm text-red-500">{{ ui.fileErr }}</div>
         </div>
         <div class="">File Format</div>
-        <div class="flex flex-col w-full">
+        <div class="flex-col w-full">
           <SelectInput :options="u.importFmts"
                        v-model="fileFormatRef" />
           <div v-if="ui.fileFmtErr"

@@ -10,13 +10,13 @@ const props = defineProps<{
 
 </script>
 <template>
-  <div class="flex flex-col place-items-end justify-between">
+  <div class="flex-col place-items-end justify-between">
     <div id="label"
          class="text-sm font-medium">
       {{ label }}
     </div>
     <div id="value"
-         class="flex flex-row center-items">
+         class="flex center-items">
       <span class="text-xl">{{ value }}</span>
       <slot name="valueRight" />
     </div>

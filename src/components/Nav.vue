@@ -2,7 +2,8 @@
 <nav class="
   relative
   w-full
-  flex flex-wrap
+  flex
+  flex-wrap
   items-center
   justify-between
   py-4
@@ -47,7 +48,7 @@
       loading="lazy" />
   </a>
   <!-- Left links -->
-  <ul class="navbar-nav flex flex-col pl-0 list-style-none mr-auto">
+  <ul class="navbar-nav flex-col pl-0 list-style-none mr-auto">
     <li class="nav-item p-2">
       <a class="nav-link text-gray-500 hover:text-gray-700 focus:text-gray-700 p-0" href="#">Dashboard</a>
     </li>
@@ -82,7 +83,8 @@
           mr-4
           dropdown-toggle
           hidden-arrow
-          flex items-center
+          flex
+          items-center
         " href="#" id="dropdownMenuButton1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
       <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="bell"
         class="w-4" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">

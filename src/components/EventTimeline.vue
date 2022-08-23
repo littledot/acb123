@@ -19,14 +19,14 @@ let emits = defineEmits({})
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex-col">
     <div v-if="events.option.length > 0"
          id="options">
 
       <div v-for="(optHist, i) of events.option">
         <div class="event-grid items-center">
-          <div class="col-[1/4] flex flex-row items-center">
-            <div class="flex flex-row items-center font-semibold text-xl mr-90">
+          <div class="col-[1/4] flex items-center">
+            <div class="flex items-center font-semibold text-xl mr-90">
               <span>
                 {{ capitalize(optHist.contract.type) }} options</span>
               <Icon class="w-5 h-5 ml-2 mr-1"
@@ -59,7 +59,7 @@ let emits = defineEmits({})
     <div v-if="events.stock.length > 0"
          id="stocks">
       <div class="event-grid items-center pl-5">
-        <div class="col-[1/4] flex flex-row items-center">
+        <div class="col-[1/4] flex items-center">
           <p class="text-left font-semibold text-xl">Stocks</p>
         </div>
         <p class="col-[4/5] text-right font-semibold"
