@@ -69,7 +69,7 @@ describe(`TradeHistory.insertTrade()`, async () => {
     expect(lot.contract).toBe(opt.contract)
     expect(lot.trades[0].tradeEvent).toBe(trade)
 
-    // should append to existing lot with same id
+    // should append to existing lot when id is not `new`
     let trade1 = { ...fakeTrade(), optionLot: lot }
 
     ans.insertTrade(trade1)

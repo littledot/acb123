@@ -30,6 +30,7 @@
     "papaparse": "^5.3.2",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.6.1",
+    "rxjs": "^7.5.6",
     "tw-elements": "^1.0.0-alpha12",
     "uuid": "^8.3.2",
     "vue": "^3.2.25",

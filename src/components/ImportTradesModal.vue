@@ -1,12 +1,14 @@
 <script setup lang='ts'>
+import FileInput from '@c/core/FileInput.vue'
 import Modal from '@c/core/Modal.vue'
 import SelectInput from '@c/core/SelectInput.vue'
-import * as u from '@m/util'
+import ProgressView from '@c/core/ProgressView.vue'
 import { IbkrParser, QtParser, TradeConfirmParser } from '@m/stores/parser'
 import { useTradeStore } from '@m/stores/trade'
+import * as u from '@m/util'
 import Papa, { ParseResult } from 'papaparse'
 import * as v from 'vue'
-import FileInput from '@c/core/FileInput.vue'
+import Accordion from './core/Accordion.vue'
 
 let props = defineProps<{
   show: boolean,
@@ -19,12 +21,16 @@ let tradeStore = useTradeStore()
 let fileRef = v.ref<File>()
 let fileFormatRef = v.ref('')
 let parserRef = v.ref(new Map<string, TradeConfirmParser>())
-init()
+let progressRef = v.ref<u.Progress>()
 
-function init() {
+v.watch(() => props.show, init)
+
+function init(show: boolean) {
+  if (!show) return
   fileRef.value = void 0
   fileFormatRef.value = 'ibkr'
   parserRef.value.clear()
+  progressRef.value = void 0
 }
 
 v.watch(fileRef, (file) => {
@@ -34,6 +40,7 @@ v.watch(fileRef, (file) => {
       skipEmptyLines: true,
       transform: (s) => s.trim().toLocaleLowerCase(),
       complete: (result: ParseResult<string[]>) => {
+        // Check first few lines for file format
         parserRef.value = new Map([
           ['ibkr', new IbkrParser(result)],
           ['qt', new QtParser(result)],
@@ -60,6 +67,7 @@ let ui = v.computed(() => {
     fileErr: parser.papaErr.at(0)?.let(it => `Could not parse file. Are you sure this is a CSV file? (${it.message})`),
     fileFmtErr: parser.papaErr.length > 0 ? null :
       parser.missing.size > 0 ? `The following columns are missing: ${[...parser.missing.values()].join(', ')}` : null,
+    disableOk: parser.papaErr.length + parser.missing.size > 0,
   }
 })
 
@@ -68,7 +76,10 @@ function onImport() {
   let parser = parserRef.value.get(fileFormatRef.value)
   if (!file || !parser) return
 
-  useTradeStore().importCsvFile(file, parser)
+  useTradeStore().importCsvFile(file, parser).subscribe({
+    next: (v) => progressRef.value = v,
+    complete: () => emits('hide'),
+  })
 }
 
 </script>
@@ -76,7 +87,7 @@ function onImport() {
   <Modal title="Import Trades"
          @ok="onImport"
          :ok-disabled="ui.disableOk"
-         @cancel="init"
+         :ok-no-emit-hide="true"
          :show="show"
          @hide="emits('hide')">
     <div class="flex flex-col">
@@ -98,25 +109,11 @@ function onImport() {
         </div>
       </div>
 
-      <div id="accordionExample"
+      <div id="importGuideAccordion"
            class="accordion mt-4">
-        <div class="accordion-item bg-white border border-gray-200">
-          <h2 class="accordion-header mb-0"
-              id="headingOne">
-            <button class="accordion-button relative flex items-center w-full py-4 px-5 text-base text-gray-800 text-left bg-white border-0 rounded-none transition focus:outline-none"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseOne"
-                    aria-expanded="true"
-                    aria-controls="collapseOne">
-              Import Guide
-            </button>
-          </h2>
-          <div id="collapseOne"
-               class="accordion-collapse collapse"
-               aria-labelledby="headingOne"
-               data-bs-parent="#accordionExample">
-
+        <Accordion id="guide">
+          <template #header>Import Guide</template>
+          <template #body>
             <template v-if="fileFormatRef == 'ibkr'">
               <a href="https://i.imgur.com/blJ3odN.png"
                  target="_blank">
@@ -222,9 +219,14 @@ function onImport() {
                 <li>Upload the CSV file at the very top of this page.</li>
               </div>
             </template>
-          </div>
-        </div>
+          </template>
+        </Accordion>
       </div>
+
+      <ProgressView v-if="progressRef"
+                    :progress="progressRef.progress"
+                    :hint="progressRef.hint"
+                    class="mt-4" />
     </div>
   </Modal>
 </template>

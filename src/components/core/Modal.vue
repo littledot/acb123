@@ -6,11 +6,15 @@ let props = defineProps<{
   showDelete?: boolean,
 
   title: string,
+
   okLabel?: string,
   okStyle?: string,
   okDisabled?: boolean,
+  okNoEmitHide?: boolean,
+
   cancelLabel?: string,
   cancelStyle?: string,
+
   deleteLabel?: string,
   deleteStyle?: string,
 }>()
@@ -23,7 +27,7 @@ let emits = defineEmits({
 
 async function onOk() {
   emits('ok')
-  emits('hide')
+  if (!props.okNoEmitHide) emits('hide')
 }
 
 function onCancel() {

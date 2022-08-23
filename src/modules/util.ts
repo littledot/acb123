@@ -10,6 +10,15 @@ export interface DateField {
   err: v.Ref<string>
 }
 
+export interface Progress {
+  progress: number
+  hint: string
+}
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 export function vueModel(props: any, emit: any, name = 'modelValue') {
   return v.computed({
     get: () => props[name],
