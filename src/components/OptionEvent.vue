@@ -96,10 +96,10 @@ const ui = v.computed(() => {
       <div id="title-content"
            class="flex flex-1 gap-x-4 items-center ml-2">
         <div class="flex flex-[3] items-center">
-          <h4 class="text-left text-gray-800 font-semibold text-xl">
+          <h4 class="text-left text-gray-800 font-semibold text">
             {{ ui.title }}</h4>
           <Icon :path="mdiPencil"
-                class="w-6 h-6 ml-2 fill-current"
+                class="w-4 h-4 ml-2 fill-current"
                 :class="{ hidden: !(isHover || showEditModal) }"
                 @click="showEditModal = true" />
         </div>

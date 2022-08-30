@@ -9,6 +9,7 @@ import EditTradeModal from '@c/EditTradeModal.vue'
 import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
 import Popper from '@c/core/Popper.vue'
+import Pill from '@c/core/Pill.vue'
 
 let props = defineProps<{
   event: t.TradeNode,
@@ -24,7 +25,6 @@ const ui = v.computed(() => {
   let trade = props.event.tradeEvent
   let action = _.capitalize(trade.action)
   let asset = trade.optionLot ? `options` : `shares`
-  let optLot = trade.optionLot?.let(it => `(lot ${it.id})`) ?? ''
   let date = u.fmt(trade.date)
 
 
@@ -38,7 +38,8 @@ const ui = v.computed(() => {
   let cg = props.event.cg
 
   return {
-    title: `${date}: ${action} ${trade.shares} ${asset} ${optLot}`,
+    title: `${date}: ${action} ${trade.shares} ${asset}`,
+    optLot: trade.optionLot?.let(it => '#' + it.id.slice(-4)),
     showForex: isForex,
     forexPrice: trade.price.format(),
     forexPriceCurrency: trade.priceFx.currency,
@@ -105,10 +106,13 @@ const ui = v.computed(() => {
       <div id="title-content"
            class="flex flex-1 gap-x-4 items-center ml-2">
         <div class="flex flex-[3] items-center">
-          <h4 class="text-left text-gray-800 font-semibold text-xl">
-            {{ ui.title }}</h4>
+          <h4 class="text-left text-gray-800 font-semibold">
+            {{  ui.title  }}</h4>
+          <Pill v-if="ui.optLot"
+                type="light"
+                class="ml-2">{{  ui.optLot  }}</Pill>
           <Icon :path="mdiPencil"
-                class="w-6 h-6 ml-2 fill-current"
+                class="w-4 h-4 ml-2 fill-current"
                 :class="{ hidden: !(isHover || showEditModal) }"
                 @click="showEditModal = true" />
         </div>
@@ -142,14 +146,14 @@ const ui = v.computed(() => {
         <div v-if="ui.acb"
              class="col-[4/5] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
-                :class="ui.acb.costColor">{{ ui.acb.cost }}</span>
-          <span class="text-xl">{{ ui.acb.totalCost }}</span>
+                :class="ui.acb.costColor">{{  ui.acb.cost  }}</span>
+          <span class="text-xl">{{  ui.acb.totalCost  }}</span>
         </div>
 
         <div v-if="ui.acb"
              class="col-[5/6] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
-                :class="ui.acb.sharesColor">{{ ui.acb.shares }}</span>
+                :class="ui.acb.sharesColor">{{  ui.acb.shares  }}</span>
           <div class="flex justify-end items-center">
             <Popper v-if="ui.acb.showNegativeSharesAlert">
               <Icon :path="mdiAlert"
@@ -159,19 +163,19 @@ const ui = v.computed(() => {
                 <p>Some trades may be missing and calculations may not be accurate.</p>
               </template>
             </Popper>
-            <span class="text-xl">{{ ui.acb.totalShares }}</span>
+            <span class="text-xl">{{  ui.acb.totalShares  }}</span>
           </div>
         </div>
 
         <div class="col-[6/7] row-[1/2] flex-col justify-end text-right">
-          <span class="text-xl">{{ ui.acb?.acb }}</span>
+          <span class="text-xl">{{  ui.acb?.acb  }}</span>
         </div>
 
         <div v-if="ui.cg"
              class="col-[7/8] row-[1/2] flex-col justify-end text-right">
           <span class="text-l"
-                :class="ui.cg.gainsColor">{{ ui.cg.gains }}</span>
-          <span class="text-xl">{{ ui.cg.totalGains }}</span>
+                :class="ui.cg.gainsColor">{{  ui.cg.gains  }}</span>
+          <span class="text-xl">{{  ui.cg.totalGains  }}</span>
         </div>
       </div>
     </div>

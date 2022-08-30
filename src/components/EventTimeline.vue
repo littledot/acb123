@@ -11,6 +11,7 @@ import * as t from '@/modules/tradeNode'
 import * as u from '@m/util'
 import ExpiredOptionsHint from '@c/ExpiredOptionsHintView.vue'
 import OptionLotView from '@c/OptionLotView.vue'
+import Pill from '@c/core/Pill.vue'
 
 let props = defineProps<{
   events: TickerTradeHistory
@@ -24,21 +25,26 @@ let emits = defineEmits({})
          id="options">
 
       <div v-for="(optLot, i) of events.option">
+
+        <hr v-if="i > 0"
+            id="divider"
+            class="h-[1px] w-full mb-2 bg-gray-200" />
+
         <div class="event-grid items-center">
           <div class="col-[1/4] flex items-center">
-            <div class="flex items-center font-semibold text-xl mr-90">
+            <div class="flex items-center font-semibold mr-90">
               <span>
-                {{ capitalize(optLot.contract.type) }} options</span>
-              <Icon class="w-5 h-5 ml-2 mr-1"
+                {{  capitalize(optLot.contract.type)  }} options</span>
+              <Icon class="w-4 h-4 ml-2 mr-1"
                     :path="mdiClockAlertOutline" />
               <span>
-                {{ u.fmt(optLot.contract.expiryDate) }}</span>
-              <Icon class="w-5 h-5 ml-2"
+                {{  u.fmt(optLot.contract.expiryDate)  }}</span>
+              <Icon class="w-4 h-4 ml-2"
                     :path="mdiCurrencyUsd" />
               <span>
-                {{ optLot.contract.strike }}</span>
-              <span class="self-center font-normal text-xs ml-2">
-                #{{ optLot.id.slice(-4) }}</span>
+                {{  optLot.contract.strike  }}</span>
+              <Pill type="light"
+                    class="ml-2">#{{  optLot.id.slice(-4)  }}</Pill>
             </div>
           </div>
           <p class="col-[4/5] text-right font-semibold"
@@ -56,11 +62,17 @@ let emits = defineEmits({})
         <OptionLotView :option-lot="optLot" />
       </div>
     </div>
+
     <div v-if="events.stock.length > 0"
          id="stocks">
+
+      <hr v-if="events.option.length > 0"
+          id="divider"
+          class="h-[1px] w-full mb-2 bg-gray-400" />
+
       <div class="event-grid items-center pl-5">
         <div class="col-[1/4] flex items-center">
-          <p class="text-left font-semibold text-xl">Stocks</p>
+          <p class="text-left font-semibold">Stocks</p>
         </div>
         <p class="col-[4/5] text-right font-semibold"
            :class="{ hidden: events.option.length > 0 }">Cost</p>
