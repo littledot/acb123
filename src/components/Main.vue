@@ -1,5 +1,4 @@
 <script setup lang='ts'>
-import questradeUrl from '@/assets/questrade1.csv?url'
 import Button from '@c/core/Button.vue'
 import Modal from '@c/core/Modal.vue'
 import EventTimeline from '@c/EventTimeline.vue'
@@ -12,13 +11,9 @@ import * as u from '@m/util'
 import EditTradeModal from '@c/EditTradeModal.vue'
 import Accordion from '@c/core/Accordion.vue'
 import { DateTime } from 'luxon'
-
+import { newDemoTrades } from '@/modules/demo'
 
 let tradeStore = useTradeStore()
-
-function importExample() {
-  tradeStore.importCsvFile(questradeUrl)
-}
 
 let showImportModal = v.ref(false)
 let showClearModal = v.ref(false)
@@ -35,6 +30,12 @@ function onShowEditModal(ticker: string, date: DateTime) {
   editModalTickerField.value = ticker
   editModalDateField.value = date
   showEditModal.value = true
+}
+
+function importExample() {
+  for (let t of newDemoTrades()) {
+    tradeStore.insertTrade(t)
+  }
 }
 
 </script>
@@ -74,9 +75,10 @@ function onShowEditModal(ticker: string, date: DateTime) {
         <div class="flex-1 flex">
           <Button type="pri"
                   @click="importExample">
-            Import Example
+            Import Demo
           </Button>
           <Button type="pri"
+                  class="ml-2"
                   @click="showImportModal = true">
             Import Trades (CSV)
           </Button>
