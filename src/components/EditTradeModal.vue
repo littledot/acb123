@@ -133,7 +133,6 @@ function init(show: boolean) {
   notesRef.value = `Created on ${u.fmt(DateTime.now())}.`
 
   optionLotRef.value = 'new'
-  optionLotOptionsRef.value = new Map()
   optionTypeRef.value = 'call'
   expiryDateRef.value = DateTime.now()
   strikeRef.value = 0
