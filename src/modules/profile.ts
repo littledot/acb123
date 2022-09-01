@@ -59,6 +59,8 @@ export class Profile {
       }
       await t.convertForex(history.stock)
       t.calcGainsForTrades(history.stock, t.StockCalc)
+
+      await t.convertForex(history.orphan)
     }
 
     this.tradeReport = this.groupByYear()

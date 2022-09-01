@@ -12,6 +12,7 @@ import * as u from '@m/util'
 import ExpiredOptionsHint from '@c/ExpiredOptionsHintView.vue'
 import OptionLotView from '@c/OptionLotView.vue'
 import Pill from '@c/core/Pill.vue'
+import OrphanEvent from '@c/OrphanEvent.vue'
 
 let props = defineProps<{
   events: TickerTradeHistory
@@ -34,17 +35,17 @@ let emits = defineEmits({})
           <div class="col-[1/4] flex items-center">
             <div class="flex items-center font-semibold mr-90">
               <span>
-                {{  capitalize(optLot.contract.type)  }} options</span>
+                {{ capitalize(optLot.contract.type) }} options</span>
               <Icon class="w-4 h-4 ml-2 mr-1"
                     :path="mdiClockAlertOutline" />
               <span>
-                {{  u.fmt(optLot.contract.expiryDate)  }}</span>
+                {{ u.fmt(optLot.contract.expiryDate) }}</span>
               <Icon class="w-4 h-4 ml-2"
                     :path="mdiCurrencyUsd" />
               <span>
-                {{  optLot.contract.strike  }}</span>
+                {{ optLot.contract.strike }}</span>
               <Pill type="light"
-                    class="ml-2">#{{  optLot.id.slice(-4)  }}</Pill>
+                    class="ml-2">#{{ optLot.id.slice(-4) }}</Pill>
             </div>
           </div>
           <p class="col-[4/5] text-right font-semibold"
@@ -91,6 +92,15 @@ let emits = defineEmits({})
         <StockEvent :event="it"
                     :isFirst="i === 0"
                     :isLast="i === events.stock.length - 1" />
+      </div>
+    </div>
+
+    <div v-if="events.orphan.length > 0">
+      <div v-for="(it, i) of events.orphan"
+           :key="it.tradeEvent.id">
+        <OrphanEvent :event="it"
+                     :isFirst="true"
+                     :isLast="true" />
       </div>
     </div>
   </div>

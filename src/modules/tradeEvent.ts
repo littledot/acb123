@@ -27,7 +27,7 @@ export class AnnualTradeHistory {
     }
   }
 
-  appendOrphan(ticker: string, trades: TradeEvent[]) {
+  appendOrphan(ticker: string, trades: t.TradeNode[]) {
     if (trades.length > 0) {
       this._getHist(ticker).appendOrphan(trades)
       this.tradeCount += trades.length
@@ -43,7 +43,7 @@ export class AnnualTradeHistory {
 export class TickerTradeHistory {
   option: OptionLot[]
   stock: t.TradeNode[]
-  orphan: TradeEvent[]
+  orphan: t.TradeNode[]
 
   tradeCount = 0
   yearGains = money(0)
@@ -68,7 +68,7 @@ export class TickerTradeHistory {
     }
   }
 
-  appendOrphan(trades: TradeEvent[]) {
+  appendOrphan(trades: t.TradeNode[]) {
     this.orphan.push(...trades)
     this.tradeCount += trades.length
   }
@@ -77,7 +77,7 @@ export class TickerTradeHistory {
 export class TradeHistory {
   option = new Map<string, OptionLot[]>()
   stock = [] as t.TradeNode[]
-  orphan = [] as TradeEvent[]
+  orphan = [] as t.TradeNode[]
 
 
   init(db: Db, dbHistory: DbTradeHistory) {
@@ -93,8 +93,9 @@ export class TradeHistory {
       .filter(it => it) as t.TradeNode[]
 
     this.orphan = dbHistory.orphan
-      .map(it => db.readTradeEvent(it))
-      .filter(it => it) as TradeEvent[]
+      .map(it => db.readTradeEvent(it)
+        ?.let(it => t.newTradeNode(it)))
+      .filter(it => it) as t.TradeNode[]
   }
 
   groupByYear() {
@@ -169,7 +170,7 @@ export class TradeHistory {
       }
 
       // Couldn't find any lots? Add to orphan pile
-      this.orphan.push(trade)
+      this.orphan.push(node)
       return false
     }
     return false
@@ -212,7 +213,7 @@ export class TradeHistory {
     return <DbTradeHistory>{
       option: options,
       stock: this.stock.map(it => it.tradeEvent.id),
-      orphan: this.orphan.map(it => it.id),
+      orphan: this.orphan.map(it => it.tradeEvent.id),
     }
   }
 }
@@ -235,6 +236,11 @@ export interface TradeEvent {
 }
 
 export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
+  let optLot = json.options?.let(it => ({
+    id: `new`,
+    contract: fromDbOption(it)!,
+    trades: [],
+  }))
   return {
     id: json.id,
     security: json.security,
@@ -248,6 +254,7 @@ export function fromDbTradeEvent(json: DbTradeEvent): TradeEvent {
     outlayFx: json.outlayFx,
     notes: json.notes,
     raw: json.raw,
+    optionLot: optLot,
   }
 }
 
@@ -319,8 +326,7 @@ export function fromDbOptionHistory(db: Db, cache: Map<string, t.TradeNode>, obj
   } as OptionLot
 
   r.trades = obj.tradeIds.map(it => db.readTradeEvent(it)
-    ?.also(it => it.optionLot = r)
-  )
+    ?.also(it => it.optionLot = r))
     .filter(it => it)
     .map(it => t.newTradeNode(it!))
 

@@ -111,8 +111,27 @@ export function newDemoTrades(): TradeEvent[] {
       rate: 0
     },
     security: `AAPL`,
-    settleDate: DateTime.local(2021, 10, 18),
+    settleDate: DateTime.local(2021, 2, 18),
     shares: 100
+  },
+  {
+    action: `sell`, // Will become orphan
+    date: DateTime.local(2021, 3, 20),
+    id: v4(),
+    optionLot: newOption(`put`, DateTime.local(2022, 3, 1), 150, `USD`),
+    outlay: $(12.55),
+    outlayFx: {
+      currency: `USD`,
+      rate: 0
+    },
+    price: $(25),
+    priceFx: {
+      currency: `USD`,
+      rate: 0
+    },
+    security: `AAPL`,
+    settleDate: DateTime.local(2021, 3, 22),
+    shares: 50
   },
 
   {

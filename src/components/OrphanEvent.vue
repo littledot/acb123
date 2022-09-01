@@ -3,13 +3,11 @@ import * as t from '@/modules/tradeNode'
 import FxMetric from '@c/core/FxMetric.vue'
 import Icon from '@c/core/Icon.vue'
 import Metric from '@c/core/Metric.vue'
-import Pill from '@c/core/Pill.vue'
-import Popper from '@c/core/Popper.vue'
-import EditTradeModal from '@c/EditTradeModal.vue'
 import * as u from '@m/util'
-import { mdiAlert, mdiPencil } from '@mdi/js'
+import { mdiPencil } from '@mdi/js'
 import { capitalize } from 'lodash'
 import * as v from 'vue'
+import EditTradeModal from '@c/EditTradeModal.vue'
 
 let props = defineProps<{
   event: t.TradeNode,
@@ -22,17 +20,17 @@ let showEditModal = v.ref(false)
 let isHover = v.ref(false)
 
 const ui = v.computed(() => {
-  let { tradeEvent: trade, tradeValue: cad, optAcb: acb, optCg: cg, warn: warn } = props.event
+  let { tradeEvent: trade, tradeValue: cad, warn: warn } = props.event
   let action = capitalize(trade.action)
   let asset = trade.optionLot ? `options` : `shares`
   let date = u.fmt(trade.date)
   let total = cad?.price.multiply(trade.shares).add(cad.outlay)
   let isForex = v.toRaw(trade.priceFx.currency) !== 'CAD'
     || v.toRaw(trade.outlayFx.currency) !== 'CAD'
+  let optContract = trade.optionLot?.contract
 
   return {
     title: `${date}: ${action} ${trade.shares} ${asset}`,
-    optLot: trade.optionLot?.let(it => '#' + it.id.slice(-4)),
     showForex: isForex,
     forexPrice: trade.price.format(),
     forexPriceCurrency: trade.priceFx.currency,
@@ -44,21 +42,10 @@ const ui = v.computed(() => {
     cadOutlay: cad?.outlay.format(),
     cadTotal: total?.format(),
 
-    acb: acb ? {
-      shares: u.signNumFmt.format(acb.shares),
-      sharesColor: `text-${acb.shares < 0 ? 'red' : 'green'}-600`,
-      totalShares: u.fmt(acb.accShares),
-      cost: acb.cost.format({ pattern: `+!#` }),
-      costColor: `text-${acb.cost.value < 0 ? 'red' : 'green'}-600`,
-      totalCost: acb.accCost.format(),
-      acb: acb.acb.format(),
-      showNegativeSharesAlert: acb.accShares < 0,
-    } : null,
-
-    cg: cg ? {
-      gains: cg.gains.format({ pattern: `+!#` }),
-      gainsColor: `text-${cg.gains.value < 0 ? 'red' : 'green'}-600`,
-      totalGains: cg.yearGains.format(),
+    contract: optContract ? {
+      type: capitalize(optContract.type),
+      expiryDate: u.fmt(optContract.expiryDate),
+      strike: `${optContract.strike} ${optContract.strikeFx.currency}`,
     } : null,
   }
 })
@@ -101,11 +88,8 @@ const ui = v.computed(() => {
         <div class="flex flex-[3] items-center">
           <h4 class="text-left text-gray-800 font-semibold">
             {{ ui.title }}</h4>
-          <Pill v-if="ui.optLot"
-                type="light"
-                class="ml-2">{{ ui.optLot }}</Pill>
           <Icon :path="mdiPencil"
-                class="w-4 h-4 ml-2 fill-current"
+                class="w-6 h-6 ml-2 fill-current"
                 :class="{ hidden: !(isHover || showEditModal) }"
                 @click="showEditModal = true" />
         </div>
@@ -136,39 +120,11 @@ const ui = v.computed(() => {
                 label="Total"
                 :value="ui.cadTotal" />
 
-        <div v-if="ui.acb"
-             class="col-[4/5] row-[1/2] flex-col justify-end text-right">
-          <span class="text-l"
-                :class="ui.acb.costColor">{{ ui.acb.cost }}</span>
-          <span class="text-xl">{{ ui.acb.totalCost }}</span>
-        </div>
-
-        <div v-if="ui.acb"
-             class="col-[5/6] row-[1/2] flex-col justify-end text-right">
-          <span class="text-l"
-                :class="ui.acb.sharesColor">{{ ui.acb.shares }}</span>
-          <div class="flex justify-end items-center">
-            <Popper v-if="ui.acb.showNegativeSharesAlert">
-              <Icon :path="mdiAlert"
-                    class="w-6 h-6 mx-1 fill-yellow-500" />
-              <template #pop>
-                <p class="text-left">Negative shares detected.</p>
-                <p>Some trades may be missing and calculations may not be accurate.</p>
-              </template>
-            </Popper>
-            <span class="text-xl">{{ ui.acb.totalShares }}</span>
-          </div>
-        </div>
-
-        <div class="col-[6/7] row-[1/2] flex-col justify-end text-right">
-          <span class="text-xl">{{ ui.acb?.acb }}</span>
-        </div>
-
-        <div v-if="ui.cg"
-             class="col-[7/8] row-[1/2] flex-col justify-end text-right">
-          <span class="text-l"
-                :class="ui.cg.gainsColor">{{ ui.cg.gains }}</span>
-          <span class="text-xl">{{ ui.cg.totalGains }}</span>
+        <div v-if="ui.contract"
+             class="col-[4/8] row-[1/2] flex-col items-start">
+          <p class="font-semibold">{{ ui.contract.type }} Option Details</p>
+          <p><span class="font-semibold">Expiry:</span> {{ ui.contract.expiryDate }}</p>
+          <p><span class="font-semibold">Strke:</span> {{ ui.contract.strike }}</p>
         </div>
       </div>
     </div>
