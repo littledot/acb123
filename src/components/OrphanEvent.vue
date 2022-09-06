@@ -45,7 +45,7 @@ const ui = v.computed(() => {
     contract: optContract ? {
       type: capitalize(optContract.type),
       expiryDate: u.fmt(optContract.expiryDate),
-      strike: `${optContract.strike} ${optContract.strikeFx.currency}`,
+      strike: `${optContract.strikeFx.currency}$${optContract.strike} `,
     } : null,
   }
 })
@@ -123,8 +123,8 @@ const ui = v.computed(() => {
         <div v-if="ui.contract"
              class="col-[4/8] row-[1/2] flex-col items-start">
           <p class="font-semibold">{{ ui.contract.type }} Option Details</p>
-          <p><span class="font-semibold">Expiry:</span> {{ ui.contract.expiryDate }}</p>
           <p><span class="font-semibold">Strke:</span> {{ ui.contract.strike }}</p>
+          <p><span class="font-semibold">Expiry:</span> {{ ui.contract.expiryDate }}</p>
         </div>
       </div>
     </div>
