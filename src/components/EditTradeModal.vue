@@ -75,7 +75,7 @@ v.watch(securityRef, (security) => { // Show all option lots for ticker
   let optLot = props.trade?.tradeEvent.optionLot
   // debugger
   optionLotOptionsRef.value.clear()
-  optionLotRef.value = 'new'
+  optionLotRef.value = 'orphan'
 
   tradeStore.profile.tradeHistory.get(security)
     ?.option?.values()?.let(it => [...it])
@@ -98,7 +98,11 @@ v.watch(optionLotRef, (optionLot) => { // Fill opt contract fields for lot
 })
 
 let optionLotOptionsUi = v.computed(() => {
-  let r = new Map([['new', 'New lot']])
+  let r = new Map<string, u.SelectOption>([
+    ['orphan', { label: 'Select a lot', disabled: true, hidden: true }],
+    ['new', 'Create new lot'],
+  ])
+
   optionLotOptionsRef.value.forEach(it => {
     let c = it.contract
     r.set(it.id, `$${c.strike} ${c.type} ${c.expiryDate.toFormat('yyyy-MM-dd')} - #${it.id.slice(-4)}`)
@@ -289,26 +293,31 @@ function validateForm() {
   else if (strikeFx.rate <= 0 && strikeFx.currency == 'custom')
     errs.strikeFx.value = 'This value must be a positive.'
 
-  // Moving buy option event to another lot? Must be head of lot or create new lot
-  if (assetClass == 'option' && action == 'buy'
-    && lotId != 'new'
-    && lotId != tradeLot?.id) {
-    let lotHead = optionLotOptionsRef.value.get(lotId)!.trades[0].tradeEvent
-    if (lotHead.action == 'buy')
-      errs.optionLot.value = 'Option purchase event must be the first event in a lot. Cannot move to this lot as this lot already has an option purchase event as its first event.'
-    else if (lotHead.date < tradeDate)
-      errs.optionLot.value = `Option purchase event must be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)}, which is earlier than this event.`
-  }
-
-  // Moving sell option event to another lot? Must not be head of lot
-  if (assetClass == 'option' && action == 'sell'
-    && lotId != tradeLot?.id) {
-    if (lotId == 'new')
-      errs.optionLot.value = 'Option sale event must not be the first event in a lot. Please create an option purchase event first.'
-    else {
+  // Validate lotId
+  if (lotId == 'orphan') {
+    errs.optionLot.value = 'This trade is currently ungrouped. Please move it to a valid lot.'
+  } else {
+    // Moving buy option event to another lot? Must be head of lot or create new lot
+    if (assetClass == 'option' && action == 'buy'
+      && lotId != 'new'
+      && lotId != tradeLot?.id) {
       let lotHead = optionLotOptionsRef.value.get(lotId)!.trades[0].tradeEvent
-      if (lotHead.date > tradeDate)
-        errs.optionLot.value = `Option sale event must not be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)} which is later than this event.`
+      if (lotHead.action == 'buy')
+        errs.optionLot.value = 'Option purchase event must be the first event in a lot. Cannot move to this lot as this lot already has an option purchase event as its first event.'
+      else if (lotHead.date < tradeDate)
+        errs.optionLot.value = `Option purchase event must be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)}, which is earlier than this event.`
+    }
+
+    // Moving sell option event to another lot? Must not be head of lot
+    if (assetClass == 'option' && action == 'sell'
+      && lotId != tradeLot?.id) {
+      if (lotId == 'new')
+        errs.optionLot.value = 'Option sale event must not be the first event in a lot. Please create an option purchase event first.'
+      else {
+        let lotHead = optionLotOptionsRef.value.get(lotId)!.trades[0].tradeEvent
+        if (lotHead.date > tradeDate)
+          errs.optionLot.value = `Option sale event must not be the first event in a lot. Cannot move to this lot as this lot's first event has a trade date of ${u.fmt(lotHead.date)} which is later than this event.`
+      }
     }
   }
   console.log('validate form ok')

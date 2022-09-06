@@ -1,13 +1,28 @@
 <script setup lang='ts'>
 import * as v from 'vue'
+import * as u from '@m/util'
+import { isString } from 'lodash'
 
 let props = defineProps<{
-  options?: Map<unknown, string> // ID <> value
+  options?: Map<unknown, u.SelectOption> // ID <> value
 
   modelValue?: unknown,
 }>()
 let emits = defineEmits({
   'update:modelValue': (it: unknown, event: Event) => true,
+})
+
+let uiOptions = v.computed(() => {
+  let m = new Map<unknown, u.SelectVm>()
+
+  for (let [k, v] of props.options?.entries() ?? []) {
+    if (isString(v)) {
+      m.set(k, { label: v })
+    } else {
+      m.set(k, v)
+    }
+  }
+  return m
 })
 
 function onChange(event: Event) {
@@ -43,9 +58,11 @@ function onChange(event: Event) {
             hidden>
       Fix for iOS
     </option>
-    <option v-for="[id, option] of options"
+    <option v-for="[id, option] of uiOptions"
+            :disabled="option.disabled"
+            :hidden="option.hidden"
             :value="id">
-      {{ option }}
+      {{ option.label }}
     </option>
   </select>
 </template>

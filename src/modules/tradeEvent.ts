@@ -94,6 +94,7 @@ export class TradeHistory {
 
     this.orphan = dbHistory.orphan
       .map(it => db.readTradeEvent(it)
+        ?.also(it => it.optionLot?.let(it => it.id = `orphan`))
         ?.let(it => t.newTradeNode(it)))
       .filter(it => it) as t.TradeNode[]
   }
@@ -136,7 +137,7 @@ export class TradeHistory {
   _insertOptionTrade(option: Option, node: t.TradeNode): boolean {
     let trade = node.tradeEvent
     let key = optionHash(option)
-    let histories = u.mapGetDefault(this.option, key, () => [])
+    let optLots = u.mapGetDefault(this.option, key, () => [])
 
     if (trade.action == 'buy') { // Buy options? Create new lot
       trade.optionLot = {
@@ -144,32 +145,33 @@ export class TradeHistory {
         contract: option,
         trades: [node],
       }
-      histories.push(trade.optionLot)
+      optLots.push(trade.optionLot)
       return true
     }
 
     // Sell options? Find a lot to append to
     if (trade.action == 'sell'
       || trade.action == 'exercise') {
-      for (let history of histories) {
+      for (let optLot of optLots) {
         // Sell must be after buy
-        if (trade.date < history.trades[0]?.tradeEvent.date) {
+        if (trade.date < optLot.trades[0]?.tradeEvent.date) {
           continue
         }
 
         // Lot must have enough shares for sale
-        let remainShares = t.sumShares(history.trades)
+        let remainShares = t.sumShares(optLot.trades)
         if (remainShares < trade.shares) {
           continue
         }
 
         // Insert trade to lot
-        t.insertTradeNode(history.trades, node)
-        trade.optionLot = history
+        trade.optionLot = optLot
+        t.insertTradeNode(optLot.trades, node)
         return true
       }
 
       // Couldn't find any lots? Add to orphan pile
+      trade.optionLot?.let(it => it.id = `orphan`)
       this.orphan.push(node)
       return false
     }
@@ -184,13 +186,18 @@ export class TradeHistory {
       this.stock[i]?.let(it => it.acb = it.optAcb = void 0)
     }
 
+    let j = this.orphan.findIndex(it => it.tradeEvent.id === trade.id)
+    if (j > -1) {
+      this.orphan.splice(j, 1)
+    }
+
     for (let optHists of this.option.values()) {
       for (let [d, optHist] of optHists.entries()) {
-        let i = optHist.trades.findIndex(it => it.tradeEvent.id == trade.id)
-        if (i > -1) {
-          optHist.trades.splice(i, 1)
+        let k = optHist.trades.findIndex(it => it.tradeEvent.id == trade.id)
+        if (k > -1) {
+          optHist.trades.splice(k, 1)
           // Force recalculate acb/cg for new item in its place
-          optHist.trades[i]?.let(it => it.acb = it.optAcb = void 0)
+          optHist.trades[k]?.let(it => it.acb = it.optAcb = void 0)
           // Empty lot? Remove it
           if (optHist.trades.length == 0) {
             optHists.splice(d, 1)

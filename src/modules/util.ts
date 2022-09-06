@@ -5,6 +5,15 @@ import * as v from 'vue'
 export enum DI {
   Fx = 'fx'
 }
+
+export type SelectOption = string | SelectVm
+
+export interface SelectVm {
+  label: string
+  disabled?: boolean
+  hidden?: boolean
+}
+
 export interface DateField {
   date: v.Ref<DateTime>
   err: v.Ref<string>
