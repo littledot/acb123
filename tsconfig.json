@@ -9,6 +9,7 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "skipLibCheck": true, // https://github.com/vuejs/core/issues/1228
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "types": ["vitest/globals"],

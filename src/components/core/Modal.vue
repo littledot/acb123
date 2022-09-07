@@ -41,7 +41,8 @@ async function onDelete() {
 }
 
 function onClickBg(event: Event) {
-  if (event.target?.id === 'modalRoot') onCancel()
+  let target = event.target as HTMLInputElement
+  if (target.id === 'modalRoot') onCancel()
 }
 </script>
 <template>

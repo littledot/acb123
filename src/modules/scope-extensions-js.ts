@@ -158,7 +158,7 @@ declare global {
 }
 
 Object.defineProperty(Object.prototype, "let", {
-  value(block) {
+  value(block: any) {
     return block(this!)
   },
   configurable: true,
@@ -166,7 +166,7 @@ Object.defineProperty(Object.prototype, "let", {
 })
 
 Object.defineProperty(Object.prototype, "also", {
-  value(block) {
+  value(block: any) {
     block(this)
     return this
   },
@@ -175,7 +175,7 @@ Object.defineProperty(Object.prototype, "also", {
 })
 
 Object.defineProperty(Object.prototype, "run", {
-  value(block) {
+  value(block: any) {
     return block.call(this!)
   },
   configurable: true,
@@ -184,7 +184,7 @@ Object.defineProperty(Object.prototype, "run", {
 
 // TODO(L): Breaks vitest
 // Object.defineProperty(Object.prototype, "apply", {
-//   value(block) {
+//   value(block: any) {
 //     block.call(this)
 //     return this
 //   },
@@ -193,7 +193,7 @@ Object.defineProperty(Object.prototype, "run", {
 // })
 
 Object.defineProperty(Object.prototype, "takeIf", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!) ? this! : undefined
   },
   configurable: true,
@@ -201,7 +201,7 @@ Object.defineProperty(Object.prototype, "takeIf", {
 })
 
 Object.defineProperty(Object.prototype, "takeUnless", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!) ? undefined : this!
   },
   configurable: true,
@@ -211,7 +211,7 @@ Object.defineProperty(Object.prototype, "takeUnless", {
 // Number
 
 Object.defineProperty(Number.prototype, "let", {
-  value(block) {
+  value(block: any) {
     return block(this!.valueOf())
   },
   configurable: true,
@@ -219,7 +219,7 @@ Object.defineProperty(Number.prototype, "let", {
 })
 
 Object.defineProperty(Number.prototype, "also", {
-  value(block) {
+  value(block: any) {
     block(this!.valueOf())
     return this
   },
@@ -228,7 +228,7 @@ Object.defineProperty(Number.prototype, "also", {
 })
 
 Object.defineProperty(Number.prototype, "run", {
-  value(block) {
+  value(block: any) {
     return block.call(this!.valueOf())
   },
   configurable: true,
@@ -236,7 +236,7 @@ Object.defineProperty(Number.prototype, "run", {
 })
 
 Object.defineProperty(Number.prototype, "apply", {
-  value(block) {
+  value(block: any) {
     block.call(this!.valueOf())
     return this!.valueOf()
   },
@@ -245,7 +245,7 @@ Object.defineProperty(Number.prototype, "apply", {
 })
 
 Object.defineProperty(Number.prototype, "takeIf", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!.valueOf()) ? this!.valueOf() : undefined
   },
   configurable: true,
@@ -253,7 +253,7 @@ Object.defineProperty(Number.prototype, "takeIf", {
 })
 
 Object.defineProperty(Number.prototype, "takeUnless", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!.valueOf()) ? undefined : this!.valueOf()
   },
   configurable: true,
@@ -264,7 +264,7 @@ Object.defineProperty(Number.prototype, "takeUnless", {
 
 
 Object.defineProperty(String.prototype, "let", {
-  value(block) {
+  value(block: any) {
     return block(this!.valueOf())
   },
   configurable: true,
@@ -272,7 +272,7 @@ Object.defineProperty(String.prototype, "let", {
 })
 
 Object.defineProperty(String.prototype, "also", {
-  value(block) {
+  value(block: any) {
     block(this!.valueOf())
     return this
   },
@@ -281,7 +281,7 @@ Object.defineProperty(String.prototype, "also", {
 })
 
 Object.defineProperty(String.prototype, "run", {
-  value(block) {
+  value(block: any) {
     return block.call(this!.valueOf())
   },
   configurable: true,
@@ -289,7 +289,7 @@ Object.defineProperty(String.prototype, "run", {
 })
 
 Object.defineProperty(String.prototype, "apply", {
-  value(block) {
+  value(block: any) {
     block.call(this!.valueOf())
     return this!.valueOf()
   },
@@ -298,7 +298,7 @@ Object.defineProperty(String.prototype, "apply", {
 })
 
 Object.defineProperty(String.prototype, "takeIf", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!.valueOf()) ? this!.valueOf() : undefined
   },
   configurable: true,
@@ -306,7 +306,7 @@ Object.defineProperty(String.prototype, "takeIf", {
 })
 
 Object.defineProperty(String.prototype, "takeUnless", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate(this!.valueOf()) ? undefined : this!.valueOf()
   },
   configurable: true,
@@ -315,7 +315,7 @@ Object.defineProperty(String.prototype, "takeUnless", {
 
 
 Object.defineProperty(Boolean.prototype, "let", {
-  value(block) {
+  value(block: any) {
     return block(this!.valueOf())
   },
   configurable: true,
@@ -323,7 +323,7 @@ Object.defineProperty(Boolean.prototype, "let", {
 })
 
 Object.defineProperty(Boolean.prototype, "also", {
-  value(block) {
+  value(block: any) {
     block(this!.valueOf())
     return this
   },
@@ -332,7 +332,7 @@ Object.defineProperty(Boolean.prototype, "also", {
 })
 
 Object.defineProperty(Boolean.prototype, "run", {
-  value(block) {
+  value(block: any) {
     return block.call(this!.valueOf())
   },
   configurable: true,
@@ -340,7 +340,7 @@ Object.defineProperty(Boolean.prototype, "run", {
 })
 
 Object.defineProperty(Boolean.prototype, "apply", {
-  value(block) {
+  value(block: any) {
     block.call(this!.valueOf())
     return this!.valueOf()
   },
@@ -349,7 +349,7 @@ Object.defineProperty(Boolean.prototype, "apply", {
 })
 
 Object.defineProperty(Boolean.prototype, "takeIf", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate && predicate(this!.valueOf()) || this!.valueOf() ? this!.valueOf() : undefined
   },
   configurable: true,
@@ -357,7 +357,7 @@ Object.defineProperty(Boolean.prototype, "takeIf", {
 })
 
 Object.defineProperty(Boolean.prototype, "takeUnless", {
-  value(predicate) {
+  value(predicate: any) {
     return predicate && predicate(this!.valueOf()) || this!.valueOf() ? undefined : this!.valueOf()
   },
   configurable: true,
