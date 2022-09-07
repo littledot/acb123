@@ -10,11 +10,13 @@ export default {
 
     const fire = initializeApp(options)
     const analytics = getAnalytics(fire)
+    app.config.globalProperties.$ga = analytics
+    options.onAnalyticsOk?.(app, analytics)
+
     const remoteConfig = getRemoteConfig(fire)
     remoteConfig.settings.minimumFetchIntervalMillis = 3_600_000
-
     fetchAndActivate(remoteConfig).then(() => {
-      app.config.globalProperties.$remoteConfig = remoteConfig
+      app.config.globalProperties.$grc = remoteConfig
       options.onRemoteConfigOk?.(app, remoteConfig)
     })
   }
