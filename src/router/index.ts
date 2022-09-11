@@ -14,3 +14,6 @@ export default createRouter({
     },
   ],
 })
+
+export const homeLink = { name: 'home' }
+export const calcLink = { name: 'calc' }
