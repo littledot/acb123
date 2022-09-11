@@ -70,7 +70,7 @@ function importExample() {
 
   <div v-bind="$attrs"
        class="flex-col items-center mt-4">
-    <div class="w-[90%]">
+    <div class="container">
       <div class="w-full flex">
         <div class="flex-1 flex">
           <Button type="pri"
