@@ -3,10 +3,6 @@
 @tailwind utilities;
 
 
-*:hover {
-  outline: 1px blue solid;
-}
-
 /* TODO: These colors should be included in tailwind */
 .text-green-600 {
   color: rgb(22 163 74);

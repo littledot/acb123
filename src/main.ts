@@ -7,6 +7,9 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './index.css'
 
+if (process.env.NODE_ENV === 'development') {
+  import('./index-dev.css')
+}
 
 createApp(App)
   .also(it => {
