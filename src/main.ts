@@ -1,3 +1,4 @@
+import Router from '@/router'
 import FirebasePlugin from '@m/plugins/firebase'
 import '@m/scope-extensions-js'
 import { createPinia } from 'pinia'
@@ -26,5 +27,6 @@ createApp(App)
     appId: "1:797706459663:web:7fa8fd8daaf8b692cd617a",
     measurementId: "G-N2QB25HNHY",
   })
+  .use(Router)
   .use(createPinia())
   .mount('#app')
