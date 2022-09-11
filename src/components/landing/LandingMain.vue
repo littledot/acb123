@@ -1,7 +1,6 @@
 <script setup lang='ts'>
 import * as v from 'vue'
 import * as u from '@m/util'
-import '@/styles.css'
 import NavBar from '@c/Nav.vue'
 import Icon from '@c/core/Icon.vue'
 import { mdiGithub, mdiFinance, mdiDatabaseLock } from '@mdi/js'
@@ -404,6 +403,6 @@ let emits = defineEmits({
   </footer>
 </template>
 <style scoped>
-
+@import '@/start-bootstrap.css'
 </style>
   

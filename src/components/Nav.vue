@@ -1,6 +1,5 @@
 <script setup lang='ts'>
 import { calcLink, homeLink } from '@/router'
-import '@/styles.css'
 import Icon from '@c/core/Icon.vue'
 import { mdiGithub } from '@mdi/js'
 </script>
@@ -43,3 +42,6 @@ import { mdiGithub } from '@mdi/js'
     </div>
   </nav>
 </template>
+<style scoped>
+@import '@/start-bootstrap.css'
+</style>
