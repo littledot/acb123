@@ -86,7 +86,7 @@ let emits = defineEmits({
                   :path="mdiGithub" />
           </div>
           <h2 class="h4 fw-bolder">Free and Open Source</h2>
-          <p>Tax preparation should be free for all. Source code is also available for your viewing pleasure.</p>
+          <p>Completely free for all. Source code is also available for your viewing pleasure.</p>
           <a v-if="false"
              class="text-decoration-none"
              href="#!">
