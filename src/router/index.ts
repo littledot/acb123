@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 export default createRouter({
   history: createWebHashHistory(),
+  linkActiveClass: 'active',
   routes: [
     {
       path: '/', name: 'home',

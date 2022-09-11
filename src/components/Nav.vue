@@ -20,7 +20,7 @@ import { mdiGithub } from '@mdi/js'
            id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <router-link class="nav-link active"
+            <router-link class="nav-link"
                          :to="homeLink"
                          href="">Home</router-link>
           </li>
