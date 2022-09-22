@@ -13,8 +13,13 @@ export default createRouter({
       path: '/calc', name: 'calc',
       component: () => import('@c/calc/CalcMain.vue')
     },
+    {
+      path: '/privacy', name: 'privacy',
+      component: () => import('@c/privacy/PrivacyMain.vue')
+    },
   ],
 })
 
 export const homeLink = { name: 'home' }
 export const calcLink = { name: 'calc' }
+export const privLink = { name: 'privacy' }

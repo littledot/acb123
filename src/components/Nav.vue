@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { calcLink, homeLink } from '@/router'
+import { calcLink, homeLink, privLink } from '@/router'
 import Icon from '@c/core/Icon.vue'
 import { mdiGithub } from '@mdi/js'
 </script>
@@ -21,16 +21,16 @@ import { mdiGithub } from '@mdi/js'
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <router-link class="nav-link"
-                         :to="homeLink"
-                         href="">Home</router-link>
+                         :to="homeLink">Home</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link"
-                         :to="calcLink"
-                         href="#!">Calculator</router-link>
+                         :to="calcLink">Calculator</router-link>
           </li>
-          <li class="nav-item"><a class="nav-link"
-               href="#!">Privacy</a></li>
+          <li class="nav-item">
+            <router-link class="nav-link"
+                         :to="privLink">Privacy</router-link>
+          </li>
           <li class="nav-item"><a class="nav-link"
                target="_blank"
                href="https://github.com/littledot/acb123">
