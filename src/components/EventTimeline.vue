@@ -1,18 +1,13 @@
 <script setup lang='ts'>
 import Icon from '@c/core/Icon.vue'
-import StockEvent from '@c/StockEvent.vue'
-import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
-import { Option, OptionLot, TradeEvent, TickerTradeHistory } from '@m/tradeEvent'
-import { capitalize } from 'lodash'
-import { DateTime } from 'luxon'
-import { v4 } from 'uuid'
-import OptionEvent from '@c/OptionEvent.vue'
-import * as t from '@/modules/tradeNode'
-import * as u from '@m/util'
-import ExpiredOptionsHint from '@c/ExpiredOptionsHintView.vue'
-import OptionLotView from '@c/OptionLotView.vue'
 import Pill from '@c/core/Pill.vue'
+import OptionLotView from '@c/OptionLotView.vue'
 import OrphanEvent from '@c/OrphanEvent.vue'
+import StockEvent from '@c/StockEvent.vue'
+import { TickerTradeHistory } from '@m/tradeEvent'
+import * as u from '@m/util'
+import { mdiClockAlertOutline, mdiCurrencyUsd } from '@mdi/js'
+import { capitalize } from 'lodash'
 
 let props = defineProps<{
   events: TickerTradeHistory

@@ -24,7 +24,7 @@ let emits = defineEmits({
           <div class="text-center my-5">
             <h1 class="display-5 fw-bolder text-white mb-2">Calculate T5008 Adjusted Cost Base & Capital Gains with ease
             </h1>
-            <p class="lead text-white-50 mb-4">Directly import trade history from brokers and the calculator will
+            <p class="lead text-white-50 mb-4">Directly import trade history from brokers and ACB123 will
               compute ACB & Capital Gains for every trade. Spend less time logging trades and more time trading.</p>
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
               <router-link :to="{name:'calc'}"
