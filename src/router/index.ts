@@ -1,7 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { nextTick } from 'vue'
 
 
-export default createRouter({
+const router = createRouter({
   history: createWebHashHistory(),
   linkActiveClass: 'active',
   routes: [
@@ -19,6 +20,8 @@ export default createRouter({
     },
   ],
 })
+
+export default router
 
 export const homeLink = { name: 'home' }
 export const calcLink = { name: 'calc' }
